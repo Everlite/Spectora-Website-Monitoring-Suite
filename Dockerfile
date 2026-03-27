@@ -52,10 +52,13 @@ RUN crontab /etc/cron.d/laravel-cron
 # Copy Supervisor configuration
 COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Set permissions for Laravel
-RUN chown -R www-data:www-data storage bootstrap/cache
-
 WORKDIR /var/www/html
+
+# Copy application files
+COPY . .
+
+# Set permissions for Laravel
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose port 80
 EXPOSE 80
