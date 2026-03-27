@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -10,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('plans')) {
+            return;
+        }
+
         // Plus (ID 1) -> 10 Domains
         DB::table('plans')->where('id', 1)->update(['max_domains' => 10]);
 
@@ -25,6 +30,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('plans')) {
+            return;
+        }
+
         DB::table('plans')->update(['max_domains' => null]);
     }
 };

@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('users')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn('users', 'last_domain_deleted_at')) {
-                $table->timestamp('last_domain_deleted_at')->nullable()->after('active_until');
+                $table->timestamp('last_domain_deleted_at')->nullable();
             }
         });
     }
@@ -23,6 +27,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('users') || !Schema::hasColumn('users', 'last_domain_deleted_at')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('last_domain_deleted_at');
         });

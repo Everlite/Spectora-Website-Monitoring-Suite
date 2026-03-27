@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('domains')) {
+            return;
+        }
+
         Schema::table('domains', function (Blueprint $table) {
             if (!Schema::hasColumn('domains', 'last_pagespeed_details')) {
                 $table->json('last_pagespeed_details')->nullable()->after('pagespeed_desktop');

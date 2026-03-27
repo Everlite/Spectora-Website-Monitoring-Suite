@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('users')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn('users', 'timezone')) {
                 $table->string('timezone')->default('UTC')->after('email');

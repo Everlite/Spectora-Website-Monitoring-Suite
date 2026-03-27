@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('domains')) {
+            return;
+        }
+
         Schema::table('domains', function (Blueprint $table) {
             if (!Schema::hasColumn('domains', 'pagespeed_score')) {
                 $table->integer('pagespeed_score')->nullable()->after('safety_status');

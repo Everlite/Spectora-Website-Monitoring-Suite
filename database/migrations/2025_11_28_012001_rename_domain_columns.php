@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('domains')) {
+            return;
+        }
+
         Schema::table('domains', function (Blueprint $table) {
             // Add new columns if they don't exist
             if (!Schema::hasColumn('domains', 'status_code')) {
