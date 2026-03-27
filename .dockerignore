@@ -1,0 +1,35 @@
+# Git
+.git
+.github
+.gitignore
+
+# Composer & NPM
+vendor
+node_modules
+npm-debug.log
+
+# Laravel
+.env
+.env.backup
+.env.production
+storage/*.key
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+storage/logs/*
+public/storage
+public/build
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+Dockerfile
+.dockerignore
+
+# IDE & OS
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+*.bak

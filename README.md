@@ -48,7 +48,7 @@ Spectora utilizes a modern, dockerized setup that includes all necessary depende
 
 ```mermaid
 graph TD
-    A[Spectora App Container] --> B[Apache / PHP 8.2]
+    A[Spectora App Container] --> B[Apache / PHP 8.4]
     A --> C[Laravel Scheduler / Cron]
     A --> D[Lighthouse CLI]
     A --> E[Chromium Headless]
@@ -71,26 +71,18 @@ graph TD
 *   **Docker & Docker Compose**
 *   **Hardware**: Minimum **2 GB RAM** (required for Chromium/Lighthouse processes)
 
-### 1. Setup
+### 1. Clone & Start
 ```bash
-# Clone the repository
 git clone https://github.com/Everlite/Spectora.git
 cd Spectora
-
-# Prepare configuration
-cp .env.example .env
+docker compose up -d --build
 ```
 
-### 2. Start
-```bash
-docker-compose up -d --build
-```
-
-### 3. Initialization
-```bash
-docker-compose exec app php artisan key:generate
-docker-compose exec app php artisan migrate --force
-```
+The entrypoint script automatically handles:
+*   `.env` creation from `.env.example`
+*   `APP_KEY` generation
+*   Database migrations
+*   Storage link creation
 
 The application is now accessible at **http://localhost:8000**.
 

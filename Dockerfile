@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -y \
     libgbm1 \
     libasound2 \
     libzip-dev \
+    libicu-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js and Lighthouse
@@ -43,7 +44,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && npm install -g lighthouse
 
 # PHP Extensions
-RUN docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip
+RUN docker-php-ext-configure intl \
+    && docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip intl
 
 # Configure Cron for Laravel Scheduler
 COPY ./docker/laravel.cron /etc/cron.d/laravel-cron
@@ -69,17 +71,16 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Ensure .env exists and has an APP_KEY
-RUN if [ ! -f .env ]; then cp .env.example .env; fi \
-    && if [ -z "$(grep APP_KEY .env | cut -d'=' -f2)" ]; then php artisan key:generate --force; fi
+# Copy startup script
+COPY ./docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-
-# Final permission check after composer/env actions
+# Final permission check
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
 # Expose port 80
 EXPOSE 80
 
-# Start Supervisor (which starts Apache and Cron)
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Use custom entrypoint for automation (keys, migrations, supervisor)
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
