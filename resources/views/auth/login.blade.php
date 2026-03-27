@@ -34,5 +34,10 @@
         <button class="w-full px-4 py-2 text-white font-medium bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-600 rounded-lg duration-150 transition-colors shadow-lg shadow-indigo-500/30">
             Einloggen
         </button>
+
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+            Noch kein Konto?
+            <a href="{{ route('register') }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Jetzt registrieren</a>
+        </p>
     </form>
 </x-auth-layout>
