@@ -129,7 +129,7 @@ class CheckUrlJob implements ShouldQueue
             $this->monitoredUrl->update([
                 'last_status_code' => $statusCode,
                 'last_safety_status' => $safetyStatus,
-                'last_response_time' => $responseTimeMs,
+                'last_response_time' => round(($responseTime ?? 0) * 1000),
                 'last_checked' => now(),
             ]);
             
@@ -140,7 +140,7 @@ class CheckUrlJob implements ShouldQueue
             $this->domain->update([
                 'status_code' => $statusCode,
                 'ssl_days_left' => $sslDays,
-                'response_time' => $responseTimeMs,
+                'response_time' => $responseTime ?? 0,
                 'safety_status' => $safetyStatus,
                 'safety_details' => $safetyDetails,
                 'last_checked' => now(),
@@ -179,15 +179,46 @@ class CheckUrlJob implements ShouldQueue
         try {
             $host = parse_url($url, PHP_URL_HOST);
             if (!$host) return null;
-            $context = stream_context_create(["ssl" => ["capture_peer_cert" => true, "verify_peer" => false]]);
-            $client = @stream_socket_client("ssl://{$host}:443", $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $context);
+
+            $context = stream_context_create([
+                "ssl" => [
+                    "capture_peer_cert" => true, 
+                    "verify_peer" => false, 
+                    "verify_peer_name" => false
+                ]
+            ]);
+
+            $client = @stream_socket_client(
+                "ssl://{$host}:443", 
+                $errno, 
+                $errstr, 
+                10, 
+                STREAM_CLIENT_CONNECT, 
+                $context
+            );
+
             if (!$client) {
-                Log::warning("SSL Check failed for {$host}: {$errstr} ({$errno})");
+                Log::warning("SSL Socket failed for {$host}: {$errstr} ({$errno})");
                 return null;
             }
+
             $params = stream_context_get_params($client);
+            if (!isset($params["options"]["ssl"]["peer_certificate"])) {
+                Log::warning("SSL Certificate capture failed for {$host}");
+                fclose($client);
+                return null;
+            }
+
             $cert = openssl_x509_parse($params["options"]["ssl"]["peer_certificate"]);
-            return floor(($cert['validTo_time_t'] - time()) / 86400);
+            fclose($client);
+
+            if (!$cert || !isset($cert['validTo_time_t'])) {
+                Log::warning("SSL Certificate parsing failed for {$host}");
+                return null;
+            }
+
+            $days = floor(($cert['validTo_time_t'] - time()) / 86400);
+            return max(0, $days);
         } catch (\Exception $e) {
             Log::error("SSL check exception for {$url}: " . $e->getMessage());
             return null;

@@ -288,8 +288,8 @@ class DomainController extends Controller
             ->where('created_at', '>=', now()->subDay())
             ->avg('response_time');
         
-        // Stored as ms now, so just round
-        $avgResponseTime = round($avgResponseTime ?? 0);
+        // Stored as seconds in history, so convert to ms for the dashboard
+        $avgResponseTime = round(($avgResponseTime ?? 0) * 1000);
 
         // Recent Checks (Logbook)
         $recentChecks = $domain->history()->orderBy('created_at', 'desc')->paginate(20);
@@ -300,7 +300,7 @@ class DomainController extends Controller
         // History Chart (Response Time) - Align with Analytics Chart if possible
         $historyChartData = $domain->history()->orderBy('created_at', 'desc')->take(50)->get()->reverse();
         $historyLabels = $historyChartData->map(fn($h) => $h->created_at->format('d.m. H:i'))->values();
-        $historyResponseTimes = $historyChartData->pluck('response_time')->values();
+        $historyResponseTimes = $historyChartData->map(fn($h) => round($h->response_time * 1000))->values();
 
 
         // --- 3. Performance & Security ---
