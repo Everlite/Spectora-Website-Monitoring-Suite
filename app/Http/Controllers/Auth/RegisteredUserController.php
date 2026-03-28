@@ -47,7 +47,7 @@ class RegisteredUserController extends Controller
             'email'         => $request->email,
             'password'      => Hash::make($request->password),
             'company_name'  => $request->company_name,
-            'logo_path'     => $logoPath,
+            'agency_logo_path' => $logoPath,
         ]);
 
         event(new Registered($user));

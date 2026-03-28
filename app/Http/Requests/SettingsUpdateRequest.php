@@ -26,6 +26,7 @@ class SettingsUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'company_name' => ['required', 'string', 'max:255'],
             'timezone' => ['required', 'string', 'max:255', Rule::in(timezone_identifiers_list())],
         ];
     }
