@@ -628,7 +628,7 @@
                 },
                 wdCopyJson() {
                     navigator.clipboard.writeText(JSON.stringify(this.statusDetails, null, 2));
-                    const btn = this.$refs.wdCopyBtn;
+                    const btn = document.getElementById('wd-copy-btn');
                     if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); }
                 },
             };
