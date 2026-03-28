@@ -130,6 +130,7 @@ class CheckUrlJob implements ShouldQueue
                 'last_status_code' => $statusCode,
                 'last_safety_status' => $safetyStatus,
                 'last_response_time' => $responseTimeMs,
+                'last_checked' => now(),
             ]);
             
             // Still update the domain's last_checked to show activity on the dashboard

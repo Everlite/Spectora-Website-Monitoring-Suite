@@ -15,10 +15,13 @@ class MonitoredUrl extends Model
         'is_active',
         'last_status_code',
         'last_safety_status',
+        'last_response_time',
+        'last_checked',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'last_checked' => 'datetime',
     ];
 
     public function domain()

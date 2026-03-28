@@ -269,6 +269,12 @@ class DomainController extends Controller
         
         $deviceLabels = $devices->pluck('device');
         $deviceData = $devices->pluck('total');
+        
+        // Prepare keyed stats for legend (e.g. ['desktop' => 70, 'mobile' => 20, ...])
+        $totalDeviceVisits = $deviceData->sum();
+        $deviceStats = $devices->mapWithKeys(function($d) use ($totalDeviceVisits) {
+            return [strtolower($d->device) => $totalDeviceVisits > 0 ? round(($d->total / $totalDeviceVisits) * 100) : 0];
+        })->toArray();
 
 
         // --- 2. History & KPIs ---
@@ -318,7 +324,7 @@ class DomainController extends Controller
         return view('domains.dashboard', compact(
             'domain',
             // Analytics
-            'chartLabels', 'chartVisitors', 'chartPageviews', 'topPages', 'topSources', 'deviceLabels', 'deviceData',
+            'chartLabels', 'chartVisitors', 'chartPageviews', 'topPages', 'topSources', 'deviceLabels', 'deviceData', 'deviceStats',
             // Technical
             'uptime', 'avgResponseTime', 'sslDaysRemaining', 'recentChecks', 'monitoredUrls',
             'historyLabels', 'historyResponseTimes', 'psHistoryLabels', 'psHistoryScores',
