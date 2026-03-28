@@ -24,11 +24,11 @@
                 <img src="/logo.png" width="150" alt="Spectora Logo" class="mb-8">
                 <div class="space-y-6">
                     <h3 class="text-white text-3xl font-bold leading-tight">
-                        Schützen Sie Ihre digitale Infrastruktur.
+                        Protect your digital infrastructure.
                     </h3>
                     <p class="text-gray-300 text-lg">
-                        Starten Sie jetzt mit professionellem Monitoring für Uptime, SSL und Performance. 
-                        Automatische Alerts, bevor Ihre Kunden etwas merken.
+                        Get started now with professional monitoring for uptime, SSL, and performance. 
+                        Automatic alerts before your customers notice.
                     </p>
                     
 
