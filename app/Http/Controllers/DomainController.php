@@ -213,8 +213,8 @@ class DomainController extends Controller
             ->reverse();
 
         return response()->json([
-            'pagespeed_mobile' => $domain->pagespeed_mobile,
-            'pagespeed_desktop' => $domain->pagespeed_desktop,
+            'pagespeed_mobile' => $domain->pagespeed_score,
+            'pagespeed_desktop' => $domain->pagespeed_score_desktop,
             'updated_at' => $domain->updated_at->toIso8601String(),
             'details' => $domain->last_pagespeed_details,
             'history_labels' => $history->map(fn($h) => $h->created_at->setTimezone('Europe/Berlin')->format('d.m. H:i'))->values(),

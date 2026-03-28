@@ -256,7 +256,7 @@
                  class="space-y-6">
 
                 @php
-                    $score = $domain->pagespeed_desktop ?? 0;
+                    $score = $domain->pagespeed_score_desktop ?? 0;
                     $scoreColor = $score >= 90 ? 'green' : ($score >= 50 ? 'orange' : 'red');
                     $watchdogData = $domain->safety_details['watchdog'] ?? null;
                     $securityIssues = $watchdogData['issues'] ?? [];

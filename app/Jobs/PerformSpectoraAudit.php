@@ -205,7 +205,7 @@ class PerformSpectoraAudit implements ShouldQueue
             $score = max(0, min(100, $score));
 
             // 3. Save
-            $this->domain->pagespeed_desktop = $score; // Using this column as "Spectora Score"
+            $this->domain->pagespeed_score_desktop = $score; // Using this column as "Spectora Score"
             $this->domain->last_pagespeed_details = $details;
             $this->domain->touch(); // Updates updated_at
             $this->domain->save();
