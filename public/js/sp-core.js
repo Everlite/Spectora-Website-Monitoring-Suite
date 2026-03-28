@@ -29,8 +29,14 @@
         width: window.innerWidth
     };
 
-    // 3. Send Data
-    var endpoint = '/api/sync';
+    // 3. Send Data (Resolve absolute endpoint from script source)
+    var endpoint;
+    try {
+        var url = new URL(script.src);
+        endpoint = url.protocol + '//' + url.host + '/api/sync';
+    } catch (e) {
+        endpoint = '/api/sync'; // Fallback to relative
+    }
 
     try {
         fetch(endpoint, {

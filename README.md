@@ -102,44 +102,43 @@ Since Spectora uses no external APIs, configuration is minimal:
 
 By default, Spectora is accessible at `http://localhost:8000`. If you want to use the **Analytics Tracking** feature (to track visitors on your clients' websites), your Spectora dashboard must be publicly accessible via a real domain/subdomain (e.g., `spectora.your-agency.com`).
 
-### 1. DNS Setup
-Create an `A-Record` for your desired subdomain that points to the public IP address of your Spectora server.
+### 1. Why a Public Domain is Required
+Tracking external websites from a `localhost` instance is technically impossible because the client's browser wouldn't be able to reach your Spectora server to "sync" the visitor data. For global tracking, Spectora must be reachable via a public IP and a registered DNS record.
 
-### 2. Update .env
+### 2. DNS & Subdomain Setup
+1.  **A-Record**: Create an `A-Record` (e.g., `spectora.your-agency.com`) pointing to your server's public IP.
+2.  **Subdomain vs. Main Domain**: We recommend using a dedicated subdomain so your main agency site remains independent.
+
+### 3. Update .env
 On your server, modify the `.env` file to set your public URL. This is crucial for the tracking script (`sp-core.js`) to generate correct absolute URLs:
 ```env
 APP_URL=https://spectora.your-agency.com
 ```
 
-### 3. Nginx Reverse Proxy
-Install Nginx on your host machine and create a new site configuration (e.g., `/etc/nginx/sites-available/spectora`):
+### 4. Implementation Logic
+Once Spectora is public, you can generate a **Tracking Snippet** in the domain's analytics tab. 
+*   **The Snippet**: `<script src="https://spectora.your-agency.com/js/sp-core.js" data-domain="..." defer></script>`
+*   **Automatic Host Detection**: The `sp-core.js` script is intelligent; it automatically detects its own origin and sends data back to your Spectora `/api/sync` endpoint, regardless of which client site it's embedded on.
 
-```nginx
-server {
-    server_name spectora.your-agency.com;
+### 5. Nginx & SSL (HTTPS)
+For modern browsers to allow cross-domain tracking, **HTTPS is mandatory**. install Nginx and secure it with Certbot:
 
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-Enable the site and reload Nginx:
 ```bash
-ln -s /etc/nginx/sites-available/spectora /etc/nginx/sites-enabled/
-systemctl reload nginx
-```
+# Install Nginx & Certbot
+apt update && apt install nginx certbot python3-certbot-nginx -y
 
-### 4. SSL Certificate (HTTPS)
-We strongly recommend using [Certbot](https://certbot.eff.org/) to secure your connection automatically:
-```bash
-apt install certbot python3-certbot-nginx
+# Setup SSL
 certbot --nginx -d spectora.your-agency.com
 ```
-Once this is done, the **Tracking Snippet** provided in the Spectora dashboard will function correctly on external websites.
+
+---
+
+## 📊 Analytics: Privacy-by-Design
+
+The Spectora tracking engine was built with the **GDPR** in mind. It provides accurate stats without compromising visitor privacy:
+*   **No Cookies**: We do not use any tracking cookies.
+*   **Anonymized Hashing**: Visitors are identified via a rotating daily hash composed of `IP + UserAgent + Date + APP_KEY`. This allows unique visitor counting without storing personally identifiable information (PII).
+*   **No Third Parties**: No data ever leaves your server. Unlike Google Analytics, your client data is 100% yours.
 ---
 
 ## 🛡️ Data Privacy & GDPR
