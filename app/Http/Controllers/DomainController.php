@@ -3,11 +3,145 @@
 namespace App\Http\Controllers;
 
 use App\Models\Domain;
+use App\Models\MonitoredUrl;
+use App\Services\SitemapService;
+use App\Services\MonitoringFilterService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Symfony\Component\DomCrawler\Crawler;
 
 class DomainController extends Controller
 {
+    public function updateSettings(Request $request, Domain $domain)
+    {
+        if ($domain->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'only_check_public_pages' => 'boolean',
+            'respect_robots_txt' => 'boolean',
+            'respect_noindex' => 'boolean',
+            'exclude_patterns' => 'nullable|string',
+            'included_sitemaps' => 'nullable|array',
+        ]);
+
+        $domain->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Settings updated successfully']);
+        }
+
+        return back()->with('status', 'Einstellungen gespeichert.');
+    }
+
+    public function detectSitemaps(Domain $domain, SitemapService $sitemapService)
+    {
+        if ($domain->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $sitemaps = $sitemapService->discover($domain->url);
+        
+        $domain->update([
+            'sitemap_urls' => $sitemaps
+        ]);
+
+        return response()->json([
+            'message' => count($sitemaps) . ' Sitemaps gefunden.',
+            'sitemaps' => $sitemaps
+        ]);
+    }
+
+    public function scanUrls(Domain $domain, SitemapService $sitemapService, MonitoringFilterService $filterService)
+    {
+        if ($domain->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $allUrls = [];
+        $domainHost = parse_url($domain->url, PHP_URL_HOST);
+
+        // 1. Scan Homepage Links
+        try {
+            $response = Http::timeout(10)->get($domain->url);
+            if ($response->successful()) {
+                $crawler = new Crawler($response->body());
+                $crawler->filter('a[href]')->each(function (Crawler $node) use (&$allUrls, $domainHost, $domain) {
+                    $href = $node->attr('href');
+                    if (!$href) return;
+                    
+                    // Normalize
+                    if (str_starts_with($href, '/')) {
+                        $href = rtrim($domain->url, '/') . $href;
+                    }
+                    
+                    $urlHost = parse_url($href, PHP_URL_HOST);
+                    if ($urlHost === $domainHost) {
+                        $allUrls[] = $href;
+                    }
+                });
+            }
+        } catch (\Exception $e) { /* ignore */ }
+
+        // 2. Scan Sitemaps (only those included/selected)
+        $sitemapsToScan = $domain->included_sitemaps ?? [];
+        foreach ($sitemapsToScan as $sitemapUrl) {
+            $parsed = $sitemapService->parse($sitemapUrl);
+            if (!empty($parsed['items'])) {
+                foreach ($parsed['items'] as $item) {
+                     $allUrls[] = $item;
+                }
+            }
+        }
+
+        // 3. Unique & Clean
+        $uniqueUrls = array_unique($allUrls);
+        $results = [];
+
+        foreach ($uniqueUrls as $url) {
+            // Check if already monitored
+            $existing = $domain->monitoredUrls()->where('url', $url)->first();
+            
+            // Check if "public" per filter
+            $filter = $filterService->shouldCheck($domain, $url);
+            
+            $results[] = [
+                'url' => $url,
+                'is_monitored' => $existing ? $existing->is_active : false,
+                'is_public' => $filter['should_check'],
+                'skip_reason' => $filter['should_check'] ? null : $filter['reason'],
+            ];
+        }
+
+        return response()->json([
+            'urls' => $results
+        ]);
+    }
+
+    public function syncMonitoredUrls(Request $request, Domain $domain)
+    {
+        if ($domain->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'urls' => 'required|array',
+            'urls.*.url' => 'required|url',
+            'urls.*.is_active' => 'required|boolean',
+        ]);
+
+        foreach ($validated['urls'] as $urlData) {
+            $domain->monitoredUrls()->updateOrCreate(
+                ['url' => $urlData['url']],
+                ['is_active' => $urlData['is_active']]
+            );
+        }
+
+        return response()->json(['message' => 'URLs synchronisiert.']);
+    }
+
     public function history(Domain $domain)
     {
         // Ensure the user owns the domain

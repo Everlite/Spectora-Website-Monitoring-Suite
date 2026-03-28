@@ -50,7 +50,7 @@ RUN docker-php-ext-configure intl \
 # Configure Cron for Laravel Scheduler
 COPY ./docker/laravel.cron /etc/cron.d/laravel-cron
 RUN chmod 0644 /etc/cron.d/laravel-cron
-RUN crontab /etc/cron.d/laravel-cron
+RUN crontab -u www-data /etc/cron.d/laravel-cron
 
 # Copy Supervisor configuration
 COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

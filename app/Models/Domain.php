@@ -29,6 +29,12 @@ class Domain extends Model
         'safety_status',
         'safety_details',
         'visitors_today',
+        'only_check_public_pages',
+        'respect_robots_txt',
+        'respect_noindex',
+        'exclude_patterns',
+        'sitemap_urls',
+        'included_sitemaps',
     ];
 
     protected $casts = [
@@ -36,6 +42,11 @@ class Domain extends Model
         'notify_sent' => 'boolean',
         'last_pagespeed_details' => 'array',
         'safety_details' => 'array',
+        'only_check_public_pages' => 'boolean',
+        'respect_robots_txt' => 'boolean',
+        'respect_noindex' => 'boolean',
+        'sitemap_urls' => 'array',
+        'included_sitemaps' => 'array',
     ];
 
     public function user()
@@ -56,6 +67,11 @@ class Domain extends Model
     public function analyticsVisits()
     {
         return $this->hasMany(AnalyticsVisit::class);
+    }
+
+    public function monitoredUrls()
+    {
+        return $this->hasMany(MonitoredUrl::class);
     }
 
     /**

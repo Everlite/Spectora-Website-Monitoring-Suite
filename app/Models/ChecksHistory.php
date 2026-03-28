@@ -26,6 +26,11 @@ class ChecksHistory extends Model
         'response_time' => 'float', // Optional: Damit Zahlen auch Zahlen sind
     ];
 
+    public function monitoredUrl()
+    {
+        return $this->belongsTo(MonitoredUrl::class, 'monitored_url_id');
+    }
+
     public function domain()
     {
         return $this->belongsTo(Domain::class);

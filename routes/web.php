@@ -20,6 +20,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/domains/{domain}/status', [\App\Http\Controllers\DomainController::class, 'status'])->name('domains.status');
     Route::post('/domains/{domain}/analyze', [\App\Http\Controllers\DomainController::class, 'analyze'])->name('domains.analyze');
     Route::post('/domains', [\App\Http\Controllers\DomainController::class, 'store'])->name('domains.store');
+    Route::post('/domains/{domain}/settings', [\App\Http\Controllers\DomainController::class, 'updateSettings'])->name('domains.settings.update');
+    Route::post('/domains/{domain}/sitemaps/detect', [\App\Http\Controllers\DomainController::class, 'detectSitemaps'])->name('domains.sitemaps.detect');
+    Route::post('/domains/{domain}/urls/scan', [\App\Http\Controllers\DomainController::class, 'scanUrls'])->name('domains.urls.scan');
+    Route::post('/domains/{domain}/urls/monitored', [\App\Http\Controllers\DomainController::class, 'syncMonitoredUrls'])->name('domains.urls.sync');
     Route::delete('/domains/{domain}', [\App\Http\Controllers\DomainController::class, 'destroy'])->name('domains.destroy');
     Route::get('/domains/{domain}/analytics', [App\Http\Controllers\AnalyticsController::class, 'show'])->name('domains.analytics');
     Route::get('/domains/{domain}/report', [\App\Http\Controllers\ReportController::class, 'download'])->name('domains.report');

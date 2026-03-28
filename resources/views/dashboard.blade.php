@@ -188,7 +188,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="button" 
-                                            @click="confirmDelete('domain', 'delete-form-{{ $domain->id }}', '{{ $domain->url }}')"
+                                            @click="confirmDelete('domain', 'delete-form-{{ $domain->id }}', {{ json_encode($domain->url) }})"
                                             class="px-3 py-1.5 border border-red-900/50 rounded text-xs font-bold text-red-500 uppercase tracking-wider hover:bg-red-900/20 hover:text-red-400 hover:border-red-700 transition whitespace-nowrap">
                                         Delete
                                     </button>

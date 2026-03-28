@@ -69,6 +69,7 @@
                                 <thead class="bg-gray-800/50">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Time</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">URL</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Response Time</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">SSL</th>
@@ -79,6 +80,9 @@
                                         <tr class="hover:bg-gray-700/30 transition-colors">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                                 {{ $check->created_at->format('d.m.Y H:i:s') }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-[10px] text-gray-400 font-mono italic max-w-xs truncate">
+                                                {{ $check->monitoredUrl ? parse_url($check->monitoredUrl->url, PHP_URL_PATH) ?: '/' : '/' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 @if($check->status_code >= 200 && $check->status_code < 400)

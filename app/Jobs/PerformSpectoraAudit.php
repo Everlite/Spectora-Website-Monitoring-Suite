@@ -23,11 +23,19 @@ class PerformSpectoraAudit implements ShouldQueue
 
     public function handle(): void
     {
+        $filterService = app(\App\Services\MonitoringFilterService::class);
         set_time_limit(120); // Allow 2 minutes for execution
 
         $url = $this->domain->url;
         if (!str_starts_with($url, 'http')) {
             $url = 'https://' . $url;
+        }
+
+        // 0. Pre-check Filter (Excludes, Robots.txt)
+        $filter = $filterService->shouldCheck($this->domain, $url);
+        if (!$filter['should_check']) {
+            Log::info("Skipping audit for {$url}: {$filter['reason']}");
+            return;
         }
 
         $score = 100;
@@ -49,6 +57,13 @@ class PerformSpectoraAudit implements ShouldQueue
                 ])
                 ->timeout(15)
                 ->get($url);
+
+            // 1.5 Post-fetch Filter (noindex, auth)
+            $postFilter = $filterService->shouldIgnoreResponse($this->domain, $response);
+            if ($postFilter['ignore']) {
+                Log::info("Ignoring audit response for {$url}: {$postFilter['reason']}");
+                return;
+            }
 
             if ($response->failed()) {
                 Log::error("Spectora Audit failed for {$url}: HTTP " . $response->status());
