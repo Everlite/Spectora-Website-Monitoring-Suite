@@ -122,11 +122,14 @@ class CheckUrlJob implements ShouldQueue
             $safetyStatus = 'danger';
         }
 
+        $responseTimeMs = round(($responseTime ?? 0) * 1000);
+
         // --- Update Records ---
         if ($this->monitoredUrl) {
             $this->monitoredUrl->update([
                 'last_status_code' => $statusCode,
                 'last_safety_status' => $safetyStatus,
+                'last_response_time' => $responseTimeMs,
             ]);
             
             // Still update the domain's last_checked to show activity on the dashboard
@@ -136,7 +139,7 @@ class CheckUrlJob implements ShouldQueue
             $this->domain->update([
                 'status_code' => $statusCode,
                 'ssl_days_left' => $sslDays,
-                'response_time' => $responseTime,
+                'response_time' => $responseTimeMs,
                 'safety_status' => $safetyStatus,
                 'safety_details' => $safetyDetails,
                 'last_checked' => now(),
@@ -177,11 +180,15 @@ class CheckUrlJob implements ShouldQueue
             if (!$host) return null;
             $context = stream_context_create(["ssl" => ["capture_peer_cert" => true, "verify_peer" => false]]);
             $client = @stream_socket_client("ssl://{$host}:443", $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $context);
-            if (!$client) return null;
+            if (!$client) {
+                Log::warning("SSL Check failed for {$host}: {$errstr} ({$errno})");
+                return null;
+            }
             $params = stream_context_get_params($client);
             $cert = openssl_x509_parse($params["options"]["ssl"]["peer_certificate"]);
             return floor(($cert['validTo_time_t'] - time()) / 86400);
         } catch (\Exception $e) {
+            Log::error("SSL check exception for {$url}: " . $e->getMessage());
             return null;
         }
     }

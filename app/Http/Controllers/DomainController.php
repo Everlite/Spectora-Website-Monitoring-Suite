@@ -282,15 +282,16 @@ class DomainController extends Controller
             ->where('created_at', '>=', now()->subDay())
             ->avg('response_time');
         
-        // Assuming response_time is in seconds (e.g., 0.123), convert to ms
-        // If it's already in ms (e.g. 123), this would make it huge, but previous dashboard showed 's', so likely seconds.
-        $avgResponseTime = round(($avgResponseTime ?? 0) * 1000);
+        // Stored as ms now, so just round
+        $avgResponseTime = round($avgResponseTime ?? 0);
 
         // Recent Checks (Logbook)
         $recentChecks = $domain->history()->orderBy('created_at', 'desc')->paginate(20);
+        
+        // Monitored URLs for the Overview tab
+        $monitoredUrls = $domain->monitoredUrls()->where('is_active', true)->get();
 
-        // History Chart (Response Time) - Align with Analytics Chart if possible, or just last 50 checks
-        // Let's use last 50 checks for the "Technical" tab graph
+        // History Chart (Response Time) - Align with Analytics Chart if possible
         $historyChartData = $domain->history()->orderBy('created_at', 'desc')->take(50)->get()->reverse();
         $historyLabels = $historyChartData->map(fn($h) => $h->created_at->format('d.m. H:i'))->values();
         $historyResponseTimes = $historyChartData->pluck('response_time')->values();
@@ -298,7 +299,7 @@ class DomainController extends Controller
 
         // --- 3. Performance & Security ---
         // SSL
-        $sslDaysRemaining = $domain->ssl_days_left ?? 0; // Assuming this attribute exists or is calculated
+        $sslDaysRemaining = $domain->ssl_days_left ?? 0;
 
         // PageSpeed History for Chart
         $psHistory = $domain->history()
@@ -317,14 +318,12 @@ class DomainController extends Controller
         return view('domains.dashboard', compact(
             'domain',
             // Analytics
-            'chartLabels', 'chartVisitors', 'chartPageviews',
-            'topPages', 'topSources', 'deviceLabels', 'deviceData',
-            // KPIs
-            'uptime', 'avgResponseTime', 'sslDaysRemaining',
-            // History
-            'recentChecks', 'historyLabels', 'historyResponseTimes',
-            // Performance
-            'psHistoryLabels', 'psHistoryScores',
+            'chartLabels', 'chartVisitors', 'chartPageviews', 'topPages', 'topSources', 'deviceLabels', 'deviceData',
+            // Technical
+            'uptime', 'avgResponseTime', 'sslDaysRemaining', 'recentChecks', 'monitoredUrls',
+            'historyLabels', 'historyResponseTimes', 'psHistoryLabels', 'psHistoryScores',
+            // Security/Audit
+            'criticalCount', 'warningCount', 'auditDetails',
             // Notes
             'notes'
         ));

@@ -459,6 +459,44 @@
                 </div>
                 @endif
 
+                @if(count($monitoredUrls) > 0)
+                <!-- Monitored Paths Summary -->
+                <div class="card-base p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-violet-100 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800 dark:text-white">Überwachte Pfade</h3>
+                                <p class="text-xs text-slate-500 dark:text-gray-400">Aktueller Status deiner Unterseiten</p>
+                            </div>
+                        </div>
+                        <button @click="tab = 'monitoring'" class="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline">Alle verwalten →</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        @foreach($monitoredUrls as $mUrl)
+                        <div class="p-3 rounded-xl border border-slate-100 dark:border-gray-700/50 bg-slate-50/50 dark:bg-gray-800/30 flex items-center justify-between group hover:border-violet-200 dark:hover:border-violet-500/30 transition-all">
+                            <div class="min-w-0 pr-4">
+                                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-tighter">{{ parse_url($mUrl->url, PHP_URL_PATH) ?: '/' }}</p>
+                                <p class="text-xs font-semibold text-slate-700 dark:text-gray-200 truncate" title="{{ $mUrl->url }}">{{ $mUrl->url }}</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <p class="text-[10px] font-bold {{ $mUrl->last_status_code < 400 ? 'text-emerald-500' : 'text-rose-500' }}">
+                                        {{ $mUrl->last_status_code ?: 'PENDING' }}
+                                    </p>
+                                    <p class="text-[9px] text-slate-400 font-mono">{{ $mUrl->last_response_time }}ms</p>
+                                </div>
+                                <div class="w-2 h-2 rounded-full {{ $mUrl->last_status_code < 400 ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
                 <!-- Audit Details - Grouped by Category with Messages -->
                 @if(!empty($auditDetails))
                 @php
@@ -1330,15 +1368,15 @@
                     this.initSparklines();
                 },
                 initSparklines() {
-                    // Performance Sparkline (simulated trend data)
+                    // Performance Sparkline
                     const perfCtx = document.getElementById('performanceSparkline');
                     if (perfCtx) {
                         new Chart(perfCtx, {
                             type: 'line',
                             data: {
-                                labels: ['', '', '', '', '', '', ''],
+                                labels: @json($psHistoryLabels),
                                 datasets: [{
-                                    data: [75, 78, 80, 77, 82, 79, {{ $score }}],
+                                    data: @json($psHistoryScores),
                                     borderColor: '{{ $score >= 90 ? "#10b981" : ($score >= 50 ? "#f59e0b" : "#ef4444") }}',
                                     backgroundColor: '{{ $score >= 90 ? "rgba(16,185,129,0.1)" : ($score >= 50 ? "rgba(245,158,11,0.1)" : "rgba(239,68,68,0.1)") }}',
                                     borderWidth: 2,
@@ -1350,7 +1388,7 @@
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
+                                plugins: { legend: { display: false }, tooltip: { enabled: true } },
                                 scales: {
                                     x: { display: false },
                                     y: { display: false, min: 0, max: 100 }
@@ -1358,7 +1396,7 @@
                             }
                         });
                     }
-                    // Uptime Sparkline (30-day trend)
+                    // Uptime Sparkline
                     const uptimeCtx = document.getElementById('uptimeSparkline');
                     if (uptimeCtx) {
                         new Chart(uptimeCtx, {
@@ -1366,7 +1404,7 @@
                             data: {
                                 labels: ['', '', '', '', '', '', ''],
                                 datasets: [{
-                                    data: [100, 100, 99.9, 100, 100, 99.8, {{ $uptime }}],
+                                    data: [100, 100, 100, 100, 100, 100, {{ $uptime }}],
                                     borderColor: '#10b981',
                                     backgroundColor: 'rgba(16,185,129,0.1)',
                                     borderWidth: 2,
@@ -1392,9 +1430,9 @@
                         new Chart(respCtx, {
                             type: 'line',
                             data: {
-                                labels: ['', '', '', '', '', '', ''],
+                                labels: @json($historyLabels),
                                 datasets: [{
-                                    data: [{{ $avgResponseTime + 20 }}, {{ $avgResponseTime - 10 }}, {{ $avgResponseTime }}, {{ $avgResponseTime + 15 }}, {{ $avgResponseTime - 5 }}, {{ $avgResponseTime + 10 }}, {{ $avgResponseTime }}],
+                                    data: @json($historyResponseTimes),
                                     borderColor: '{{ $avgResponseTime < 300 ? "#8b5cf6" : "#f59e0b" }}',
                                     backgroundColor: '{{ $avgResponseTime < 300 ? "rgba(139,92,246,0.1)" : "rgba(245,158,11,0.1)" }}',
                                     borderWidth: 2,
@@ -1406,7 +1444,7 @@
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
+                                plugins: { legend: { display: false }, tooltip: { enabled: true } },
                                 scales: {
                                     x: { display: false },
                                     y: { display: false }
