@@ -128,6 +128,9 @@ class CheckUrlJob implements ShouldQueue
                 'last_status_code' => $statusCode,
                 'last_safety_status' => $safetyStatus,
             ]);
+            
+            // Still update the domain's last_checked to show activity on the dashboard
+            $this->domain->update(['last_checked' => now()]);
         } else {
             // Updating the Domain model as the "Main URL" record
             $this->domain->update([

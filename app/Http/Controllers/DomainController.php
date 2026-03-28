@@ -61,39 +61,51 @@ class DomainController extends Controller
         }
 
         $allUrls = [];
-        $domainHost = parse_url($domain->url, PHP_URL_HOST);
+        $domainHost = preg_replace('/^www\./', '', parse_url($domain->url, PHP_URL_HOST));
 
         // 1. Scan Homepage Links
         try {
-            $response = Http::timeout(10)->get($domain->url);
+            $response = Http::timeout(10)->withUserAgent('SpectoraBot/1.0')->get($domain->url);
             if ($response->successful()) {
                 $crawler = new Crawler($response->body());
                 $crawler->filter('a[href]')->each(function (Crawler $node) use (&$allUrls, $domainHost, $domain) {
                     $href = $node->attr('href');
-                    if (!$href) return;
+                    if (!$href || str_starts_with($href, '#') || str_starts_with($href, 'javascript:')) return;
                     
-                    // Normalize
-                    if (str_starts_with($href, '/')) {
+                    // Normalize relative links
+                    if (str_starts_with($href, '//')) {
+                        $href = (parse_url($domain->url, PHP_URL_SCHEME) ?: 'https') . ':' . $href;
+                    } elseif (str_starts_with($href, '/')) {
                         $href = rtrim($domain->url, '/') . $href;
                     }
                     
-                    $urlHost = parse_url($href, PHP_URL_HOST);
+                    $urlHost = preg_replace('/^www\./', '', parse_url($href, PHP_URL_HOST));
                     if ($urlHost === $domainHost) {
-                        $allUrls[] = $href;
+                        $allUrls[] = rtrim($href, '/');
                     }
                 });
             }
-        } catch (\Exception $e) { /* ignore */ }
+        } catch (\Exception $e) { 
+            \Illuminate\Support\Facades\Log::warning("Homepage scan failed for {$domain->url}: " . $e->getMessage());
+        }
 
-        // 2. Scan Sitemaps (only those included/selected)
-        $sitemapsToScan = $domain->included_sitemaps ?? [];
+        // 2. Scan Sitemaps
+        $sitemapsToScan = $domain->included_sitemaps;
+        
+        // If no sitemaps selected, try auto-discovery to give user some results
+        if (empty($sitemapsToScan)) {
+            $sitemapsToScan = $sitemapService->discover($domain->url);
+        }
+
         foreach ($sitemapsToScan as $sitemapUrl) {
-            $parsed = $sitemapService->parse($sitemapUrl);
-            if (!empty($parsed['items'])) {
-                foreach ($parsed['items'] as $item) {
-                     $allUrls[] = $item;
+            try {
+                $parsed = $sitemapService->parse($sitemapUrl);
+                if (!empty($parsed['items'])) {
+                    foreach ($parsed['items'] as $item) {
+                         $allUrls[] = rtrim($item, '/');
+                    }
                 }
-            }
+            } catch (\Exception $e) { /* ignore single sitemap failure */ }
         }
 
         // 3. Unique & Clean
@@ -101,8 +113,11 @@ class DomainController extends Controller
         $results = [];
 
         foreach ($uniqueUrls as $url) {
-            // Check if already monitored
-            $existing = $domain->monitoredUrls()->where('url', $url)->first();
+            // Check if already monitored (normalize both for comparison)
+            $existing = $domain->monitoredUrls()
+                ->where('url', $url)
+                ->orWhere('url', $url . '/')
+                ->first();
             
             // Check if "public" per filter
             $filter = $filterService->shouldCheck($domain, $url);
@@ -116,7 +131,7 @@ class DomainController extends Controller
         }
 
         return response()->json([
-            'urls' => $results
+            'urls' => array_values($results)
         ]);
     }
 
@@ -128,14 +143,14 @@ class DomainController extends Controller
 
         $validated = $request->validate([
             'urls' => 'required|array',
-            'urls.*.url' => 'required|url',
-            'urls.*.is_active' => 'required|boolean',
+            'urls.*.url' => 'required|string',
+            'urls.*.is_monitored' => 'required|boolean',
         ]);
 
         foreach ($validated['urls'] as $urlData) {
             $domain->monitoredUrls()->updateOrCreate(
-                ['url' => $urlData['url']],
-                ['is_active' => $urlData['is_active']]
+                ['url' => rtrim($urlData['url'], '/')],
+                ['is_active' => $urlData['is_monitored']]
             );
         }
 

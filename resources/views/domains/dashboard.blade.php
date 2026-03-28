@@ -740,14 +740,32 @@
                         </div>
                     </div>
 
-                    <!-- Column 3: Sitemaps -->
+                    <!-- Column 3: Sitemaps & URLs -->
                     <div class="lg:col-span-1 space-y-6">
+                        <!-- Sitemaps Card -->
                         <div class="bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-xl shadow-sm p-6">
                             <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                                 <svg class="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
                                 Sitemaps
                             </h3>
-                            
+                            <div class="mb-4">
+                                <button @click="detectSitemaps()" class="w-full py-2 bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 rounded-lg text-sm font-bold hover:bg-slate-200 dark:hover:bg-gray-600 transition flex items-center justify-center gap-2" :disabled="isDetecting">
+                                    <template x-if="isDetecting">
+                                        <svg class="animate-spin h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    </template>
+                                    <span x-text="isDetecting ? 'Suche...' : 'Sitemaps automatisch suchen'"></span>
+                                </button>
+                            </div>
+                            <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                                <template x-for="sitemap in sitemap_urls" :key="sitemap">
+                                    <label class="flex items-center gap-3 p-2 rounded bg-slate-50 dark:bg-gray-900/40 border border-slate-100 dark:border-gray-700 hover:bg-slate-100 dark:hover:bg-gray-700 transition cursor-pointer">
+                                        <input type="checkbox" :value="sitemap" x-model="settings.included_sitemaps" class="w-4 h-4 rounded border-slate-300 dark:border-gray-600 text-cyan-500 focus:ring-cyan-500">
+                                        <span class="text-xs font-mono text-slate-600 dark:text-gray-300 truncate" x-text="sitemap.split('/').pop() || sitemap"></span>
+                                    </label>
+                                </template>
+                                <template x-if="sitemap_urls.length === 0">
+                                    <p class="text-center py-4 text-xs text-slate-400 italic">Keine Sitemaps gefunden.</p>
+                                </template>
                             </div>
                         </div>
 
@@ -766,7 +784,7 @@
                             </div>
 
                             <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                                <template x-for="url in monitoredUrls" :key="url.id">
+                                <template x-for="url in monitoredUrls" :key="url.id || url.url">
                                     <div class="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-gray-900/40 border border-slate-100 dark:border-gray-700/50">
                                         <div class="min-w-0 flex-1">
                                             <p class="text-[10px] font-mono text-slate-500 dark:text-gray-400 truncate" x-text="url.url"></p>
@@ -782,93 +800,98 @@
                                 </template>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </div> <!-- End Column 3 -->
+                    
+                </div> <!-- End Grid -->
 
-            <!-- URL Selection Modal -->
-            <div x-show="showUrlModal" 
-                 class="fixed inset-0 z-50 overflow-y-auto" 
-                 x-cloak
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0">
-                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"></div>
-                    </div>
-
-                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-slate-200 dark:border-gray-700">
-                        <div class="px-6 py-4 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center">
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">URLs zum Überwachen auswählen</h3>
-                            <button @click="showUrlModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18"></path></svg>
-                            </button>
+                <!-- URL Selection Modal (Now safely inside monitoringManager) -->
+                <div x-show="showUrlModal" 
+                     class="fixed inset-0 z-50 overflow-y-auto" 
+                     x-cloak
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0">
+                    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="showUrlModal = false">
+                            <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"></div>
                         </div>
 
-                        <div class="p-6">
-                            <div class="mb-6 flex items-center justify-between">
-                                <div class="text-sm text-slate-500 dark:text-gray-400">
-                                    Scanne Sitemaps und Homepage nach Links...
-                                </div>
-                                <div class="flex gap-2">
-                                    <button @click="selectPublicOnly()" class="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline">Nur öffentliche wählen</button>
-                                    <span class="text-slate-300">|</span>
-                                    <button @click="toggleAllUrls()" class="text-xs font-bold text-slate-600 dark:text-slate-400 hover:underline" x-text="allSelected ? 'Alle abwählen' : 'Alle wählen'"></button>
-                                </div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-slate-200 dark:border-gray-700">
+                            <div class="px-6 py-4 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center">
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white">URLs zum Überwachen auswählen</h3>
+                                <button @click="showUrlModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18"></path></svg>
+                                </button>
                             </div>
 
-                            <div class="space-y-2 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
-                                <template x-if="isScanningUrls">
-                                    <div class="py-12 text-center">
-                                        <svg class="animate-spin h-8 w-8 text-violet-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <p class="text-slate-500">Analysiere Domain-Struktur...</p>
+                            <div class="p-6">
+                                <div class="mb-6 flex items-center justify-between">
+                                    <div class="text-sm text-slate-500 dark:text-gray-400">
+                                        Scanne Sitemaps und Homepage nach Links...
                                     </div>
-                                </template>
+                                    <div class="flex gap-2">
+                                        <button @click="selectPublicOnly()" class="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline">Nur öffentliche wählen</button>
+                                        <span class="text-slate-300 dark:text-gray-600">|</span>
+                                        <button @click="toggleAllUrls()" class="text-xs font-bold text-slate-600 dark:text-slate-400 hover:underline" x-text="allSelected ? 'Alle abwählen' : 'Alle wählen'"></button>
+                                    </div>
+                                </div>
 
-                                <template x-for="item in discoveredUrls" :key="item.url">
-                                    <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer group">
-                                        <input type="checkbox" x-model="item.is_monitored" class="w-5 h-5 rounded border-slate-300 dark:border-gray-600 text-violet-600 focus:ring-violet-500">
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-xs font-mono text-slate-700 dark:text-gray-300 truncate" x-text="item.url"></p>
-                                            <div class="flex items-center gap-2 mt-1">
-                                                <template x-if="item.is_public">
-                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">ÖFFENTLICH</span>
-                                                </template>
-                                                <template x-if="!item.is_public">
-                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400" :title="item.skip_reason">PRIVAT/GESPERRT</span>
-                                                </template>
-                                            </div>
+                                <div class="space-y-2 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                                    <template x-if="isScanningUrls">
+                                        <div class="py-12 text-center">
+                                            <svg class="animate-spin h-8 w-8 text-violet-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <p class="text-slate-500">Analysiere Domain-Struktur...</p>
                                         </div>
-                                    </label>
-                                </template>
+                                    </template>
+
+                                    <template x-for="item in discoveredUrls" :key="item.url">
+                                        <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer group">
+                                            <input type="checkbox" x-model="item.is_monitored" class="w-5 h-5 rounded border-slate-300 dark:border-gray-600 text-violet-600 focus:ring-violet-500">
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-xs font-mono text-slate-700 dark:text-gray-300 truncate" x-text="item.url"></p>
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <template x-if="item.is_public">
+                                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">ÖFFENTLICH</span>
+                                                    </template>
+                                                    <template x-if="!item.is_public">
+                                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400" :title="item.skip_reason">PRIVAT/GESPERRT</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </template>
+
+                                    <template x-if="discoveredUrls.length === 0 && !isScanningUrls">
+                                        <div class="py-12 text-center text-slate-400 text-sm">
+                                            <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 12h.01M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            Keine URLs gefunden. Versuche es mit anderen Sitemap-Einstellungen.
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="px-6 py-4 bg-slate-50 dark:bg-gray-900/50 border-t border-slate-100 dark:border-gray-700 flex justify-end gap-3">
+                                <button @click="showUrlModal = false" class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition">Abbrechen</button>
+                                <button @click="saveUrlSelection()" class="btn-primary" :disabled="isSyncingUrls">
+                                    <template x-if="isSyncingUrls">
+                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    </template>
+                                    <span x-text="isSyncingUrls ? 'Speichere...' : 'Auswahl speichern'"></span>
+                                </button>
                             </div>
                         </div>
+                    </div>
+                </div> <!-- End Modal -->
 
-                        <div class="px-6 py-4 bg-slate-50 dark:bg-gray-900/50 border-t border-slate-100 dark:border-gray-700 flex justify-end gap-3">
-                            <button @click="showUrlModal = false" class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition">Abbrechen</button>
-                            <button @click="saveUrlSelection()" class="btn-primary" :disabled="isSyncingUrls">
-                                <template x-if="isSyncingUrls">
-                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                </template>
-                                <span x-text="isSyncingUrls ? 'Speichere...' : 'Auswahl speichern'"></span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </div> <!-- End Tab Content: Monitoring (monitoringManager) -->
 
 
             <!-- Tab Content: Analytics -->

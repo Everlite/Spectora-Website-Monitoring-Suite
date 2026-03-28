@@ -28,7 +28,9 @@ class MonitoringFilterService
             $patterns = array_filter(explode("\n", str_replace("\r", "", $domain->exclude_patterns)));
             foreach ($patterns as $pattern) {
                 if ($this->matchPattern(trim($pattern), $url)) {
-                    return ['should_check' => false, 'reason' => 'URL matched exclude pattern: ' . $pattern];
+                    $reason = 'URL matched exclude pattern: ' . $pattern;
+                    Log::info("MonitoringFilter: Skipping {$url} - {$reason}");
+                    return ['should_check' => false, 'reason' => $reason];
                 }
             }
         }
@@ -36,7 +38,9 @@ class MonitoringFilterService
         // 2. Robots.txt Respect
         if ($domain->respect_robots_txt) {
             if (!$this->robotsTxt->isAllowed($url)) {
-                return ['should_check' => false, 'reason' => 'Disallowed by robots.txt'];
+                $reason = 'Disallowed by robots.txt';
+                Log::info("MonitoringFilter: Skipping {$url} - {$reason}");
+                return ['should_check' => false, 'reason' => $reason];
             }
         }
 
