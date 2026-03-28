@@ -321,6 +321,11 @@ class DomainController extends Controller
         // --- 4. Notes ---
         $notes = $domain->notes()->orderBy('created_at', 'desc')->get();
 
+        // --- 5. Security & Audit Summary (Restored Fix) ---
+        $auditDetails = $domain->last_pagespeed_details ?? [];
+        $criticalCount = collect($auditDetails)->where('status', 'error')->count();
+        $warningCount = collect($auditDetails)->where('status', 'warning')->count();
+
         return view('domains.dashboard', compact(
             'domain',
             // Analytics
