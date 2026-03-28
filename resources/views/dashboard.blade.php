@@ -286,7 +286,7 @@
             <div x-show="isStatusOpen" 
                  x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
                  x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                 class="inline-block align-bottom bg-gray-800 border border-gray-700 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                 class="inline-block align-bottom bg-gray-800 border border-gray-700 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
                 
                 <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
@@ -307,8 +307,8 @@
                                 </template>
 
                                 <template x-if="statusType !== 'safe' && statusDetails">
-                                    <div class="bg-gray-900 rounded p-4 border border-gray-700 font-mono text-xs text-gray-300 overflow-x-auto">
-                                        <pre x-text="JSON.stringify(statusDetails, null, 2)"></pre>
+                                    <div class="w-full text-white mt-4">
+                                        @include('reports.watchdog-report')
                                     </div>
                                 </template>
                                 
