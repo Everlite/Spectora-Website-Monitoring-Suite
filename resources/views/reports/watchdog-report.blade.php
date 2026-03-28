@@ -4,22 +4,22 @@
     <!-- Header / Summary -->
     <template x-if="wdHasWatchdog()">
         <div class="flex flex-wrap gap-3 flex-shrink-0">
-            <template x-if="wdSummary.critical > 0">
+            <template x-if="wdGetSummary().critical > 0">
                 <div class="px-3 py-1 bg-red-900/50 border border-red-700 text-red-200 rounded-full text-sm font-semibold flex items-center shadow-sm">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    <span x-text="wdSummary.critical + ' Critical'"></span>
+                    <span x-text="wdGetSummary().critical + ' Critical'"></span>
                 </div>
             </template>
-            <template x-if="wdSummary.warning > 0">
+            <template x-if="wdGetSummary().warning > 0">
                 <div class="px-3 py-1 bg-yellow-900/50 border border-yellow-700 text-yellow-200 rounded-full text-sm font-semibold flex items-center shadow-sm">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    <span x-text="wdSummary.warning + ' Warnings'"></span>
+                    <span x-text="wdGetSummary().warning + ' Warnings'"></span>
                 </div>
             </template>
-            <template x-if="wdSummary.info > 0">
+            <template x-if="wdGetSummary().info > 0">
                 <div class="px-3 py-1 bg-blue-900/50 border border-blue-700 text-blue-200 rounded-full text-sm font-semibold flex items-center shadow-sm">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span x-text="wdSummary.info + ' Info'"></span>
+                    <span x-text="wdGetSummary().info + ' Info'"></span>
                 </div>
             </template>
         </div>
@@ -45,9 +45,9 @@
         </template>
 
         <!-- Issues Loop (Watchdog) -->
-        <template x-if="wdHasWatchdog() && wdIssues.length > 0">
+        <template x-if="wdHasWatchdog() && wdGetIssues().length > 0">
             <div class="space-y-4">
-                <template x-for="(issue, index) in wdIssues" :key="index">
+                <template x-for="(issue, index) in wdGetIssues()" :key="index">
                     <div x-show="!wdIsDismissed(issue)" 
                         x-transition:leave="transition ease-in duration-300"
                         x-transition:leave-start="opacity-100 transform scale-100"
@@ -138,7 +138,7 @@
                     </div>
                 </template>
                 
-                <template x-if="wdIssues.length > 0 && wdVisibleCount === 0">
+                <template x-if="wdGetIssues().length > 0 && wdVisibleCount() === 0">
                     <div class="text-center py-8 border border-dashed border-gray-700 rounded-xl bg-gray-800/30">
                         <p class="text-spectora-cyan font-medium mb-3">✅ Alle Warnungen wurden als gelesen markiert.</p>
                         <button @click="wdRestoreAll()" class="text-xs text-gray-400 hover:text-white border border-gray-600 rounded px-3 py-1.5 hover:bg-gray-700 transition-colors focus:outline-none">
@@ -149,7 +149,7 @@
             </div>
         </template>
 
-        <template x-if="(!wdHasWatchdog() || wdIssues.length === 0) && (!statusDetails?.keywords_found?.length)">
+        <template x-if="(!wdHasWatchdog() || wdGetIssues().length === 0) && (!statusDetails?.keywords_found?.length)">
             <div class="text-gray-400 italic text-center py-10">Keine spezifischen Sicherheitswarnungen in den Details gefunden.</div>
         </template>
     </div> <!-- End scrollable area -->

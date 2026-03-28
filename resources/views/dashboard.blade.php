@@ -96,7 +96,7 @@
                                 @endif
 
                                 <!-- Security Status -->
-                                <div @click="openStatus('{{ $domain->url }}', {{ json_encode($domain->safety_details) }}, '{{ $domain->safety_status }}')" 
+                                <div @click="openStatus('{{ $domain->url }}', {{ json_encode($domain->safety_details ?? []) }}, '{{ $domain->safety_status }}')" 
                                      class="relative group flex items-center justify-center space-x-1 cursor-pointer px-2 py-1 rounded border text-xs font-bold uppercase w-28 h-8 shrink-0
                                     @if($domain->safety_status === 'safe') bg-green-900 text-green-400 border-green-700
                                     @elseif($domain->safety_status === 'danger') bg-red-900 text-red-400 border-red-700
@@ -608,9 +608,9 @@
                 },
 
                 // Watchdog Report Helpers
-                wdHasWatchdog() { return this.statusDetails && this.statusDetails.watchdog; },
-                get wdIssues() { return this.wdHasWatchdog() ? (this.statusDetails.watchdog.issues || []) : []; },
-                get wdSummary() { return this.wdHasWatchdog() ? (this.statusDetails.watchdog.summary || {critical:0, warning:0, info:0}) : {critical:0, warning:0, info:0}; },
+                wdHasWatchdog() { return !!(this.statusDetails && this.statusDetails.watchdog); },
+                wdGetIssues() { return this.wdHasWatchdog() ? (this.statusDetails.watchdog.issues || []) : []; },
+                wdGetSummary() { return this.wdHasWatchdog() ? (this.statusDetails.watchdog.summary || {critical:0, warning:0, info:0}) : {critical:0, warning:0, info:0}; },
                 wdIssueKey(issue) { return (issue.type || '') + '::' + (issue.title || ''); },
                 wdDismiss(issue) {
                     const key = this.wdIssueKey(issue);
@@ -620,7 +620,7 @@
                     }
                 },
                 wdIsDismissed(issue) { return this.wdDismissed.includes(this.wdIssueKey(issue)); },
-                get wdVisibleCount() { return this.wdIssues.filter(i => !this.wdIsDismissed(i)).length; },
+                wdVisibleCount() { return this.wdGetIssues().filter(i => !this.wdIsDismissed(i)).length; },
                 wdRestoreAll() {
                     this.wdDismissed = [];
                     localStorage.removeItem(this.wdStorageKey);
