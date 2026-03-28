@@ -11,7 +11,7 @@
 
 ---
 
-## 🚀 The "Google-Free" Philosophy
+##  The "Google-Free" Philosophy
 
 Unlike traditional monitoring tools, Spectora operates fully autonomously. All analyses take place **locally within your container**.
 
