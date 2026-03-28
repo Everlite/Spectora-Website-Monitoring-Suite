@@ -25,13 +25,13 @@ class CheckDomainJob implements ShouldQueue
 
     public function handle(): void
     {
-        // 1. Check Main Domain URL
-        CheckUrlJob::dispatch($this->domain);
+        // 1. Check Main Domain URL - Force synchronous for manual analysis compatibility
+        CheckUrlJob::dispatchSync($this->domain);
 
         // 2. Check all active sub-URLs
         $activeUrls = $this->domain->monitoredUrls()->where('is_active', true)->get();
         foreach ($activeUrls as $monitoredUrl) {
-            CheckUrlJob::dispatch($this->domain, null, $monitoredUrl);
+            CheckUrlJob::dispatchSync($this->domain, null, $monitoredUrl);
         }
     }
 }

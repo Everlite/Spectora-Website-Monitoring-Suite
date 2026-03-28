@@ -137,14 +137,19 @@ class CheckUrlJob implements ShouldQueue
             $this->domain->update(['last_checked' => now()]);
         } else {
             // Updating the Domain model as the "Main URL" record
-            $this->domain->update([
-                'status_code' => $statusCode,
-                'ssl_days_left' => $sslDays,
-                'response_time' => $responseTime ?? 0,
-                'safety_status' => $safetyStatus,
-                'safety_details' => $safetyDetails,
-                'last_checked' => now(),
-            ]);
+            Log::info("Updating domain {$this->domain->url} Status: {$statusCode}, SSL: {$sslDays}");
+            try {
+                $this->domain->update([
+                    'status_code' => $statusCode,
+                    'ssl_days_left' => $sslDays,
+                    'response_time' => $responseTime ?? 0,
+                    'safety_status' => $safetyStatus,
+                    'safety_details' => $safetyDetails,
+                    'last_checked' => now(),
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to update domain record: " . $e->getMessage());
+            }
         }
 
         // --- Create History ---
