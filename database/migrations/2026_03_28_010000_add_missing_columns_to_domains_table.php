@@ -20,6 +20,14 @@ return new class extends Migration
                 $table->integer('visitors_today')->default(0)->after('response_time');
             }
         });
+
+        if (Schema::hasTable('checks_history')) {
+            Schema::table('checks_history', function (Blueprint $table) {
+                if (!Schema::hasColumn('checks_history', 'created_at')) {
+                    $table->timestamps();
+                }
+            });
+        }
     }
 
     public function down(): void
@@ -30,6 +38,10 @@ return new class extends Migration
 
         Schema::table('domains', function (Blueprint $table) {
             $table->dropColumn(['safety_details', 'visitors_today']);
+        });
+
+        Schema::table('checks_history', function (Blueprint $table) {
+            $table->dropColumn(['created_at', 'updated_at']);
         });
     }
 };
