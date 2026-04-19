@@ -19,7 +19,11 @@ class SitemapService
         // 1. Check robots.txt for "Sitemap:" entries
         try {
             $robotsUrl = $baseUrl . '/robots.txt';
-            $response = Http::timeout(5)->get($robotsUrl);
+            if (!\App\Services\SecurityService::isSafeUrl($robotsUrl)) return [];
+
+            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                ->timeout(5)
+                ->get($robotsUrl);
             if ($response->successful()) {
                 preg_match_all('/^Sitemap:\s*(.*)$/im', $response->body(), $matches);
                 if (!empty($matches[1])) {
@@ -41,9 +45,12 @@ class SitemapService
         foreach ($commonLocations as $location) {
             $testUrl = $baseUrl . $location;
             if (in_array($testUrl, $sitemaps)) continue;
+            if (!\App\Services\SecurityService::isSafeUrl($testUrl)) continue;
 
             try {
-                $response = Http::timeout(3)->head($testUrl);
+                $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                    ->timeout(3)
+                    ->head($testUrl);
                 if ($response->successful()) {
                     $sitemaps[] = $testUrl;
                 }
@@ -58,8 +65,15 @@ class SitemapService
      */
     public function parse(string $sitemapUrl): array
     {
+        if (!\App\Services\SecurityService::isSafeUrl($sitemapUrl)) {
+            Log::warning("Blocked unsafe sitemap URL: {$sitemapUrl}");
+            return [];
+        }
+
         try {
-            $response = Http::timeout(10)->get($sitemapUrl);
+            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                ->timeout(10)
+                ->get($sitemapUrl);
             if (!$response->successful()) return [];
 
             $xml = simplexml_load_string($response->body());

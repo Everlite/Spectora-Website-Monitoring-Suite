@@ -7,7 +7,7 @@
 [![GDPR](https://img.shields.io/badge/GDPR-Safe-003399?style=for-the-badge)](https://gdpr-info.eu/)
 [![Google-Free](https://img.shields.io/badge/Google-Purged-green?style=for-the-badge)](https://github.com/Everlite/Spectora)
 
-**Spectora Agency Edition** is a highly specialized, self-hosted monitoring tool for agencies. It was designed to provide a central dashboard for all client domains – without dependency on third-party providers and with maximum data privacy.
+**Spectora Agency Edition** is a highly specialized, self-hosted monitoring tool for agencies. It was designed to provide a central dashboard for all client domains – minimizing dependency on third-party providers and prioritizing data sovereignty.
 
 ---
 
@@ -15,32 +15,37 @@
 
 Unlike traditional monitoring tools, Spectora operates fully autonomously. All analyses take place **locally within your container**.
 
-*   **No Google PageSpeed API Key**: Audits are performed via local Lighthouse CLI and Chromium.
+*   **Spectora Audit Engine**: Audits are performed via our proprietary heuristic scoring system. It analyzes DOM structure, meta-data, and performance metrics locally. **No Chromium or Lighthouse dependencies are required**, keeping the system lightweight and secure.
 *   **No Google Fonts**: We use a modern **System Font Stack**. No external requests, no tracking cookies, maximum loading speed.
-*   **No CDNs**: All scripts (including Alpine.js) are bundled locally.
+*   **No Third-Party CDNs**: All runtime assets (Chart.js, Alpine.js, etc.) are bundled locally. **Nothing is loaded from external servers into the user's browser.**
 *   **Private Search Engine Crawler**: Our watchdog identifies itself as `SpectoraBot` to perform security checks without masquerading.
 
 ---
 
 ##  Core Features
 
-### 1. Uptime & Performance Monitoring
+### 1. High-Precision Uptime & Performance
 Real-time monitoring of availability and latency for your domains.
-*   **Interval**: Every 15 minutes (configurable).
-*   **Lighthouse Audits**: Full performance scores (Desktop/Mobile) generated directly within your container.
+*   **Dynamic Metrics**: Real historical 7-day sparklines and precise 1-decimal uptime (e.g., `99.9%`). No placeholders.
+*   **Health Scoring**: Proprietary "Spectora Score" based on local heuristic audits (Accessibility, Performance, and Security).
 
-### 2. Security Watchdog
+### 2. Universal Security (Double-Layered SSRF Protection)
+Spectora implements a state-of-the-art **Double-Layered SSRF Defense** for every system-wide HTTP request:
+1.  **Pre-Request Guard**: Every URL is validated against a blacklist of internal/private IPs before a request is initiated.
+2.  **Redirect Middleware**: Every redirect hop is intercepted and validated mid-flight to ensure it stays within safe, public bounds.
+**All legacy, unhardened monitoring paths (Lighthouse) have been purged from the system.**
+
+### 3. Security Watchdog
 An intelligent scanner that checks websites for typical threats:
-*   **Malware Keywords**: Scans for pharma-spam, gambling content, and malicious keywords.
-*   **SEO Check**: Inspects for `display:none` manipulations and hidden links.
-*   **Verification Checks**: Validates Search Console meta tags.
+*   **Malware & Spam**: Scans for pharma-spam, gambling content, and malicious keywords.
+*   **SEO Enforcement**: Inspects for `display:none` manipulations and hidden links.
+*   **Verification**: Validates Search Console meta tags.
 
-### 3. SSL & Domain Health
-*   **SSL Status**: Displays the remaining validity days of your certificates.
-*   **Health Report**: Color-coded dashboard for an immediate overview of critical issues.
-
-### 4. Agency Reporting
-Generate professional reports for your clients directly from the dashboard.
+### 4. Enterprise Auth Stack
+Fully restored Laravel authentication stack including:
+*   **Secure Password Reset** (Requires configured `MAIL_MAILER`)
+*   **Email Verification**
+*   **Session Management**
 
 ---
 
@@ -52,15 +57,13 @@ Spectora utilizes a modern, dockerized setup that includes all necessary depende
 graph TD
     A[Spectora App Container] --> B[Apache / PHP 8.4]
     A --> C[Laravel Scheduler / Cron]
-    A --> D[Lighthouse CLI]
-    A --> E[Chromium Headless]
+    A --> D[Audit Engine]
     
     C --> F[Uptime Check Job]
-    C --> G[Local Lighthouse Job]
+    C --> G[Spectora Audit Job]
     
     G --> D
-    D --> E
-    E --> H[Target Website]
+    D --> H[Target Website]
     
     B --> I[(Local SQLite DB)]
 ```
@@ -71,7 +74,7 @@ graph TD
 
 ### Prerequisites
 *   **Docker & Docker Compose**
-*   **Hardware**: Minimum **2 GB RAM** (required for Chromium/Lighthouse processes)
+*   **Hardware**: Minimum **1 GB RAM** (Optimized for low-resource environments)
 
 ### 1. Clone & Start
 ```bash
@@ -81,10 +84,7 @@ docker compose up -d --build
 ```
 
 The entrypoint script automatically handles:
-*   `.env` creation from `.env.example`
-*   `APP_KEY` generation
-*   Database migrations
-*   Storage link creation
+*   `.env` creation, `APP_KEY` generation, and Database migrations.
 
 The application is now accessible at **http://localhost:8000**.
 
@@ -92,20 +92,22 @@ The application is now accessible at **http://localhost:8000**.
 
 ##  Configuration (.env)
 
-Since Spectora uses no external APIs, configuration is minimal:
-
-*   `DB_CONNECTION=sqlite`: Pre-configured by default.
-*   `MAIL_*`: Configuration for sending reports.
-*   **No API key required for PageSpeed!**
+*   **Mail Config**: Required for Password Resets and Email Verification.
+    ```env
+    MAIL_MAILER=smtp
+    MAIL_HOST=...
+    MAIL_PORT=587
+    ```
+*   **App URL**: Set `APP_URL` to your public domain for correct tracking script generation.
 
 ---
 
 ##  Production Deployment & Analytics Tracking
 
-By default, Spectora is accessible at `http://localhost:8000`. If you want to use the **Analytics Tracking** feature (to track visitors on your clients' websites), your Spectora dashboard must be publicly accessible via a real domain/subdomain (e.g., `spectora.your-agency.com`).
+To use the **Analytics Tracking** feature, Spectora must be reachable via a public domain/subdomain (e.g., `spectora.your-agency.com`).
 
-### 1. Why a Public Domain is Required
-Tracking external websites from a `localhost` instance is technically impossible because the client's browser wouldn't be able to reach your Spectora server to "sync" the visitor data. For global tracking, Spectora must be reachable via a public IP and a registered DNS record.
+1.  **HTTPS is Mandatory**: Modern browsers require HTTPS for cross-domain tracking.
+2.  **Implementation**: Generate a snippet in the analytics tab. The script (`sp-core.js`) automatically detects its public origin to sync data back to your server.
 
 ### 2. DNS & Subdomain Setup
 1.  **A-Record**: Create an `A-Record` (e.g., `spectora.your-agency.com`) pointing to your server's public IP.
@@ -145,10 +147,10 @@ The Spectora tracking engine was built with the **GDPR** in mind. It provides ac
 
 ##  Data Privacy & GDPR
 
-Spectora is the ideal choice for European agencies:
-1.  **Data Sovereignty**: All analytical data remains within your own infrastructure.
-2.  **Zero Tracking**: No integration of Google Analytics, Fonts, or Maps in the dashboard.
-3.  **Client Security**: Your client data is never transmitted to Google servers for analysis.
+Built with **GDPR**-compliance at its core:
+*   **No Cookies**: Zero tracking cookies used. Anonymized rotating daily hashing for visitor counts.
+*   **Data Sovereignty**: Your analytical and client data remains strictly within your own infrastructure.
+*   **Rendering Exception**: To provide professional graph visuals in PDF reports without requiring complex local dependencies (like Chromium), Spectora utilizes **QuickChart.io**. Only anonymized, non-PII data points for the specific chart are transmitted for rendering.
 
 ---
 
@@ -156,14 +158,11 @@ Spectora is the ideal choice for European agencies:
 
 Developed for agencies that value privacy and independence. 
 
-###  Recent Updates
-*   **Infrastructure**: Upgraded core framework to Laravel 12.
-*   **Monitoring Engine**: Optimized `CheckUrlJob` and `CheckDomainJob` for precise status tracking and preventing database race-conditions.
-*   **Dashboard UI**: Restored HTML structural integrity for absolute tab-isolation (Monitoring vs. Analytics) and separated Chart.js tracking instances.
+### 🔄 Definitive Remediation Updates
+*   **Engineering**: Upgraded core framework to Laravel 12.
+*   **Architecture**: Purged all legacy Lighthouse/Chromium dependencies for a true "1GB RAM" state.
+*   **Security**: Closed all SSRF vulnerabilities with double-layered validation middleware across **all** active code paths.
+*   **Privacy**: 100% localization of runtime libraries and GDPR-compliant anonymized visitor hashing.
+*   **Accuracy**: Unified failure detection, optimized monitoring engines (preventing race-conditions), and real historical trends.
 
-*   **Framework**: [Laravel 12](https://laravel.com)
-*   **Frontend**: [Alpine.js](https://alpinejs.dev) & Tailwind CSS
-*   **Monitoring**: [Lighthouse](https://developers.google.com/web/tools/lighthouse) (Local Version)
-
----
 *Created by Everlite.*

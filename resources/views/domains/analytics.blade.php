@@ -115,7 +115,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="2" class="px-4 py-3 text-center">Keine Daten verfügbar</td>
+                                        <td colspan="2" class="px-4 py-3 text-center">No data available</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -151,7 +151,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/chart.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('mainChart').getContext('2d');

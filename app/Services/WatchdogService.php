@@ -30,19 +30,34 @@ class WatchdogService
     /**
      * Scans a domain for security issues
      */
-    public function scan(Domain $domain): array
+    public function scan(Domain $domain, ?string $url = null): array
     {
-        $url = $domain->url;
+        $url = $url ?? $domain->url;
         if (!str_starts_with($url, 'http')) {
             $url = 'https://' . $url;
+        }
+
+        // SSRF Protection
+        if (!\App\Services\SecurityService::isSafeUrl($url)) {
+            return [
+                'status' => 'error',
+                'issues' => [[
+                    'type' => 'security_blocked',
+                    'severity' => 'critical',
+                    'title' => 'SSRF Blocked',
+                    'description' => 'The destination IP is prohibited.',
+                ]],
+                'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0]
+            ];
         }
 
         $issues = [];
         $summary = ['critical' => 0, 'warning' => 0, 'info' => 0];
 
         try {
-            // SpectoraBot (Privacy First Scanner)
-            $response = Http::withUserAgent('SpectoraBot/1.0 (+https://example.com/bot)')
+            // SpectoraBot (Privacy First Scanner) with SSRF Middleware
+            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                ->withUserAgent('SpectoraBot/1.0 (+https://example.com/bot)')
                 ->timeout(15)
                 ->get($url);
 

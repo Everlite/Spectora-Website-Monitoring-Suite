@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->id();
                 $table->string('email')->unique();
                 $table->string('password');
-                $table->boolean('verified')->default(false);
+                $table->timestamp('email_verified_at')->nullable();
                 $table->string('first_name')->nullable();
                 $table->string('last_name')->nullable();
                 $table->string('company_name')->nullable();
@@ -33,12 +33,13 @@ return new class extends Migration
                 $table->integer('plan_id')->nullable();
                 $table->string('plan_status')->nullable();
                 $table->date('active_until')->nullable();
+                $table->rememberToken();
                 $table->timestamps(); // created_at, updated_at
             });
         }
 
-        if (!Schema::hasTable('password_resets')) {
-            Schema::create('password_resets', function (Blueprint $table) {
+        if (!Schema::hasTable('password_reset_tokens')) {
+            Schema::create('password_reset_tokens', function (Blueprint $table) {
                 $table->id();
                 $table->string('email')->index();
                 $table->string('token');
@@ -64,7 +65,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
-        Schema::dropIfExists('password_resets');
+        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }
 };

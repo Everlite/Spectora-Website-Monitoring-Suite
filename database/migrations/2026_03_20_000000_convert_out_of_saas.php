@@ -32,8 +32,6 @@ return new class extends Migration
                     'plan_id',
                     'plan_status',
                     'active_until',
-                    'verify_token',
-                    'verified',
                 ]);
             }
         });

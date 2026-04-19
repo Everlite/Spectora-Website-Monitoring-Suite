@@ -26,7 +26,7 @@ class ReportController extends Controller
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('PDF Generation failed: ' . $e->getMessage());
             \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
-            return redirect()->back()->with('error', 'PDF konnte nicht erstellt werden: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'PDF could not be generated: ' . $e->getMessage());
         }
     }
 }

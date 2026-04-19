@@ -33,12 +33,17 @@ class AnalyticsController extends Controller
             $originHost = $origin ? parse_url($origin, PHP_URL_HOST) : null;
             $refererHost = $referer ? parse_url($referer, PHP_URL_HOST) : null;
 
-            if ($originHost && $originHost !== $domainHost) {
-                abort(403, 'Origin mismatch');
-            }
+            // Strict Host Comparison
+            $isAuthorized = false;
             
-            if (!$originHost && $refererHost && $refererHost !== $domainHost) {
-                abort(403, 'Referer mismatch');
+            if ($originHost && $originHost === $domainHost) {
+                $isAuthorized = true;
+            } elseif (!$originHost && $refererHost && $refererHost === $domainHost) {
+                $isAuthorized = true;
+            }
+
+            if (!$isAuthorized) {
+                abort(403, 'Unauthorized tracking origin (Expected: ' . $domainHost . ')');
             }
         }
 
@@ -117,9 +122,7 @@ class AnalyticsController extends Controller
      */
     public function show(\App\Models\Domain $domain)
     {
-        if ($domain->user_id !== \Illuminate\Support\Facades\Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('view', $domain);
 
         $days = 30;
         $startDate = now()->subDays($days);

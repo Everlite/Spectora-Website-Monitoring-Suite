@@ -45,6 +45,12 @@ class CheckUrlJob implements ShouldQueue
             return;
         }
 
+        // 0.5 SSRF Protection
+        if (!\App\Services\SecurityService::isSafeUrl($url)) {
+            Log::warning("SSRF Protection: Blocked prohibited URL check for {$url}");
+            return;
+        }
+
         $startTime = microtime(true);
         $statusCode = 0;
         $sslDays = null;
@@ -53,8 +59,9 @@ class CheckUrlJob implements ShouldQueue
         $safetyDetails = [];
 
         try {
-            // 1. Perform HTTP Check with SpectoraBot UA
-            $response = Http::withUserAgent('SpectoraBot/1.0')
+            // 1. Perform HTTP Check with SpectoraBot UA and SSRF Middleware
+            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                ->withUserAgent('SpectoraBot/1.0')
                 ->timeout(15)
                 ->get($url);
             
@@ -90,10 +97,8 @@ class CheckUrlJob implements ShouldQueue
             // 4. Watchdog Service (Security, Title, Links, etc.)
             try {
                 $watchdog = new WatchdogService();
-                // Watchdog currently expects Domain for settings, but we can pass URL if needed.
-                // For now, let's just use it as is but be aware it scans the URL from the response.
-                $scanResult = $watchdog->scan($this->domain); // This might repeat the request if not careful, but WatchdogService uses domain->url.
-                // TODO: Refactor WatchdogService to accept a Crawler or Response body to avoid redundant requests.
+                // Pass the specific URL being checked to avoid scanning the main domain only
+                $scanResult = $watchdog->scan($this->domain, $url); 
                 
                 $safetyDetails['watchdog'] = $scanResult;
                 if ($scanResult['status'] === 'danger') {
@@ -164,19 +169,26 @@ class CheckUrlJob implements ShouldQueue
         ]);
 
         // --- Handle Notifications (Only if it's the main domain for now to avoid spam) ---
-        if (!$this->monitoredUrl && !empty($issues)) {
-             // Existing notification logic...
-             if (!$this->domain->notify_sent) {
-                 try {
-                     $user = $this->domain->user;
-                     if ($user) {
-                         Mail::to($user->email)->send(new DomainWarningMail($this->domain, $issues));
-                         $this->domain->update(['notify_sent' => true]);
-                     }
-                 } catch (\Exception $e) {
-                     Log::error("Failed to send mail: " . $e->getMessage());
-                 }
-             }
+        if (!$this->monitoredUrl) {
+            if (!empty($issues)) {
+                if (!$this->domain->notify_sent) {
+                    try {
+                        $user = $this->domain->user;
+                        if ($user) {
+                            Mail::to($user->email)->send(new DomainWarningMail($this->domain, $issues));
+                            $this->domain->update(['notify_sent' => true]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Failed to send mail: " . $e->getMessage());
+                    }
+                }
+            } else {
+                // If the domain is healthy again and a notification was sent previously, reset the flag
+                if ($this->domain->notify_sent) {
+                    $this->domain->update(['notify_sent' => false]);
+                    Log::info("Resetting notify_sent for {$this->domain->url} (Healthy again)");
+                }
+            }
         }
     }
 

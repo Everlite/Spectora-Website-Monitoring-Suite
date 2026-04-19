@@ -29,8 +29,19 @@ class ReportService
         }
 
         // Gather Data
-        // 1. Uptime (Mocked or calculated)
-        $uptime = '100%'; 
+        // 1. Real Uptime Calculation (Last 30 Days)
+        $totalChecks = $domain->history()->where('created_at', '>=', now()->subDays(30))->count();
+        $failedChecks = $domain->history()
+            ->where('created_at', '>=', now()->subDays(30))
+            ->where(function($q) {
+                $q->where('status_code', '>=', 400)
+                  ->orWhereNull('status_code')
+                  ->orWhere('status_code', 0);
+            })->count();
+        
+        $uptime = $totalChecks > 0 
+            ? number_format((($totalChecks - $failedChecks) / $totalChecks) * 100, 1) . '%' 
+            : '0.0%';
 
         // 2. Avg Response Time
         $avgResponseTime = $domain->response_time ?? 0;
@@ -74,16 +85,24 @@ class ReportService
         $days = collect(range(29, 0))->map(fn($days) => now()->subDays($days)->format('Y-m-d'));
         $labels = $days->map(fn($date) => \Carbon\Carbon::parse($date)->format('d.m'));
 
-        // Helper to fetch and encode image
+        // Helper to fetch and encode image with SSRF Middleware
         $fetchChart = function($config) {
             $url = 'https://quickchart.io/chart?c=' . urlencode(json_encode($config)) . '&w=400&h=200';
+            
+            if (!\App\Services\SecurityService::isSafeUrl($url)) {
+                return null;
+            }
+
             try {
-                $image = file_get_contents($url);
-                if ($image !== false) {
-                    return 'data:image/png;base64,' . base64_encode($image);
+                $response = \Illuminate\Support\Facades\Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                    ->timeout(10)
+                    ->get($url);
+
+                if ($response->successful()) {
+                    return 'data:image/png;base64,' . base64_encode($response->body());
                 }
             } catch (\Exception $e) {
-                // Log error or ignore
+                \Illuminate\Support\Facades\Log::error("QuickChart fetch failed: " . $e->getMessage());
             }
             return null;
         };
@@ -185,14 +204,21 @@ class ReportService
         ];
         $data['chartScore'] = $fetchChart($chartConfig3);
 
-        // --- Mock Data for "Recent Checks" Table ---
-        $data['recentChecks'] = [
-            ['check' => 'SSL Certificate', 'status' => 'Valid', 'time' => now()->subMinutes(5)->format('H:i')],
-            ['check' => 'Homepage Availability', 'status' => 'Online', 'time' => now()->subMinutes(10)->format('H:i')],
-            ['check' => 'DNS Resolution', 'status' => 'Resolved', 'time' => now()->subMinutes(15)->format('H:i')],
-            ['check' => 'Server Response', 'status' => $avgResponseTime . 's', 'time' => now()->subMinutes(20)->format('H:i')],
-            ['check' => 'Malware Scan', 'status' => 'Clean', 'time' => now()->subHour()->format('H:i')],
-        ];
+        // --- Real Data for "Recent Checks" Table ---
+        $data['recentChecks'] = $domain->history()
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function($check) {
+                $status = ($check->status_code >= 200 && $check->status_code < 400) ? 'Online' : 'Offline';
+                if ($check->status_code === 0) $status = 'Error';
+                
+                return [
+                    'check' => 'Uptime Check',
+                    'status' => $status . ' (HTTP ' . ($check->status_code ?: '???') . ')',
+                    'time' => $check->created_at->format('H:i d.m.')
+                ];
+            })->toArray();
 
         $pdf = Pdf::loadView('reports.monthly', $data);
         $pdf->setOptions(['isRemoteEnabled' => true, 'defaultFont' => 'sans-serif']);

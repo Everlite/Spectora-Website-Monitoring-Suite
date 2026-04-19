@@ -85,4 +85,27 @@ class Domain extends Model
     {
         return 'uuid';
     }
+
+    /**
+     * Calculates the uptime percentage for a given number of days.
+     */
+    public function calculateUptime(int $days = 30): float
+    {
+        $startDate = now()->subDays($days);
+        $totalChecks = $this->history()->where('created_at', '>=', $startDate)->count();
+        if ($totalChecks === 0) {
+            return 0.0;
+        }
+
+        $failedChecks = $this->history()
+            ->where('created_at', '>=', $startDate)
+            ->where(function ($q) {
+                $q->where('status_code', '>=', 400)
+                  ->orWhereNull('status_code')
+                  ->orWhere('status_code', 0);
+            })
+            ->count();
+
+        return round((($totalChecks - $failedChecks) / $totalChecks) * 100, 2);
+    }
 }

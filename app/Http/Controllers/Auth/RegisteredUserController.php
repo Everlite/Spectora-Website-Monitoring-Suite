@@ -19,6 +19,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
+        if (!config('auth.registration_enabled', true)) {
+            abort(403, 'Registration is currently disabled.');
+        }
         return view('auth.register');
     }
 
@@ -27,6 +30,10 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if (!config('auth.registration_enabled', true)) {
+            abort(403, 'Registration is currently disabled.');
+        }
+
         $request->validate([
             'first_name'    => ['required', 'string', 'max:255'],
             'last_name'     => ['required', 'string', 'max:255'],

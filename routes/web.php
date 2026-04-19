@@ -44,9 +44,6 @@ Route::middleware('auth')->group(function () {
     // Web Push Subscriptions
     Route::post('/subscriptions', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('subscriptions.store');
 
-    // Web Push Subscriptions
-    Route::post('/subscriptions', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('subscriptions.store');
-
 });
 
 require __DIR__.'/auth.php';

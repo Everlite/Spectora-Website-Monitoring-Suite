@@ -17,8 +17,12 @@ class RobotsTxtService
         $robotsUrl = $baseUrl . '/robots.txt';
 
         $content = Cache::remember("robots_txt_" . md5($baseUrl), 3600, function () use ($robotsUrl) {
+            if (!\App\Services\SecurityService::isSafeUrl($robotsUrl)) return '';
+            
             try {
-                $response = Http::timeout(5)->get($robotsUrl);
+                $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                    ->timeout(5)
+                    ->get($robotsUrl);
                 return $response->successful() ? $response->body() : '';
             } catch (\Exception $e) {
                 return '';

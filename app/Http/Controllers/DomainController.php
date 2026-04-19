@@ -15,9 +15,7 @@ class DomainController extends Controller
 {
     public function updateSettings(Request $request, Domain $domain)
     {
-        if ($domain->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $domain);
 
         $validated = $request->validate([
             'only_check_public_pages' => 'boolean',
@@ -38,9 +36,7 @@ class DomainController extends Controller
 
     public function detectSitemaps(Domain $domain, SitemapService $sitemapService)
     {
-        if ($domain->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $domain);
 
         $sitemaps = $sitemapService->discover($domain->url);
         
@@ -56,16 +52,22 @@ class DomainController extends Controller
 
     public function scanUrls(Domain $domain, SitemapService $sitemapService, MonitoringFilterService $filterService)
     {
-        if ($domain->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $domain);
 
         $allUrls = [];
         $domainHost = preg_replace('/^www\./', '', parse_url($domain->url, PHP_URL_HOST));
 
-        // 1. Scan Homepage Links
+        // 1. Scan Homepage Links with SSRF Middleware
+        if (!\App\Services\SecurityService::isSafeUrl($domain->url)) {
+            \Illuminate\Support\Facades\Log::warning("Blocked unsafe homepage scan: {$domain->url}");
+            return;
+        }
+
         try {
-            $response = Http::timeout(10)->withUserAgent('SpectoraBot/1.0')->get($domain->url);
+            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                ->timeout(10)
+                ->withUserAgent('SpectoraBot/1.0')
+                ->get($domain->url);
             if ($response->successful()) {
                 $crawler = new Crawler($response->body());
                 $crawler->filter('a[href]')->each(function (Crawler $node) use (&$allUrls, $domainHost, $domain) {
@@ -159,10 +161,7 @@ class DomainController extends Controller
 
     public function history(Domain $domain)
     {
-        // Ensure the user owns the domain
-        if ($domain->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('view', $domain);
 
         $showOnlyErrors = request()->has('only_errors');
         $dateFilter = request()->input('date');
@@ -204,9 +203,7 @@ class DomainController extends Controller
 
     public function show(Domain $domain)
     {
-        if ($domain->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('view', $domain);
 
         // --- 1. Analytics Data (Last 30 Days) ---
         $days = 30;
@@ -278,10 +275,29 @@ class DomainController extends Controller
 
 
         // --- 2. History & KPIs ---
-        // Uptime (Last 30 days based on checks)
-        $totalChecks = $domain->history()->where('created_at', '>=', $startDate)->count();
-        $failedChecks = $domain->history()->where('created_at', '>=', $startDate)->where('status_code', '>=', 400)->count();
-        $uptime = $totalChecks > 0 ? round((($totalChecks - $failedChecks) / $totalChecks) * 100, 2) : 100;
+        // Uptime (Last 30 days based on KPI)
+        $uptime = $domain->calculateUptime(30);
+
+        // Uptime History for Sparkline (Last 7 days)
+        $uptimeHistory = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $dayTotal = $domain->history()->whereDate('created_at', $date)->count();
+            if ($dayTotal === 0) {
+                // Return 0 if no data, or maybe better 100 if we assume it was up?
+                // The user complained about 100 placeholder, so 0 is safer/more honest for fresh domains.
+                $uptimeHistory[] = 0;
+            } else {
+                $dayFailed = $domain->history()
+                    ->whereDate('created_at', $date)
+                    ->where(function ($q) {
+                        $q->where('status_code', '>=', 400)
+                          ->orWhereNull('status_code')
+                          ->orWhere('status_code', 0);
+                    })->count();
+                $uptimeHistory[] = round((($dayTotal - $dayFailed) / $dayTotal) * 100, 1);
+            }
+        }
 
         // Avg Response Time (24h)
         $avgResponseTime = $domain->history()
@@ -337,7 +353,7 @@ class DomainController extends Controller
             // Analytics
             'chartLabels', 'chartVisitors', 'chartPageviews', 'topPages', 'topSources', 'deviceLabels', 'deviceData', 'deviceStats',
             // Technical
-            'uptime', 'avgResponseTime', 'sslDaysRemaining', 'recentChecks', 'monitoredUrls',
+            'uptime', 'uptimeHistory', 'avgResponseTime', 'sslDaysRemaining', 'recentChecks', 'monitoredUrls',
             'historyLabels', 'historyResponseTimes', 'psHistoryLabels', 'psHistoryScores',
             // Security/Audit
             'criticalCount', 'warningCount', 'auditDetails', 'score', 'scoreColor', 'watchdogData',
@@ -348,9 +364,7 @@ class DomainController extends Controller
 
     public function analyze(Request $request, Domain $domain)
     {
-        if ($domain->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $domain);
 
         // Dispatch Jobs Synchronously
         \App\Jobs\PerformSpectoraAudit::dispatchSync($domain);
@@ -365,9 +379,7 @@ class DomainController extends Controller
 
     public function status(Domain $domain)
     {
-        if ($domain->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('view', $domain);
 
         // Fetch History for Chart
         $history = $domain->history()
@@ -386,8 +398,11 @@ class DomainController extends Controller
             'history_scores' => $history->pluck('pagespeed_score_desktop')->values(),
         ]);
     }
+
     public function store(Request $request)
     {
+        $this->authorize('create', Domain::class);
+
         $request->validate([
             'url' => 'required|string',
             'keyword_must_contain' => 'nullable|string',
@@ -400,6 +415,11 @@ class DomainController extends Controller
         $url = trim($request->url);
         if (!preg_match('#^https?://#', $url)) {
             $url = 'https://' . $url;
+        }
+
+        // SSRF Protection
+        if (!\App\Services\SecurityService::isSafeUrl($url)) {
+            return back()->withErrors(['url' => 'This URL is prohibited for security reasons (internal/private IP).']);
         }
 
         // Check for duplicates
@@ -422,6 +442,7 @@ class DomainController extends Controller
 
     public function destroy(Domain $domain)
     {
+        $this->authorize('delete', $domain);
         $domain->delete();
 
         return redirect()->route('dashboard')->with('status', 'Domain deleted.');

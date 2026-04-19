@@ -127,7 +127,7 @@
                                     <div class="text-gray-400 text-xs uppercase tracking-wider mb-1">Uptime (30d)</div>
                                     <div class="flex items-center text-white font-mono">
                                         <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                                        100%
+                                        {{ number_format($domain->calculateUptime(), 1) }}%
                                     </div>
                                 </div>
 

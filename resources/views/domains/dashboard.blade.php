@@ -316,7 +316,7 @@
                             <span class="text-[10px] lg:text-xs px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">30 Days</span>
                         </div>
                         <div class="flex items-baseline gap-1 mb-3">
-                            <span class="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white">{{ $uptime }}</span>
+                            <span class="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white">{{ number_format($uptime, 1) }}</span>
                             <span class="text-base lg:text-lg text-slate-400 dark:text-gray-500">%</span>
                         </div>
                         <div class="border-t border-slate-100 dark:border-gray-700 pt-2">
@@ -835,7 +835,7 @@
                             <div class="mb-4">
                                 <button @click="openUrlSelector()" class="w-full py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                                    URLs auswählen & verwalten
+                                    Select & Manage URLs
                                 </button>
                             </div>
 
@@ -1343,7 +1343,7 @@
                 </div>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/chart.min.js"></script>
     <script>
         function headerActions() {
             return {
@@ -1437,7 +1437,7 @@
                             data: {
                                 labels: ['', '', '', '', '', '', ''],
                                 datasets: [{
-                                    data: [100, 100, 100, 100, 100, 100, {{ $uptime }}],
+                                    data: @json($uptimeHistory),
                                     borderColor: '#10b981',
                                     backgroundColor: 'rgba(16,185,129,0.1)',
                                     borderWidth: 2,

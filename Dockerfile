@@ -22,26 +22,13 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     sqlite3 \
     libsqlite3-dev \
-    # Chromium and its dependencies for Lighthouse
-    chromium \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
     libzip-dev \
     libicu-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js and Lighthouse
+# Install Node.js for Vite build
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g lighthouse
+    && apt-get install -y nodejs
 
 # PHP Extensions
 RUN docker-php-ext-configure intl \

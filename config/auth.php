@@ -112,4 +112,15 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Registration Settings
+    |--------------------------------------------------------------------------
+    |
+    | This option defines whether public registration is enabled.
+    |
+    */
+
+    'registration_enabled' => env('SPECTORA_REGISTRATION_ENABLED', true),
+
 ];

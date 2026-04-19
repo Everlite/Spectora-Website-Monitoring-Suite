@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use App\Models\Domain;
 use App\Jobs\CheckDomainJob;
-use App\Jobs\CheckPageSpeedJob;
 use App\Jobs\CleanupJob;
 
 Artisan::command('inspire', function () {
