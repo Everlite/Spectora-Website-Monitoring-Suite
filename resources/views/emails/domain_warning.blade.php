@@ -15,7 +15,7 @@
     
     <ul>
         @foreach($issues as $issue)
-            <li class="issue">{!! $issue !!}</li>
+            <li class="issue">{{ $issue }}</li>
         @endforeach
     </ul>
 
