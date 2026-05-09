@@ -87,7 +87,7 @@ class CheckUrlJob implements ShouldQueue
                 $forbiddenKeywords = array_map('trim', explode(',', $this->domain->keyword_must_not_contain));
                 foreach ($forbiddenKeywords as $keyword) {
                     if (!empty($keyword) && str_contains($body, $keyword)) {
-                        $issues[] = "❌ Error keyword found: " . htmlspecialchars($keyword);
+                        $issues[] = "❌ Error keyword found: " . $keyword;
                         $safetyStatus = 'danger';
                         $safetyDetails['keywords_found'][] = $keyword;
                     }
