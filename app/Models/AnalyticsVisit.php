@@ -9,5 +9,16 @@ class AnalyticsVisit extends Model
     // Disable updated_at
     const UPDATED_AT = null;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'domain_id',
+        'visitor_hash',
+        'url',
+        'path',
+        'referrer',
+        'referrer_domain',
+        'browser',
+        'os',
+        'device',
+        'country',
+    ];
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Domain;
 use App\Models\MonitoredUrl;
+use App\Services\AnalyticsQueryService;
 use App\Services\SitemapService;
 use App\Services\MonitoringFilterService;
 use Illuminate\Http\Request;
@@ -13,6 +14,10 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class DomainController extends Controller
 {
+    public function __construct(
+        private readonly AnalyticsQueryService $analyticsQuery
+    ) {}
+
     public function updateSettings(Request $request, Domain $domain)
     {
         $this->authorize('update', $domain);
@@ -60,7 +65,8 @@ class DomainController extends Controller
         // 1. Scan Homepage Links with SSRF Middleware
         if (!\App\Services\SecurityService::isSafeUrl($domain->url)) {
             \Illuminate\Support\Facades\Log::warning("Blocked unsafe homepage scan: {$domain->url}");
-            return;
+
+            return response()->json(['message' => 'URL blocked for security reasons.'], 422);
         }
 
         try {
@@ -117,8 +123,9 @@ class DomainController extends Controller
         foreach ($uniqueUrls as $url) {
             // Check if already monitored (normalize both for comparison)
             $existing = $domain->monitoredUrls()
-                ->where('url', $url)
-                ->orWhere('url', $url . '/')
+                ->where(function ($q) use ($url) {
+                    $q->where('url', $url)->orWhere('url', $url . '/');
+                })
                 ->first();
             
             // Check if "public" per filter
@@ -139,9 +146,7 @@ class DomainController extends Controller
 
     public function syncMonitoredUrls(Request $request, Domain $domain)
     {
-        if ($domain->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $domain);
 
         $validated = $request->validate([
             'urls' => 'required|array',
@@ -166,14 +171,10 @@ class DomainController extends Controller
         $showOnlyErrors = request()->has('only_errors');
         $dateFilter = request()->input('date');
 
-        $query = $domain->history()->orderBy('created_at', 'desc');
+        $query = $domain->uptimeHistory()->orderBy('created_at', 'desc');
 
         if ($showOnlyErrors) {
-            $query->where(function ($q) {
-                $q->where('status_code', '>=', 400)
-                  ->orWhere('status_code', 0)
-                  ->orWhereNull('status_code');
-            });
+            $query->failedUptime();
         }
 
         if ($dateFilter) {
@@ -182,15 +183,10 @@ class DomainController extends Controller
 
         $checks = $query->paginate(20);
 
-        // Prepare data for Chart.js (Last 50 checks, chronological order)
-        // If date filter is active, show chart for that day? Or keep global trend?
-        // User asked to "filter history", usually implies the list. 
-        // Let's filter the chart too if a date is selected, to show the trend OF THAT DAY.
-        
-        $chartQuery = $domain->history()->orderBy('created_at', 'desc');
+        $chartQuery = $domain->uptimeHistory()->orderBy('created_at', 'desc');
         if ($dateFilter) {
             $chartQuery->whereDate('created_at', $dateFilter);
-            $chartData = $chartQuery->get()->reverse(); // Get all for that day
+            $chartData = $chartQuery->get()->reverse();
         } else {
             $chartData = $chartQuery->take(50)->get()->reverse();
         }
@@ -205,74 +201,7 @@ class DomainController extends Controller
     {
         $this->authorize('view', $domain);
 
-        // --- 1. Analytics Data (Last 30 Days) ---
-        $days = 30;
-        $startDate = now()->subDays($days);
-
-        $analyticsData = \App\Models\AnalyticsVisit::where('domain_id', $domain->id)
-            ->where('created_at', '>=', $startDate)
-            ->selectRaw('DATE(created_at) as date, count(*) as pageviews, count(distinct visitor_hash) as visitors')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
-
-        // Fill missing dates for chart
-        $chartData = [];
-        $currentDate = clone $startDate;
-        $now = now();
-        
-        $analyticsKeyed = $analyticsData->keyBy('date');
-
-        while ($currentDate <= $now) {
-            $dateStr = $currentDate->format('Y-m-d');
-            $record = $analyticsKeyed->get($dateStr);
-            $chartData[] = [
-                'date' => $currentDate->format('d.m.'),
-                'visitors' => $record ? $record->visitors : 0,
-                'pageviews' => $record ? $record->pageviews : 0,
-            ];
-            $currentDate->addDay();
-        }
-
-        $chartLabels = array_column($chartData, 'date');
-        $chartVisitors = array_column($chartData, 'visitors');
-        $chartPageviews = array_column($chartData, 'pageviews');
-
-        // Top Pages
-        $topPages = \App\Models\AnalyticsVisit::where('domain_id', $domain->id)
-            ->where('created_at', '>=', $startDate)
-            ->select('url', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
-            ->groupBy('url')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->get();
-
-        // Top Sources
-        $topSources = \App\Models\AnalyticsVisit::where('domain_id', $domain->id)
-            ->where('created_at', '>=', $startDate)
-            ->whereNotNull('referrer_domain')
-            ->select('referrer_domain', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
-            ->groupBy('referrer_domain')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->get();
-
-        // Devices
-        $devices = \App\Models\AnalyticsVisit::where('domain_id', $domain->id)
-            ->where('created_at', '>=', $startDate)
-            ->select('device', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
-            ->groupBy('device')
-            ->get();
-        
-        $deviceLabels = $devices->pluck('device');
-        $deviceData = $devices->pluck('total');
-        
-        // Prepare keyed stats for legend (e.g. ['desktop' => 70, 'mobile' => 20, ...])
-        $totalDeviceVisits = $deviceData->sum();
-        $deviceStats = $devices->mapWithKeys(function($d) use ($totalDeviceVisits) {
-            return [strtolower($d->device) => $totalDeviceVisits > 0 ? round(($d->total / $totalDeviceVisits) * 100) : 0];
-        })->toArray();
-
+        $analytics = $this->analyticsQuery->getDashboardData($domain);
 
         // --- 2. History & KPIs ---
         // Uptime (Last 30 days based on KPI)
@@ -282,25 +211,18 @@ class DomainController extends Controller
         $uptimeHistory = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
-            $dayTotal = $domain->history()->whereDate('created_at', $date)->count();
+            $dayQuery = $domain->uptimeHistory()->whereDate('created_at', $date);
+            $dayTotal = (clone $dayQuery)->count();
             if ($dayTotal === 0) {
-                // Return 0 if no data, or maybe better 100 if we assume it was up?
-                // The user complained about 100 placeholder, so 0 is safer/more honest for fresh domains.
                 $uptimeHistory[] = 0;
             } else {
-                $dayFailed = $domain->history()
-                    ->whereDate('created_at', $date)
-                    ->where(function ($q) {
-                        $q->where('status_code', '>=', 400)
-                          ->orWhereNull('status_code')
-                          ->orWhere('status_code', 0);
-                    })->count();
+                $dayFailed = (clone $dayQuery)->failedUptime()->count();
                 $uptimeHistory[] = round((($dayTotal - $dayFailed) / $dayTotal) * 100, 1);
             }
         }
 
         // Avg Response Time (24h)
-        $avgResponseTime = $domain->history()
+        $avgResponseTime = $domain->uptimeHistory()
             ->where('created_at', '>=', now()->subDay())
             ->avg('response_time');
         
@@ -308,13 +230,13 @@ class DomainController extends Controller
         $avgResponseTime = round(($avgResponseTime ?? 0) * 1000);
 
         // Recent Checks (Logbook)
-        $recentChecks = $domain->history()->orderBy('created_at', 'desc')->paginate(20);
+        $recentChecks = $domain->uptimeHistory()->orderBy('created_at', 'desc')->paginate(20);
         
         // Monitored URLs for the Overview tab
         $monitoredUrls = $domain->monitoredUrls()->where('is_active', true)->get();
 
         // History Chart (Response Time) - Align with Analytics Chart if possible
-        $historyChartData = $domain->history()->orderBy('created_at', 'desc')->take(50)->get()->reverse();
+        $historyChartData = $domain->uptimeHistory()->orderBy('created_at', 'desc')->take(50)->get()->reverse();
         $historyLabels = $historyChartData->map(fn($h) => $h->created_at->format('d.m. H:i'))->values();
         $historyResponseTimes = $historyChartData->map(fn($h) => round($h->response_time * 1000))->values();
 
@@ -348,17 +270,28 @@ class DomainController extends Controller
         $criticalCount = collect($auditDetails)->where('status', 'error')->count();
         $warningCount = collect($auditDetails)->where('status', 'warning')->count();
 
-        return view('domains.dashboard', compact(
-            'domain',
-            // Analytics
-            'chartLabels', 'chartVisitors', 'chartPageviews', 'topPages', 'topSources', 'deviceLabels', 'deviceData', 'deviceStats',
-            // Technical
-            'uptime', 'uptimeHistory', 'avgResponseTime', 'sslDaysRemaining', 'recentChecks', 'monitoredUrls',
-            'historyLabels', 'historyResponseTimes', 'psHistoryLabels', 'psHistoryScores',
-            // Security/Audit
-            'criticalCount', 'warningCount', 'auditDetails', 'score', 'scoreColor', 'watchdogData',
-            // Notes
-            'notes'
+        return view('domains.dashboard', array_merge(
+            compact(
+                'domain',
+                'uptime',
+                'uptimeHistory',
+                'avgResponseTime',
+                'sslDaysRemaining',
+                'recentChecks',
+                'monitoredUrls',
+                'historyLabels',
+                'historyResponseTimes',
+                'psHistoryLabels',
+                'psHistoryScores',
+                'criticalCount',
+                'warningCount',
+                'auditDetails',
+                'score',
+                'scoreColor',
+                'watchdogData',
+                'notes'
+            ),
+            $analytics
         ));
     }
 

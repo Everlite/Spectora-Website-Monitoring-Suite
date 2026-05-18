@@ -77,28 +77,40 @@ class CheckUrlJob implements ShouldQueue
 
             $statusCode = $response->status();
             $responseTime = microtime(true) - $startTime;
-            $body = strtolower($response->body());
+            $rawBody = $response->body();
+            $body = strtolower($rawBody);
 
             // 2. SSL Check (Only for main domain or if url includes host)
             $sslDays = $this->getSSLDays($url);
 
-            // 3. Keyword Check (Must NOT Contain)
+            // 3. Keyword Check (Must Contain)
+            if ($this->domain->keyword_must_contain) {
+                $requiredKeywords = array_map('trim', explode(',', $this->domain->keyword_must_contain));
+                foreach ($requiredKeywords as $keyword) {
+                    if (!empty($keyword) && !str_contains($body, strtolower($keyword))) {
+                        $issues[] = '❌ Required keyword missing: ' . htmlspecialchars($keyword);
+                        $safetyStatus = 'danger';
+                        $safetyDetails['keywords_missing'][] = $keyword;
+                    }
+                }
+            }
+
+            // 4. Keyword Check (Must NOT Contain)
             if ($this->domain->keyword_must_not_contain) {
                 $forbiddenKeywords = array_map('trim', explode(',', $this->domain->keyword_must_not_contain));
                 foreach ($forbiddenKeywords as $keyword) {
-                    if (!empty($keyword) && str_contains($body, $keyword)) {
-                        $issues[] = "❌ Error keyword found: " . $keyword;
+                    if (!empty($keyword) && str_contains($body, strtolower($keyword))) {
+                        $issues[] = '❌ Error keyword found: ' . htmlspecialchars($keyword);
                         $safetyStatus = 'danger';
                         $safetyDetails['keywords_found'][] = $keyword;
                     }
                 }
             }
 
-            // 4. Watchdog Service (Security, Title, Links, etc.)
+            // 5. Watchdog Service (reuse response body — no second HTTP request)
             try {
                 $watchdog = new WatchdogService();
-                // Pass the specific URL being checked to avoid scanning the main domain only
-                $scanResult = $watchdog->scan($this->domain, $url); 
+                $scanResult = $watchdog->scan($this->domain, $url, $rawBody, $statusCode);
                 
                 $safetyDetails['watchdog'] = $scanResult;
                 if ($scanResult['status'] === 'danger') {
@@ -161,7 +173,7 @@ class CheckUrlJob implements ShouldQueue
         ChecksHistory::create([
             'domain_id' => $this->domain->id,
             'monitored_url_id' => $this->monitoredUrl?->id,
-            'status_code' => $statusCode > 0 ? $statusCode : null,
+            'status_code' => $statusCode,
             'response_time' => $responseTime ?? 0,
             'safety_status' => $safetyStatus,
             'ssl_days_left' => $sslDays,

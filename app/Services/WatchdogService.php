@@ -28,9 +28,12 @@ class WatchdogService
     ];
 
     /**
-     * Scans a domain for security issues
+     * Scans a domain for security issues.
+     *
+     * @param  string|null  $prefetchedBody  Reuse HTML from an upstream HTTP check to avoid duplicate requests.
+     * @param  int|null  $prefetchedStatus  HTTP status when body was prefetched.
      */
-    public function scan(Domain $domain, ?string $url = null): array
+    public function scan(Domain $domain, ?string $url = null, ?string $prefetchedBody = null, ?int $prefetchedStatus = null): array
     {
         $url = $url ?? $domain->url;
         if (!str_starts_with($url, 'http')) {
@@ -55,28 +58,47 @@ class WatchdogService
         $summary = ['critical' => 0, 'warning' => 0, 'info' => 0];
 
         try {
-            // SpectoraBot (Privacy First Scanner) with SSRF Middleware
-            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
-                ->withUserAgent('SpectoraBot/1.0 (+https://example.com/bot)')
-                ->timeout(15)
-                ->get($url);
+            if ($prefetchedBody !== null) {
+                $httpStatus = $prefetchedStatus ?? 200;
+                if ($httpStatus >= 400 || $httpStatus === 0) {
+                    return [
+                        'status' => 'error',
+                        'issues' => [[
+                            'type' => 'connection_error',
+                            'severity' => 'critical',
+                            'title' => 'Website unreachable',
+                            'description' => 'The website could not be loaded (HTTP ' . $httpStatus . ').',
+                            'explanation' => 'SpectoraBot cannot crawl the page. This significantly harms SEO ranking.',
+                            'recommendation' => 'Check if the website is online and if SpectoraBot is not being blocked (robots.txt, .htaccess).',
+                        ]],
+                        'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0]
+                    ];
+                }
+                $body = $prefetchedBody;
+            } else {
+                $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                    ->withUserAgent('SpectoraBot/1.0 (+https://example.com/bot)')
+                    ->timeout(15)
+                    ->get($url);
 
-            if ($response->failed()) {
-                return [
-                    'status' => 'error',
-                    'issues' => [[
-                        'type' => 'connection_error',
-                        'severity' => 'critical',
-                        'title' => 'Website unreachable',
-                        'description' => 'The website could not be loaded (HTTP ' . $response->status() . ').',
-                        'explanation' => 'SpectoraBot cannot crawl the page. This significantly harms SEO ranking.',
-                        'recommendation' => 'Check if the website is online and if SpectoraBot is not being blocked (robots.txt, .htaccess).',
-                    ]],
-                    'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0]
-                ];
+                if ($response->failed()) {
+                    return [
+                        'status' => 'error',
+                        'issues' => [[
+                            'type' => 'connection_error',
+                            'severity' => 'critical',
+                            'title' => 'Website unreachable',
+                            'description' => 'The website could not be loaded (HTTP ' . $response->status() . ').',
+                            'explanation' => 'SpectoraBot cannot crawl the page. This significantly harms SEO ranking.',
+                            'recommendation' => 'Check if the website is online and if SpectoraBot is not being blocked (robots.txt, .htaccess).',
+                        ]],
+                        'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0]
+                    ];
+                }
+
+                $body = $response->body();
             }
 
-            $body = $response->body();
             $bodyLower = strtolower($body);
             $crawler = new Crawler($body);
 

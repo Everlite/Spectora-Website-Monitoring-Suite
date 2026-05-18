@@ -30,14 +30,9 @@ class ReportService
 
         // Gather Data
         // 1. Real Uptime Calculation (Last 30 Days)
-        $totalChecks = $domain->history()->where('created_at', '>=', now()->subDays(30))->count();
-        $failedChecks = $domain->history()
-            ->where('created_at', '>=', now()->subDays(30))
-            ->where(function($q) {
-                $q->where('status_code', '>=', 400)
-                  ->orWhereNull('status_code')
-                  ->orWhere('status_code', 0);
-            })->count();
+        $uptimeQuery = $domain->uptimeHistory()->where('created_at', '>=', now()->subDays(30));
+        $totalChecks = (clone $uptimeQuery)->count();
+        $failedChecks = (clone $uptimeQuery)->failedUptime()->count();
         
         $uptime = $totalChecks > 0 
             ? number_format((($totalChecks - $failedChecks) / $totalChecks) * 100, 1) . '%' 
@@ -60,6 +55,11 @@ class ReportService
         if (isset($rawSafetyDetails['keywords_found'])) {
             foreach ((array)$rawSafetyDetails['keywords_found'] as $kw) {
                 $safetyIssues[] = "Forbidden keyword found: " . $kw;
+            }
+        }
+        if (isset($rawSafetyDetails['keywords_missing'])) {
+            foreach ((array)$rawSafetyDetails['keywords_missing'] as $kw) {
+                $safetyIssues[] = "Required keyword missing: " . $kw;
             }
         }
         if (isset($rawSafetyDetails['watchdog']['issues'])) {
@@ -109,7 +109,7 @@ class ReportService
 
         // 1. Performance (Response Time) - Line Chart
         // Fetch from history
-        $responseHistory = $domain->history()
+        $responseHistory = $domain->uptimeHistory()
             ->where('created_at', '>=', now()->subDays(30))
             ->selectRaw('DATE(created_at) as date, AVG(response_time) as avg_time')
             ->groupBy('date')
@@ -205,7 +205,7 @@ class ReportService
         $data['chartScore'] = $fetchChart($chartConfig3);
 
         // --- Real Data for "Recent Checks" Table ---
-        $data['recentChecks'] = $domain->history()
+        $data['recentChecks'] = $domain->uptimeHistory()
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()

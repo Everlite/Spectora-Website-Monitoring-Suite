@@ -17,7 +17,33 @@ class ChecksHistory extends Model
     // also aktivieren wir sie hier, damit Laravel sie automatisch füllt.
     public $timestamps = true; 
 
-    protected $guarded = [];
+    protected $fillable = [
+        'domain_id',
+        'monitored_url_id',
+        'status_code',
+        'response_time',
+        'safety_status',
+        'ssl_days_left',
+        'pagespeed_score',
+        'pagespeed_score_desktop',
+        'created_at',
+    ];
+
+    /**
+     * Uptime checks always record response_time; audit-only rows do not.
+     */
+    public function scopeUptimeChecks($query)
+    {
+        return $query->whereNotNull('response_time');
+    }
+
+    public function scopeFailedUptime($query)
+    {
+        return $query->uptimeChecks()->where(function ($q) {
+            $q->where('status_code', '>=', 400)
+                ->orWhere('status_code', 0);
+        });
+    }
 
     // Hier sagen wir Laravel: "Behandle diese Spalten als echtes Datum"
     protected $casts = [
