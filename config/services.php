@@ -35,8 +35,4 @@ return [
         ],
     ],
 
-    'pagespeed' => [
-        'api_key' => env('SPECTORA_PAGESPEED_KEY'),
-    ],
-
 ];

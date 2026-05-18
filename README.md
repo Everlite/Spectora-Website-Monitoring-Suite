@@ -1,168 +1,205 @@
 <img width="256" height="209" alt="spectora_logo" src="https://github.com/user-attachments/assets/2166df18-7009-466d-99b7-de29dae8bb66" />
 
-#  Spectora: Website Monitoring Suite
+# Spectora: Website Monitoring Suite
 
 [![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com)
-[![GDPR](https://img.shields.io/badge/GDPR-Safe-003399?style=for-the-badge)](https://gdpr-info.eu/)
-[![Google-Free](https://img.shields.io/badge/Google-Purged-green?style=for-the-badge)](https://github.com/Everlite/Spectora)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
-**Spectora Agency Edition** is a highly specialized, self-hosted monitoring tool for agencies. It was designed to provide a central dashboard for all client domains – minimizing dependency on third-party providers and prioritizing data sovereignty.
+**Spectora Agency Edition** is a free, open-source, self-hosted monitoring tool for **freelancers and small web agencies**. Manage all client domains from one dashboard — uptime, SSL, security, lightweight audits, and optional privacy-friendly analytics — without per-seat SaaS fees.
 
----
-
-##  The "Google-Free" Philosophy
-
-Unlike traditional monitoring tools, Spectora operates fully autonomously. All analyses take place **locally within your container**.
-
-*   **Spectora Audit Engine**: Audits are performed via our proprietary heuristic scoring system. It analyzes DOM structure, meta-data, and performance metrics locally. **No Chromium or Lighthouse dependencies are required**, keeping the system lightweight and secure.
-*   **No Google Fonts**: We use a modern **System Font Stack**. No external requests, no tracking cookies, maximum loading speed.
-*   **No Third-Party CDNs**: All runtime assets (Chart.js, Alpine.js, etc.) are bundled locally. **Nothing is loaded from external servers into the user's browser.**
-*   **Private Search Engine Crawler**: Our watchdog identifies itself as `SpectoraBot` to perform security checks without masquerading.
+Originally conceived as a SaaS product, Spectora was released as open source to help agencies with limited budgets own their monitoring stack and keep client data on their own infrastructure.
 
 ---
 
-##  Core Features
+## Who is this for?
 
-### 1. High-Precision Uptime & Performance
-Real-time monitoring of availability and latency for your domains.
-*   **Dynamic Metrics**: Real historical 7-day sparklines and precise 1-decimal uptime (e.g., `99.9%`). No placeholders.
-*   **Health Scoring**: Proprietary "Spectora Score" based on local heuristic audits (Accessibility, Performance, and Security).
-
-### 2. Universal Security (Double-Layered SSRF Protection)
-Spectora implements a state-of-the-art **Double-Layered SSRF Defense** for every system-wide HTTP request:
-1.  **Pre-Request Guard**: Every URL is validated against a blacklist of internal/private IPs before a request is initiated.
-2.  **Redirect Middleware**: Every redirect hop is intercepted and validated mid-flight to ensure it stays within safe, public bounds.
-**All legacy, unhardened monitoring paths (Lighthouse) have been purged from the system.**
-
-### 3. Security Watchdog
-An intelligent scanner that checks websites for typical threats:
-*   **Malware & Spam**: Scans for pharma-spam, gambling content, and malicious keywords.
-*   **SEO Enforcement**: Inspects for `display:none` manipulations and hidden links.
-*   **Verification**: Validates Search Console meta tags.
-
-### 4. Enterprise Auth Stack
-Fully restored Laravel authentication stack including:
-*   **Secure Password Reset** (Requires configured `MAIL_MAILER`)
-*   **Email Verification**
-*   **Session Management**
+| Good fit | Less ideal |
+|----------|------------|
+| Small agencies (≈5–50 client sites) | Large DevOps teams needing Prometheus/Grafana |
+| WordPress / classic website care | Mobile app or API-only backends |
+| Agencies that want GDPR-friendly analytics | “Sign up and forget” with zero server setup |
+| Teams comfortable with Docker on a VPS | Fully managed cloud-only workflows |
 
 ---
 
-##  Technical Architecture
+## Core features
 
-Spectora utilizes a modern, dockerized setup that includes all necessary dependencies for local audits.
+### Uptime & performance
+- HTTP checks every **15 minutes** (main URL + optional sub-URLs)
+- Response time, HTTP status, SSL expiry
+- Uptime % and 7-day sparklines from real check history
+- Custom **must-contain** / **must-not-contain** keywords per domain
+
+### Spectora Audit (heuristic score)
+- Hourly local audit: TTFB, HTML size, H1/title/meta, image `alt`, HTTPS
+- **Spectora Score** (0–100) — stored in DB columns named `pagespeed_*` for historical reasons; no Google Lighthouse or Chromium required
+
+### Security Watchdog
+- Spam/malware keyword patterns, suspicious links/scripts/iframes
+- Hidden content detection, meta-refresh redirects
+- Runs during uptime checks (single HTTP request per URL)
+
+### Privacy analytics (optional)
+- Cookie-free tracking via `sp-core.js` snippet
+- Daily rotating visitor hash (`IP + User-Agent + date + APP_KEY`)
+- Requires a **public HTTPS** Spectora instance for cross-domain sync
+
+### Reports & notifications
+- **Monthly agency digest email** (1st of each month, 08:00) — overview of all domains, no PDF attachment
+- **PDF report on demand** — generate from the domain dashboard before client meetings (day-accurate snapshot)
+- **Instant warning emails** when the main domain check fails (if mail is configured)
+
+### Agency workflow
+- Multi-domain dashboard per user account
+- Domain notes, monitoring filters (robots.txt, noindex, URL patterns)
+- Sitemap-based URL discovery and selective sub-URL monitoring
+- Admin users can access any domain (`is_admin`)
+
+---
+
+## Architecture
 
 ```mermaid
 graph TD
-    A[Spectora App Container] --> B[Apache / PHP 8.4]
-    A --> C[Laravel Scheduler / Cron]
-    A --> D[Audit Engine]
-    
-    C --> F[Uptime Check Job]
-    C --> G[Spectora Audit Job]
-    
-    G --> D
-    D --> H[Target Website]
-    
-    B --> I[(Local SQLite DB)]
+    subgraph Docker container
+        A[Apache + PHP 8.4]
+        B[Cron → schedule:run]
+        C[Queue worker]
+        D[(SQLite in storage/)]
+    end
+
+    B --> E[CheckDomainJob every 15 min]
+    B --> F[PerformSpectoraAudit hourly]
+    B --> G[SendMonthlyReportsJob monthly]
+    B --> H[model:prune daily]
+
+    E --> C
+    F --> C
+    G --> C
+
+    C --> I[HTTP checks as SpectoraBot]
+    I --> J[Client websites]
+
+    A --> D
+    C --> D
 ```
+
+All monitoring HTTP requests use **double-layer SSRF protection** (pre-request DNS/IP validation + redirect middleware).
 
 ---
 
-##  Installation
+## Quick start
 
 ### Prerequisites
-*   **Docker & Docker Compose**
-*   **Hardware**: Minimum **1 GB RAM** (Optimized for low-resource environments)
+- Docker & Docker Compose
+- ~1 GB RAM
+- SMTP settings (recommended for alerts, password reset, monthly digest)
 
-### 1. Clone & Start
+### Install
+
 ```bash
-git clone https://github.com/Everlite/Spectora.git
-cd Spectora
+git clone https://github.com/Everlite/Spectora-Website-Monitoring-Suite.git
+cd Spectora-Website-Monitoring-Suite
 docker compose up -d --build
 ```
 
-The entrypoint script automatically handles:
-*   `.env` creation, `APP_KEY` generation, and Database migrations.
+Open **http://localhost:8000**, register an account, and add your first domain.
 
-The application is now accessible at **http://localhost:8000**.
-
----
-
-##  Configuration (.env)
-
-*   **Mail Config**: Required for Password Resets and Email Verification.
-    ```env
-    MAIL_MAILER=smtp
-    MAIL_HOST=...
-    MAIL_PORT=587
-    ```
-*   **App URL**: Set `APP_URL` to your public domain for correct tracking script generation.
+The entrypoint automatically creates `.env`, generates `APP_KEY`, runs migrations, and links storage. The container runs **Apache**, **cron** (scheduler), and a **queue worker**.
 
 ---
 
-##  Production Deployment & Analytics Tracking
+## Configuration
 
-To use the **Analytics Tracking** feature, Spectora must be reachable via a public domain/subdomain (e.g., `spectora.your-agency.com`).
+Copy `.env.example` to `.env` (done automatically on first Docker start) and adjust:
 
-1.  **HTTPS is Mandatory**: Modern browsers require HTTPS for cross-domain tracking.
-2.  **Implementation**: Generate a snippet in the analytics tab. The script (`sp-core.js`) automatically detects its public origin to sync data back to your server.
+| Variable | Purpose |
+|----------|---------|
+| `APP_URL` | Public URL of your instance (required for analytics snippet & correct links in emails) |
+| `MAIL_*` | SMTP for warnings, monthly digest, password reset |
+| `DB_DATABASE` | SQLite path (default: `storage/database.sqlite`) |
+| `QUEUE_CONNECTION` | Keep `database` (worker included in Docker) |
+| `VAPID_*` | Optional: browser push notifications |
 
-### 2. DNS & Subdomain Setup
-1.  **A-Record**: Create an `A-Record` (e.g., `spectora.your-agency.com`) pointing to your server's public IP.
-2.  **Subdomain vs. Main Domain**: We recommend using a dedicated subdomain so your main agency site remains independent.
+Example mail block:
 
-### 3. Update .env
-On your server, modify the `.env` file to set your public URL. This is crucial for the tracking script (`sp-core.js`) to generate correct absolute URLs:
 ```env
-APP_URL=https://spectora.your-agency.com
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=your@email.com
+MAIL_PASSWORD=secret
+MAIL_FROM_ADDRESS=monitoring@your-agency.com
+MAIL_FROM_NAME="Spectora"
 ```
 
-### 4. Implementation Logic
-Once Spectora is public, you can generate a **Tracking Snippet** in the domain's analytics tab. 
-*   **The Snippet**: `<script src="https://spectora.your-agency.com/js/sp-core.js" data-domain="..." defer></script>`
-*   **Automatic Host Detection**: The `sp-core.js` script is intelligent; it automatically detects its own origin and sends data back to your Spectora `/api/sync` endpoint, regardless of which client site it's embedded on.
+---
 
-### 5. Nginx & SSL (HTTPS)
-For modern browsers to allow cross-domain tracking, **HTTPS is mandatory**. install Nginx and secure it with Certbot:
+## Scheduled tasks
+
+| Schedule | Task |
+|----------|------|
+| Every 15 min | Uptime + SSL + Watchdog for all domains |
+| Hourly | Spectora Audit (heuristic score) |
+| Daily | Prune `checks_history` older than 90 days |
+| 1st of month, 08:00 | Monthly agency digest email |
+
+Manual **Analyze** on a domain runs audit + checks immediately (synchronous).
+
+---
+
+## Analytics setup (optional)
+
+1. Deploy Spectora on a subdomain, e.g. `spectora.your-agency.com`
+2. Set `APP_URL=https://spectora.your-agency.com`
+3. Terminate TLS (e.g. Nginx + Certbot)
+4. In the domain’s **Analytics** tab, copy the tracking snippet:
+
+```html
+<script src="https://spectora.your-agency.com/js/sp-core.js" data-domain="YOUR-DOMAIN-UUID" defer></script>
+```
+
+Events POST to `/api/sync` (rate-limited). Origin must match the monitored domain (`www` and apex are treated as equivalent).
+
+---
+
+## Privacy & third parties
+
+- **No Google Fonts, Analytics, or Lighthouse** in the monitoring stack
+- **Chart.js and scripts** are bundled under `public/js/`
+- **PDF charts**: generated via [QuickChart.io](https://quickchart.io) when you download a report — only anonymized chart data points are sent; no visitor PII
+- **Analytics data** stays in your SQLite database
+
+---
+
+## PDF reports vs monthly email
+
+| | Monthly email | PDF download |
+|---|---------------|--------------|
+| **When** | Automatic, 1st of month | Manual, anytime |
+| **Content** | Agency summary (OK vs issues) | Full per-domain report with charts |
+| **Use case** | Inbox triage across all clients | Client meeting / handover |
+| **Attachment** | None (links to dashboard) | PDF file |
+
+---
+
+## Development
 
 ```bash
-# Install Nginx & Certbot
-apt update && apt install nginx certbot python3-certbot-nginx -y
-
-# Setup SSL
-certbot --nginx -d spectora.your-agency.com
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan test
 ```
 
 ---
 
-##  Analytics: Privacy-by-Design
+## License & credits
 
-The Spectora tracking engine was built with the **GDPR** in mind. It provides accurate stats without compromising visitor privacy:
-*   **No Cookies**: We do not use any tracking cookies.
-*   **Anonymized Hashing**: Visitors are identified via a rotating daily hash composed of `IP + UserAgent + Date + APP_KEY`. This allows unique visitor counting without storing personally identifiable information (PII).
-*   **No Third Parties**: No data ever leaves your server. Unlike Google Analytics, your client data is 100% yours.
----
+MIT — see [LICENSE](LICENSE).
 
-##  Data Privacy & GDPR
+Built for agencies that value privacy, independence, and predictable costs.
 
-Built with **GDPR**-compliance at its core:
-*   **No Cookies**: Zero tracking cookies used. Anonymized rotating daily hashing for visitor counts.
-*   **Data Sovereignty**: Your analytical and client data remains strictly within your own infrastructure.
-*   **Rendering Exception**: To provide professional graph visuals in PDF reports without requiring complex local dependencies (like Chromium), Spectora utilizes **QuickChart.io**. Only anonymized, non-PII data points for the specific chart are transmitted for rendering.
-
----
-
-##  License & Credits
-
-Developed for agencies that value privacy and independence. 
-
-### 🔄 Definitive Remediation Updates
-*   **Engineering**: Upgraded core framework to Laravel 12.
-*   **Architecture**: Purged all legacy Lighthouse/Chromium dependencies for a true "1GB RAM" state.
-*   **Security**: Closed all SSRF vulnerabilities with double-layered validation middleware across **all** active code paths.
-*   **Privacy**: 100% localization of runtime libraries and GDPR-compliant anonymized visitor hashing.
-*   **Accuracy**: Unified failure detection, optimized monitoring engines (preventing race-conditions), and real historical trends.
-
-*Created by Everlite.*
+*Created by [Everlite](https://github.com/Everlite).*

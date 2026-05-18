@@ -3,8 +3,6 @@
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return redirect()->route('login');
