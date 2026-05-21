@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Prunable;
+
 class AnalyticsVisit extends Model
 {
+    use Prunable;
+
     // Disable updated_at
     const UPDATED_AT = null;
 
@@ -21,4 +25,13 @@ class AnalyticsVisit extends Model
         'device',
         'country',
     ];
+
+    /**
+     * Define the prunable model query.
+     */
+    public function prunable()
+    {
+        // Automatically prune tracking visits older than 180 days (6 months)
+        return static::where('created_at', '<=', now()->subDays(180));
+    }
 }

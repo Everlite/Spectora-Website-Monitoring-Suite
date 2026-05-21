@@ -196,6 +196,32 @@ php artisan test
 
 ---
 
+## Security & Hardening
+
+As a self-hosted application, securing your Spectora instance and host system is your responsibility. Keep these best practices in mind:
+
+### 1. Close Public Registration in Production
+By default, user registration is open. In a production environment, you should close registration to prevent unauthorized scanning (Scanner-as-a-Service abuse):
+1. Set `SPECTORA_REGISTRATION_ENABLED=false` in your `.env` file.
+2. Create additional admin or team users via database seeders or Laravel CLI:
+   ```bash
+   docker compose exec app php artisan db:seed
+   ```
+
+### 2. Network Isolation & SSRF Mitigation
+Spectora features a robust double-layer SSRF application filter (DNS checking + Guzzle redirect middleware) to prevent SpectoraBot from hitting internal APIs.
+However, to fully mitigate advanced **DNS Rebinding** and **TOCTOU** (Time-of-Check vs. Time-of-Use) vectors, it is highly recommended to configure egress firewall rules (e.g., using `iptables` or cloud firewall security groups) to prevent the container from communicating with your internal network or cloud metadata services (e.g., `169.254.169.254`).
+
+### 3. Data & SQLite Access Control
+All monitoring data and client tracking events are stored in `storage/database.sqlite`. Ensure:
+- The `storage/` directory and `.sqlite` files are properly owned by the web server user (`www-data`) and have secure permissions (`600` or `640`).
+- Back up `database.sqlite` regularly to prevent data loss.
+
+### 4. SSL/TLS Termination
+Always run Spectora behind a secure reverse proxy (like Nginx, Caddy, or Traefik) that handles TLS termination (HTTPS). Running analytics tracking (`sp-core.js`) over unencrypted HTTP exposes visitor data and is rejected by modern browsers.
+
+---
+
 ## License & credits
 
 MIT — see [LICENSE](LICENSE).
