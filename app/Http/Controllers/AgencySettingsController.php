@@ -11,7 +11,7 @@ class AgencySettingsController extends Controller
     public function updateLogo(Request $request)
     {
         $request->validate([
-            'agency_logo' => 'required|image|max:2048', // Max 2MB
+            'agency_logo' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'], // Max 2MB, excludes SVGs
         ]);
 
         $user = Auth::user();

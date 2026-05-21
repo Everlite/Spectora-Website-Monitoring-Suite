@@ -221,7 +221,7 @@ class ReportService
             })->toArray();
 
         $pdf = Pdf::loadView('reports.monthly', $data);
-        $pdf->setOptions(['isRemoteEnabled' => true, 'defaultFont' => 'sans-serif']);
+        $pdf->setOptions(['isRemoteEnabled' => false, 'defaultFont' => 'sans-serif']);
         
         return $pdf;
     }
