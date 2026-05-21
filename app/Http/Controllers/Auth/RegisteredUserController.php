@@ -40,7 +40,7 @@ class RegisteredUserController extends Controller
             'email'         => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password'      => ['required', 'confirmed', Rules\Password::defaults()],
             'company_name'  => ['required', 'string', 'max:255'],
-            'logo'          => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'logo'          => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ]);
 
         $logoPath = null;

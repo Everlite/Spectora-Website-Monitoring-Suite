@@ -25,8 +25,6 @@ class User extends Authenticatable
         'password',
         'timezone',
         'agency_logo_path',
-        'is_admin',
-        'email_verified_at',
     ];
 
     /**
