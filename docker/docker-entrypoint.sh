@@ -22,15 +22,27 @@ chmod -R 775 /var/www/html/storage
 
 # 2. Ensure .env exists
 if [ ! -f .env ]; then
-    echo "Creating .env from .env.example..."
-    cp .env.example .env
+    if [ -w . ]; then
+        echo "Creating .env from .env.example..."
+        cp .env.example .env
+    else
+        echo "WARNING: .env does not exist and directory is not writable. Cannot copy .env.example."
+    fi
 fi
 
-# 3. Check for APP_KEY (generate if missing or empty)
-CURRENT_KEY=$(grep "^APP_KEY=" .env | cut -d'=' -f2 | tr -d ' ')
-if [ -z "$CURRENT_KEY" ]; then
-    echo "APP_KEY missing or empty. Generating new key..."
-    php artisan key:generate --force
+# 3. Check for APP_KEY (safely handling missing keys under set -e)
+CURRENT_KEY=""
+if [ -f .env ] && [ -r .env ]; then
+    CURRENT_KEY=$(grep "^APP_KEY=" .env 2>/dev/null | cut -d'=' -f2 | tr -d ' ' || true)
+fi
+
+if [ -z "$CURRENT_KEY" ] || [ "$CURRENT_KEY" = "base64:PLACEHOLDER" ]; then
+    if [ -f .env ] && [ -w .env ]; then
+        echo "APP_KEY is missing/placeholder. Generating new key..."
+        php artisan key:generate --force
+    else
+        echo "WARNING: APP_KEY is empty/placeholder and .env is not writable. Skipping key:generate."
+    fi
 else
     echo "APP_KEY detected. Skipping generation."
 fi
