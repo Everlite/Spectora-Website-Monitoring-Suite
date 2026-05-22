@@ -15,12 +15,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
+        \App\Models\User::create([
+            'first_name' => 'Konstantin',
+            'last_name' => 'Balzer',
+            'email' => 'kbalzer92@outlook.de',
+            'password' => \Illuminate\Support\Facades\Hash::make('Morrjes123#2025'),
+            'is_admin' => true,
+            'timezone' => 'Europe/Berlin',
         ]);
     }
 }
