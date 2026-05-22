@@ -16,9 +16,15 @@ class SettingsController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('settings.edit', [
+        $data = [
             'user' => $request->user(),
-        ]);
+        ];
+
+        if ($request->user()->is_admin) {
+            $data['users'] = \App\Models\User::all();
+        }
+
+        return view('settings.edit', $data);
     }
 
     /**

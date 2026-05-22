@@ -42,6 +42,12 @@ Route::middleware('auth')->group(function () {
     // Web Push Subscriptions
     Route::post('/subscriptions', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('subscriptions.store');
 
+    // Admin User Management
+    Route::middleware([\App\Http\Middleware\EnsureUserIsAdmin::class])->group(function () {
+        Route::post('/users', [\App\Http\Controllers\UserController::class, 'store'])->name('users.store');
+        Route::delete('/users/{user}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
+    });
+
 });
 
 require __DIR__.'/auth.php';
