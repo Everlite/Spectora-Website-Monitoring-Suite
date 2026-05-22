@@ -35,7 +35,7 @@
             Sign in
         </button>
 
-        @if (config('auth.registration_enabled', false))
+        @if (config('spectora.registration_enabled', config('auth.registration_enabled', false)))
             <p class="text-center text-sm text-gray-500 dark:text-gray-400">
                 Don't have an account?
                 <a href="{{ route('register') }}" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Register now</a>
