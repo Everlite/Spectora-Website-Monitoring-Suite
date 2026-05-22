@@ -16,9 +16,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (config('app.env') !== 'local') {
+        if (!app()->isLocal()) {
+            $url = config('app.url');
+            \Illuminate\Support\Facades\URL::forceRootUrl($url);
             \Illuminate\Support\Facades\URL::forceScheme('https');
-            \Illuminate\Support\Facades\URL::forceRootUrl(config('app.url'));
+            // Zwingt Laravel, diesen String für alle Assets zu nutzen
+            config(['app.asset_url' => rtrim($url, '/') . '/build']);
         }
     }
 }
