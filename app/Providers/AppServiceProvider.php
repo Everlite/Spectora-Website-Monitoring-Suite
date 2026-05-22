@@ -16,8 +16,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Erzwinge HTTPS, wenn APP_URL mit https:// beginnt
-        if (str_starts_with(config('app.url', ''), 'https://')) {
+        // Erzwinge HTTPS, wenn APP_URL mit https:// beginnt oder wir nicht lokal entwickeln
+        if (str_starts_with(config('app.url', ''), 'https://') || env('APP_ENV', 'production') !== 'local') {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
     }
