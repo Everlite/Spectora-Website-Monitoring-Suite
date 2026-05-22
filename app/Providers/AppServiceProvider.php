@@ -16,10 +16,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Erzwinge HTTPS, wenn der Request über einen SSL-Proxy kommt oder wir nicht in der lokalen Entwicklungsumgebung sind
-        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
-        } elseif (str_contains(config('app.url'), 'https://') || !app()->isLocal()) {
+        // Erzwinge HTTPS, wenn APP_URL mit https:// beginnt
+        if (str_starts_with(config('app.url', ''), 'https://')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
     }
