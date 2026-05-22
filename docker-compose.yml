@@ -9,6 +9,7 @@ services:
     ports:
       - "8000:80"
     volumes:
+      - ./.env:/var/www/html/.env
       - ./app:/var/www/html/app
       - ./config:/var/www/html/config
       - ./resources:/var/www/html/resources
@@ -17,7 +18,6 @@ services:
     environment:
       - DB_CONNECTION=sqlite
       - DB_DATABASE=/var/www/html/storage/database.sqlite
-      - APP_URL=http://localhost:8000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/login"]
       interval: 30s
