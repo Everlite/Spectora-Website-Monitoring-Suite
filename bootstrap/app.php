@@ -17,11 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
         ]);
         $middleware->web(append: [
-            \App\Http\Middleware\SetUserTimezone::class,
-        ]);
-
-        $middleware->web(prepend: [
             \App\Http\Middleware\ForceHttpsUrls::class,
+            \App\Http\Middleware\SetUserTimezone::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
