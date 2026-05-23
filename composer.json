@@ -10,9 +10,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "barryvdh/laravel-dompdf": "^3.0",
+        "barryvdh/laravel-dompdf": "^4.0",
         "doctrine/dbal": "^4.3",
-        "laravel-notification-channels/webpush": "^10.3",
+        "laravel-notification-channels/webpush": "^11.0",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
