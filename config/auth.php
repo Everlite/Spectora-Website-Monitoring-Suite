@@ -121,6 +121,6 @@ return [
     |
     */
 
-    'registration_enabled' => env('SPECTORA_REGISTRATION_ENABLED', true),
+    'registration_enabled' => env('SPECTORA_REGISTRATION_ENABLED', false),
 
 ];
