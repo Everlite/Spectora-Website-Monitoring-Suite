@@ -16,14 +16,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (! app()->isLocal()) {
-            $url = config('app.url');
-
-            // Erzwingt HTTPS-Schema und Root-URL für sämtliche URL-Generierung.
-            // forceRootUrl hat in formatRoot() Priorität und setzt die Basis-URL
-            // für asset(), route(), url() etc. auf den konfigurierten APP_URL-Wert.
-            \Illuminate\Support\Facades\URL::forceScheme('https');
-            \Illuminate\Support\Facades\URL::forceRootUrl($url);
-        }
+        // Unbedingtes HTTPS-Forcing für sämtliche URL-Generierung.
+        // Greift auf Service-Provider-Ebene bevor Middleware und Requests
+        // verarbeitet werden – als Fallback zur ForceHttpsUrls-Middleware.
+        \Illuminate\Support\Facades\URL::forceScheme('https');
+        \Illuminate\Support\Facades\URL::forceRootUrl(config('app.url'));
     }
 }

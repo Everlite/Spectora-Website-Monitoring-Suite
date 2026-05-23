@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetUserTimezone::class,
         ]);
+
+        $middleware->web(prepend: [
+            \App\Http\Middleware\ForceHttpsUrls::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
