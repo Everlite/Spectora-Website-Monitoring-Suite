@@ -17,7 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
         ]);
         $middleware->web(append: [
-            \App\Http\Middleware\ForceHttpsUrls::class,
             \App\Http\Middleware\SetUserTimezone::class,
         ]);
     })

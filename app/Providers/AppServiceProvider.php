@@ -16,9 +16,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Unbedingtes HTTPS-Forcing für sämtliche URL-Generierung.
-        // Greift auf Service-Provider-Ebene bevor Middleware und Requests
-        // verarbeitet werden – als Fallback zur ForceHttpsUrls-Middleware.
+        // Zusätzliche Absicherung auf URL-Generator-Ebene.
+        // Die primäre HTTPS-Erkennung erfolgt in public/index.php vor Request::capture().
         \Illuminate\Support\Facades\URL::forceScheme('https');
         \Illuminate\Support\Facades\URL::forceRootUrl(config('app.url'));
     }
