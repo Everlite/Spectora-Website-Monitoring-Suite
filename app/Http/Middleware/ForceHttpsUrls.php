@@ -45,15 +45,17 @@ class ForceHttpsUrls
             $content = $response->getContent();
 
             if (is_string($content) && $content !== '') {
-                $url = rtrim((string) config('app.url'), '/');
-                $secureUrl = preg_replace('#^http://#', 'https://', $url);
+                $appUrl = rtrim((string) config('app.url'), '/');
+                $host = parse_url($appUrl, PHP_URL_HOST);
 
-                // Ersetze http:// → https:// für die eigene Domain
-                $content = str_replace(
-                    ['http://' . parse_url($url, PHP_URL_HOST), 'http:'],
-                    [$secureUrl, 'https:'],
-                    $content
-                );
+                // Nur http:// der EIGENEN Domain ersetzen – keine Hardcoding
+                if ($host) {
+                    $content = str_replace(
+                        'http://' . $host,
+                        'https://' . $host,
+                        $content
+                    );
+                }
 
                 $response->setContent($content);
             }
