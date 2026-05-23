@@ -36,7 +36,7 @@ class PushSubscriptionController extends Controller
             return response()->json(['error' => $e->errors()], 422);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Push Subscription Error: ' . $e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Subscription failed. Please try again later.'], 500);
         }
     }
 }
