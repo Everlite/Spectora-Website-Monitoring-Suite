@@ -4,38 +4,62 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ForceHttpsUrls
 {
     /**
      * Handle an incoming request.
      *
-     * Setzt den Request auf mehreren Ebenen auf HTTPS:
-     * 1. $_SERVER['HTTPS'] = 'on'  →  $request->isSecure() liefert TRUE
-     * 2. X-Forwarded-Proto Header   →  TrustProxies-Erkennung
-     * 3. URL::forceScheme/forceRootUrl → URL-Generator-Override
+     * Root Cause: Nginx Proxy Manager sendet keinen X-Forwarded-Proto Header.
+     * Dadurch kommt jeder Request als plain HTTP im Container an, und Laravel
+     * generiert ALLE URLs (assets, forms, routes) mit http:// – unabhängig von
+     * forceScheme/forceRootUrl/TrustProxies.
+     *
+     * Fix: Mehrstufiges Override + Response-Body-Suche-Ersetze als Fallback.
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next): mixed
     {
-        // Ebene 1: Server-Variablen – macht den Request nativ "secure"
+        // Stufe 1: Request nativ auf HTTPS zwingen
         $request->server->set('HTTPS', 'on');
         $request->server->set('SERVER_PORT', 443);
-
-        // Ebene 2: Proxy-Header – für TrustProxies
         $request->headers->set('X-Forwarded-Proto', 'https');
         $request->headers->set('X-Forwarded-Port', 443);
 
-        // Ebene 3: URL-Generator – direktes Override
+        // Stufe 2: URL-Generator Override
         URL::forceScheme('https');
         URL::forceRootUrl(config('app.url'));
 
-        /** @var Response $response */
+        /** @var \Symfony\Component\HttpFoundation\Response $response */
         $response = $next($request);
 
-        // Verhindert Caching durch NPM/Browser – stellt sicher, dass
-        // keine alte HTML-Version mit http-URLs ausgeliefert wird.
+        // Stufe 3: Response-Body-Suche-Ersetze (nuklear, aber garantiert)
+        // Ersetzt ALLE http://spectora.taikon.de Vorkommen durch https://
+        if (! $response instanceof BinaryFileResponse
+            && ! $response instanceof StreamedResponse
+            && method_exists($response, 'getContent')
+        ) {
+            $content = $response->getContent();
+
+            if (is_string($content) && $content !== '') {
+                $url = rtrim((string) config('app.url'), '/');
+                $secureUrl = preg_replace('#^http://#', 'https://', $url);
+
+                // Ersetze http:// → https:// für die eigene Domain
+                $content = str_replace(
+                    ['http://' . parse_url($url, PHP_URL_HOST), 'http:'],
+                    [$secureUrl, 'https:'],
+                    $content
+                );
+
+                $response->setContent($content);
+            }
+        }
+
+        // Anti-Cache – verhindert NPM/Browser-Caching alter HTML-Versionen
         $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         $response->headers->set('Pragma', 'no-cache');
 
