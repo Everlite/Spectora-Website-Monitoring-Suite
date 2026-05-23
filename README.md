@@ -2,7 +2,7 @@
   <img width="256" height="209" alt="spectora_logo" src="https://github.com/user-attachments/assets/2166df18-7009-466d-99b7-de29dae8bb66" />
   <h1>Spectora: Private Self-Hosted Website Monitoring Suite</h1>
   
-  [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
+  [![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
   [![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=for-the-badge&logo=php)](https://php.net)
   [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
@@ -178,7 +178,7 @@ MAIL_FROM_NAME="Spectora Monitoring"
 ## Technical Stack
 
 Spectora leverages modern web development technologies to ensure high performance, security, and responsive styling:
-* **Backend Framework:** [Laravel 13](https://laravel.com)
+* **Backend Framework:** [Laravel 12](https://laravel.com)
 * **Runtime:** PHP 8.4 (optimized for speed and low memory footprint)
 * **Database Engine:** SQLite (fast, serverless, and easy to backup/volume-mount)
 * **Frontend Compilation:** [Vite](https://vite.dev) & Vanilla JS
