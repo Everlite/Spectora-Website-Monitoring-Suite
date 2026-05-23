@@ -16,12 +16,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (!app()->isLocal()) {
+        if (! app()->isLocal()) {
             $url = config('app.url');
-            \Illuminate\Support\Facades\URL::forceRootUrl($url);
+
+            // Erzwingt HTTPS-Schema und Root-URL für sämtliche URL-Generierung.
+            // forceRootUrl hat in formatRoot() Priorität und setzt die Basis-URL
+            // für asset(), route(), url() etc. auf den konfigurierten APP_URL-Wert.
             \Illuminate\Support\Facades\URL::forceScheme('https');
-            // Zwingt Laravel, diesen String für alle Assets zu nutzen
-            config(['app.asset_url' => rtrim($url, '/') . '/build']);
+            \Illuminate\Support\Facades\URL::forceRootUrl($url);
         }
     }
 }

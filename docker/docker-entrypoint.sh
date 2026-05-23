@@ -64,15 +64,19 @@ fi
 chown www-data:www-data "$NEW_DB"
 chmod 775 "$NEW_DB"
 
-# 5. Run migrations
+# 5. Clear all caches (config, route, view, OPcache) to ensure fresh state
+echo "Clearing application caches..."
+php artisan optimize:clear
+
+# 6. Run migrations
 echo "Running database migrations..."
 # Point to the database in storage for the migration command
 DB_DATABASE="$NEW_DB" php artisan migrate --force
 
-# 6. Create storage link (forces overwriting existing links/files if present)
+# 7. Create storage link (forces overwriting existing links/files if present)
 echo "Ensuring storage link..."
 php artisan storage:link --force
 
-# 7. Start Supervisor (Apache + Cron + Queue Worker)
+# 8. Start Supervisor (Apache + Cron + Queue Worker)
 echo "Starting services via Supervisor..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
