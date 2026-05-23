@@ -55,8 +55,8 @@ RUN mkdir -p /var/www/html/database /var/www/html/storage /var/www/html/bootstra
 # Copy application files
 COPY . .
 
-# Install PHP dependencies
-RUN composer update --no-dev --optimize-autoloader --with-all-dependencies
+# Install PHP dependencies (delete stale lock for clean Laravel 13 resolution)
+RUN rm -f composer.lock && composer update --no-dev --optimize-autoloader
 
 # Build frontend assets (Vite + Tailwind + Alpine.js)
 RUN npm install && npm run build && rm -rf node_modules
