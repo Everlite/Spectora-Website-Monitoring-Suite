@@ -12,18 +12,33 @@ class ForceHttpsUrls
     /**
      * Handle an incoming request.
      *
-     * Forces all URL generation (assets, routes, redirects) to use HTTPS
-     * regardless of proxy header detection. This is a belt-and-suspenders
-     * measure for setups where Nginx Proxy Manager terminates TLS but
-     * Laravel's TrustProxies middleware fails to reliably detect the
-     * X-Forwarded-Proto header in all code paths.
+     * Setzt den Request auf mehreren Ebenen auf HTTPS:
+     * 1. $_SERVER['HTTPS'] = 'on'  →  $request->isSecure() liefert TRUE
+     * 2. X-Forwarded-Proto Header   →  TrustProxies-Erkennung
+     * 3. URL::forceScheme/forceRootUrl → URL-Generator-Override
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Hartes Override – unabhängig von Environment, Headern oder Config
+        // Ebene 1: Server-Variablen – macht den Request nativ "secure"
+        $request->server->set('HTTPS', 'on');
+        $request->server->set('SERVER_PORT', 443);
+
+        // Ebene 2: Proxy-Header – für TrustProxies
+        $request->headers->set('X-Forwarded-Proto', 'https');
+        $request->headers->set('X-Forwarded-Port', 443);
+
+        // Ebene 3: URL-Generator – direktes Override
         URL::forceScheme('https');
         URL::forceRootUrl(config('app.url'));
 
-        return $next($request);
+        /** @var Response $response */
+        $response = $next($request);
+
+        // Verhindert Caching durch NPM/Browser – stellt sicher, dass
+        // keine alte HTML-Version mit http-URLs ausgeliefert wird.
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
+
+        return $response;
     }
 }
