@@ -15,7 +15,7 @@
         "laravel-notification-channels/webpush": "^11.0",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.10.1",
+        "laravel/tinker": "^3.0",
         "symfony/css-selector": "^7.0",
         "symfony/dom-crawler": "^7.0"
     },
