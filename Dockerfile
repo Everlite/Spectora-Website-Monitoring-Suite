@@ -56,7 +56,7 @@ RUN mkdir -p /var/www/html/database /var/www/html/storage /var/www/html/bootstra
 COPY . .
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer update --no-dev --optimize-autoloader --with-all-dependencies
 
 # Build frontend assets (Vite + Tailwind + Alpine.js)
 RUN npm install && npm run build && rm -rf node_modules
