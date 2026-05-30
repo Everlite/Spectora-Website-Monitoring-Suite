@@ -47,7 +47,7 @@ class AdminUserManagementTest extends TestCase
             'first_name' => 'Alice',
             'last_name' => 'Smith',
             'is_admin' => true,
-            'timezone' => 'Europe/Berlin',
+            'timezone' => 'UTC',
         ]);
 
         $user = User::where('email', 'alice@spectora.test')->first();
@@ -157,5 +157,18 @@ class AdminUserManagementTest extends TestCase
             ->assertSessionHasErrors(['delete_user']);
 
         $this->assertModelExists($admin);
+    }
+
+    public function test_admin_can_delete_another_admin_when_multiple_exist(): void
+    {
+        $adminA = User::factory()->create(['is_admin' => true]);
+        $adminB = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($adminA)
+            ->delete("/users/{$adminB->id}")
+            ->assertRedirect()
+            ->assertSessionHas('status', 'user-deleted');
+
+        $this->assertEquals(1, User::where('is_admin', true)->count());
     }
 }

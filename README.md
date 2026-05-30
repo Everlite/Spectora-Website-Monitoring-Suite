@@ -119,7 +119,7 @@ Deploying Spectora in production behind a reverse proxy (such as Nginx Proxy Man
 
 1. **Set your APP_URL**: In your host `.env` file, configure `APP_URL` to your production domain starting with `https://` (e.g., `APP_URL=https://spectora.yourdomain.com`).
 2. **Dynamic HTTPS Enforcement**: When `APP_URL` is set to `https://`, Spectora automatically detects this and generates all internal links, route redirects, and compiled Vite assets over secure HTTPS.
-3. **Automatic Trusted Proxies**: Spectora automatically trusts reverse proxy headers (e.g. `X-Forwarded-Proto`) in production environments (when `APP_ENV` is not `local`), completely eliminating Mixed Content errors without manual middleware edits.
+3. **Trusted Proxies**: When running behind a reverse proxy, set `TRUSTED_PROXIES=*` (or comma-separated proxy IPs) in `.env` so Laravel honors `X-Forwarded-Proto` and client IPs correctly.
 
 ---
 

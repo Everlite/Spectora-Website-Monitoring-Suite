@@ -1,11 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "everlite/spectora",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Private self-hosted website monitoring suite for freelancers and agencies.",
     "keywords": [
         "laravel",
-        "framework"
+        "monitoring",
+        "uptime",
+        "spectora"
     ],
     "license": "MIT",
     "require": {

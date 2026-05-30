@@ -105,7 +105,7 @@ class SetupCommand extends Command
             'email' => $email,
             'password' => Hash::make($password),
             'is_admin' => true,
-            'timezone' => 'Europe/Berlin',
+            'timezone' => config('app.timezone'),
         ]);
 
         $this->newLine();

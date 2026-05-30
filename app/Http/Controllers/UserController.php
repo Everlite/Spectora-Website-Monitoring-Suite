@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -18,7 +18,7 @@ class UserController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', Password::defaults()],
             'timezone' => ['required', 'string', 'max:255'],
         ]);
 
@@ -41,6 +41,10 @@ class UserController extends Controller
     {
         if ($user->id === auth()->id()) {
             return redirect()->back()->withErrors(['delete_user' => 'You cannot delete your own account.']);
+        }
+
+        if ($user->is_admin && ! User::where('is_admin', true)->where('id', '!=', $user->id)->exists()) {
+            return redirect()->back()->withErrors(['delete_user' => 'You cannot delete the last administrator account.']);
         }
 
         $user->delete();

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,9 +17,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Zusätzliche Absicherung auf URL-Generator-Ebene.
-        // Die primäre HTTPS-Erkennung erfolgt in public/index.php vor Request::capture().
-        \Illuminate\Support\Facades\URL::forceScheme('https');
-        \Illuminate\Support\Facades\URL::forceRootUrl(config('app.url'));
+        $appUrl = config('app.url');
+
+        if (str_starts_with((string) $appUrl, 'https://')) {
+            URL::forceScheme('https');
+        }
+
+        URL::forceRootUrl($appUrl);
     }
 }

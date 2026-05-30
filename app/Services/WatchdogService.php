@@ -77,7 +77,7 @@ class WatchdogService
                 $body = $prefetchedBody;
             } else {
                 $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
-                    ->withUserAgent('SpectoraBot/1.0 (+https://example.com/bot)')
+                    ->withUserAgent('SpectoraBot/1.0 (+'.rtrim((string) config('app.url'), '/').'/bot)')
                     ->timeout(15)
                     ->get($url);
 

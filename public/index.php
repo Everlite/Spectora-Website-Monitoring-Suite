@@ -17,12 +17,18 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-// Force HTTPS detection at the PHP level BEFORE Request::capture() reads $_SERVER.
-// Required because the Nginx Proxy Manager terminates TLS but does not forward
-// X-Forwarded-Proto headers. Without this, Laravel sees every request as HTTP.
-if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
+// Optional HTTPS hint for reverse proxies that terminate TLS without X-Forwarded-Proto.
+if (file_exists($envFile = __DIR__.'/../.env')) {
+    Dotenv\Dotenv::createImmutable(dirname($envFile))->safeLoad();
+}
+
+$appUrl = $_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'http://localhost';
+$forceHttps = filter_var($_ENV['SPECTORA_FORCE_HTTPS'] ?? false, FILTER_VALIDATE_BOOLEAN)
+    || str_starts_with((string) $appUrl, 'https://');
+
+if ($forceHttps && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off')) {
     $_SERVER['HTTPS'] = 'on';
-    $_SERVER['SERVER_PORT'] = 443;
+    $_SERVER['SERVER_PORT'] = '443';
 }
 
 $app->handleRequest(Request::capture());
