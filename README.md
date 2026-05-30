@@ -27,10 +27,16 @@ Unlike standard public SaaS applications, Spectora is built as a **single-agency
 ## Core Features
 
 ### Uptime & Performance
-- HTTP checking loops every **15 minutes** (main domain + custom sub-URLs).
+- HTTP checking loops every **15 minutes** for the main domain and each active **monitored sub-URL**.
 - Automated tracking of response times, HTTP status codes, and SSL certificate expiry.
 - Beautiful 7-day sparkline charts generated from real history data.
 - Advanced filters including **must-contain** / **must-not-contain** keyword matches.
+- Optional monitoring rules: respect `robots.txt`, honour `noindex`, exclude URL patterns, and limit checks to public pages.
+
+### Deep URL Monitoring
+- Discover internal links from the homepage, parse **XML sitemaps**, and pick which URLs to watch.
+- Per-URL uptime history and status inside the domain dashboard.
+- Scan workflow with SSRF-safe outbound requests (`SpectoraBot` user agent).
 
 ### Spectora Audits
 - Local, lightweight hourly auditing measuring TTFB, HTML weight, title/headings/meta setup, image alt tags, and HTTPS status.
@@ -42,13 +48,19 @@ Unlike standard public SaaS applications, Spectora is built as a **single-agency
 
 ### Privacy-First Analytics (Optional)
 - Cookie-free tracking of client pageviews using a secure, lightweight `/js/sp-core.js` snippet.
-- Dynamic visitor hashing (`IP + User-Agent + APP_KEY + Date`) rotated daily to prevent historical tracking.
-- Completely GDPR/ePrivacy compliant out-of-the-box.
+- Dynamic visitor hashing (`IP + User-Agent + APP_KEY + Date`) rotated daily — no persistent visitor IDs across days.
+- Origin validation on `/api/sync` (domain UUID + matching host); designed for privacy-friendly, first-party-style analytics (you remain responsible for client consent and privacy notices).
 
 ### Automated Reports & Warnings
-- **Monthly Agency Email Digest:** Dispatched on the 1st of each month (08:00) with a global health overview.
-- **On-Demand PDF Reports:** Generate clean, premium PDF report files from the dashboard for client handovers or meetings.
-- **Instant Email Alerts:** Warnings fired immediately when client websites go offline.
+- **Monthly Agency Email Digest:** Dispatched on the 1st of each month (08:00) with a global health overview (email only, no PDF attachment).
+- **On-Demand PDF Reports:** Generate clean, premium PDF report files from the dashboard for client handovers or meetings (optional agency logo on reports).
+- **Instant Email Alerts:** Warnings fired immediately when client websites go offline (requires working `MAIL_*` configuration).
+- **Browser Push Notifications (Optional):** Web Push via VAPID keys; subscribe from the dashboard when keys are configured.
+
+### Collaboration & Branding
+- **Domain notes** per client site (team-visible on the domain detail page).
+- **Agency logo upload** in settings — embedded in generated PDF reports.
+- **Data retention:** Check history older than **90 days** is pruned automatically (`model:prune` daily).
 
 ### Multi-User Administration
 - Premium **User Management Panel** inside dashboard settings.
@@ -112,15 +124,30 @@ This interactive prompt will securely guide you to enter your **first name, last
 
 Once completed, navigate to **http://localhost:8000**, log in, and begin managing your client sites!
 
+> **Note:** The Docker image runs **Supervisor** with Apache, Cron (scheduler), and a **queue worker**. Uptime checks and audits are queued — no extra setup needed for the default container.
+
+### Local Development (without Docker)
+
+If you prefer running on the host machine:
+
+```bash
+composer setup   # install deps, .env, key, migrate, npm build
+composer dev     # serves app, queue, logs, and Vite concurrently
+php artisan spectora:setup
+```
+
+Requires **PHP 8.2+** with extensions: `sqlite3`, `pdo_sqlite`, `mbstring`, `xml`, `curl`, `zip`, `intl`.
+
 ---
 
 ## Production Deployment
 
 Deploying Spectora in production behind a reverse proxy (such as Nginx Proxy Manager, Caddy, or Traefik) is extremely straightforward and works out-of-the-box:
 
-1. **Set your APP_URL**: In your host `.env` file, configure `APP_URL` to your production domain starting with `https://` (e.g., `APP_URL=https://spectora.yourdomain.com`).
-2. **Dynamic HTTPS Enforcement**: When `APP_URL` is set to `https://`, Spectora automatically detects this and generates all internal links, route redirects, and compiled Vite assets over secure HTTPS.
-3. **Trusted Proxies**: When running behind a reverse proxy, set `TRUSTED_PROXIES=*` (or comma-separated proxy IPs) in `.env` so Laravel honors `X-Forwarded-Proto` and client IPs correctly.
+1. **Set your `APP_URL`**: Use your public HTTPS URL (e.g. `APP_URL=https://spectora.yourdomain.com`). Spectora forces HTTPS for URL generation when `APP_URL` starts with `https://`.
+2. **Reverse proxy / TLS termination**: Set `TRUSTED_PROXIES=*` (or comma-separated proxy IPs) so Laravel reads `X-Forwarded-Proto` and real client IPs correctly. Leave empty for local HTTP development.
+3. **Proxy without `X-Forwarded-Proto`**: If your proxy terminates TLS but does not forward protocol headers, set `SPECTORA_FORCE_HTTPS=true` in addition to `APP_URL=https://…`.
+4. **Configure SMTP** for offline alerts and monthly digests; optional **VAPID** keys for Web Push (see Configuration table below).
 
 ---
 
@@ -158,10 +185,15 @@ Copy `.env.example` to `.env` (automatically handled during Docker start) and ad
 
 | Variable | Purpose |
 |----------|---------|
-| `APP_URL` | Public URL of your monitoring instance (crucial for correct analytics snippets & email links). |
-| `MAIL_*` | SMTP configuration details to send offline alerts and monthly digests. |
-| `DB_DATABASE` | SQLite database absolute file path (default: `/var/www/html/storage/database.sqlite`). |
-| `SPECTORA_REGISTRATION_ENABLED` | Set to `false` (default) to secure your instance from public registration. |
+| `APP_URL` | Public URL of your instance (analytics snippet, emails, SpectoraBot UA). Use `https://` in production. |
+| `TRUSTED_PROXIES` | `*` or comma-separated IPs behind a reverse proxy; leave empty locally. |
+| `SPECTORA_FORCE_HTTPS` | `true` if TLS terminates at the proxy without `X-Forwarded-Proto` (optional; usually inferred from `APP_URL`). |
+| `SPECTORA_REGISTRATION_ENABLED` | `false` (default) — block public sign-up; create users in Settings or via `spectora:setup`. |
+| `DB_DATABASE` | SQLite file path (default in Docker: `/var/www/html/storage/database.sqlite`). |
+| `DB_JOURNAL_MODE` / `DB_BUSY_TIMEOUT` | SQLite tuning (defaults: `wal` and `5000` ms) for concurrent web + queue writes. |
+| `QUEUE_CONNECTION` | `database` (default) — requires the queue worker (included in Docker via Supervisor). |
+| `MAIL_*` | SMTP for offline alerts and monthly digests (`MAIL_MAILER=log` only logs locally). |
+| `VAPID_SUBJECT`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Web Push (optional); generate with e.g. `web-push generate-vapid-keys`. |
 
 ### Example SMTP Email Setup
 ```env
@@ -180,19 +212,22 @@ MAIL_FROM_NAME="Spectora Monitoring"
 
 Spectora leverages modern web development technologies to ensure high performance, security, and responsive styling:
 * **Backend Framework:** [Laravel 12](https://laravel.com)
-* **Runtime:** PHP 8.4 (optimized for speed and low memory footprint)
-* **Database Engine:** SQLite (fast, serverless, and easy to backup/volume-mount)
-* **Frontend Compilation:** [Vite](https://vite.dev) & Vanilla JS
-* **Design & Layout:** [Tailwind CSS](https://tailwindcss.com) (complete dark mode support throughout the dashboard)
-* **Server Runner:** Apache (included inside the optimized Dockerfile container)
+* **Runtime:** PHP **8.2+** (Docker image ships **PHP 8.4**)
+* **Database Engine:** SQLite with WAL mode (fast, serverless, easy to backup via volume)
+* **Queue:** Database-backed jobs (checks, audits, mail)
+* **Frontend Compilation:** [Vite](https://vite.dev) & Vanilla JS (Alpine.js on dashboard views)
+* **Design & Layout:** [Tailwind CSS](https://tailwindcss.com) v3 (dark mode throughout the dashboard)
+* **PDF:** [DomPDF](https://github.com/barryvdh/laravel-dompdf) for on-demand client reports
+* **Server Runner:** Apache (included in the Docker image; Cron + Supervisor for scheduler and queue)
 
 ---
 
 ## Security & Hardening
 
 * **SSRF Prevention:** Outbound HTTP uses `SecurityService::http()` — DNS/IP validation, redirect checks, and connect-time IP pinning (`CURLOPT_RESOLVE`) so requests cannot pivot to internal addresses after resolution.
-* **Strict CORS & Origin Matching:** Cookie-free tracking requests (`/api/sync`) check monitored domain UUID mappings to block cross-origin requests.
-* **TLS Termination:** Always run Spectora behind a secure reverse proxy (like Nginx, Traefik, or Caddy) handling SSL termination. Browsers will block tracking requests made from secure HTTPS clients to insecure unencrypted HTTP instances.
+* **Analytics `/api/sync`:** Throttled public endpoint; validates domain UUID and request origin/referrer host (no session cookies; CORS allows cross-origin beacons — protection is server-side origin matching).
+* **Login rate limiting:** Five failed attempts per email/IP (Laravel Breeze defaults) before lockout.
+* **TLS Termination:** Run production instances behind HTTPS. Browsers block analytics beacons from HTTPS client sites to an HTTP-only Spectora instance.
 
 ---
 
