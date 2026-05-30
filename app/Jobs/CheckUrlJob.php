@@ -60,7 +60,7 @@ class CheckUrlJob implements ShouldQueue
 
         try {
             // 1. Perform HTTP Check with SpectoraBot UA and SSRF Middleware
-            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+            $response = \App\Services\SecurityService::http()
                 ->withUserAgent('SpectoraBot/1.0')
                 ->timeout(15)
                 ->get($url);

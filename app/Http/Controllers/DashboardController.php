@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Domain;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -10,12 +10,17 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $domains = $user->domains()
+
+        $domainsQuery = Domain::query()
             ->withCount(['analyticsVisits as visitors_today' => function ($query) {
                 $query->whereDate('created_at', now());
-            }])
-            ->orderBy('url')
-            ->get();
+            }]);
+
+        if (! $user->is_admin) {
+            $domainsQuery->where('user_id', $user->id);
+        }
+
+        $domains = $domainsQuery->orderBy('url')->get();
 
         return view('dashboard', compact('domains'));
     }

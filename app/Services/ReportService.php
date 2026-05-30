@@ -94,7 +94,7 @@ class ReportService
             }
 
             try {
-                $response = \Illuminate\Support\Facades\Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                $response = \App\Services\SecurityService::http()
                     ->timeout(10)
                     ->get($url);
 

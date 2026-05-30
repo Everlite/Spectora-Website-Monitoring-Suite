@@ -20,7 +20,7 @@ class RobotsTxtService
             if (!\App\Services\SecurityService::isSafeUrl($robotsUrl)) return '';
             
             try {
-                $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                $response = \App\Services\SecurityService::http()
                     ->timeout(5)
                     ->get($robotsUrl);
                 return $response->successful() ? $response->body() : '';

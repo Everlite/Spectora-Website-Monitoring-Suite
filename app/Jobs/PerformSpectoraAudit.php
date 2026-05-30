@@ -51,7 +51,7 @@ class PerformSpectoraAudit implements ShouldQueue
 
         try {
             // 1. Download & Measure with SSRF Middleware
-            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+            $response = \App\Services\SecurityService::http()
                 ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
                 ->withOptions([
                     'on_stats' => function (TransferStats $stats) use (&$ttfb, &$totalTime) {

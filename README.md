@@ -53,7 +53,8 @@ Unlike standard public SaaS applications, Spectora is built as a **single-agency
 ### Multi-User Administration
 - Premium **User Management Panel** inside dashboard settings.
 - Admins can list active users, create new team members with administrative privileges, and delete obsolete users.
-- Strict security blocks to prevent self-deletion or unauthorized non-admin access.
+- **Administrators see every monitored domain** on the dashboard; regular users only see domains they added.
+- Strict security blocks to prevent self-deletion, deleting the last administrator, or unauthorized non-admin access.
 
 ---
 
@@ -189,7 +190,7 @@ Spectora leverages modern web development technologies to ensure high performanc
 
 ## Security & Hardening
 
-* **SSRF Prevention:** SpectoraBOT features a dual-layer SSRF filter (checks DNS/IP ranges before executing requests and secures redirect handling) to prevent hitting your internal server APIs.
+* **SSRF Prevention:** Outbound HTTP uses `SecurityService::http()` — DNS/IP validation, redirect checks, and connect-time IP pinning (`CURLOPT_RESOLVE`) so requests cannot pivot to internal addresses after resolution.
 * **Strict CORS & Origin Matching:** Cookie-free tracking requests (`/api/sync`) check monitored domain UUID mappings to block cross-origin requests.
 * **TLS Termination:** Always run Spectora behind a secure reverse proxy (like Nginx, Traefik, or Caddy) handling SSL termination. Browsers will block tracking requests made from secure HTTPS clients to insecure unencrypted HTTP instances.
 

@@ -70,7 +70,7 @@ class DomainController extends Controller
         }
 
         try {
-            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+            $response = \App\Services\SecurityService::http()
                 ->timeout(10)
                 ->withUserAgent('SpectoraBot/1.0')
                 ->get($domain->url);

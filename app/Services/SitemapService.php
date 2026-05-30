@@ -21,7 +21,7 @@ class SitemapService
             $robotsUrl = $baseUrl . '/robots.txt';
             if (!\App\Services\SecurityService::isSafeUrl($robotsUrl)) return [];
 
-            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+            $response = \App\Services\SecurityService::http()
                 ->timeout(5)
                 ->get($robotsUrl);
             if ($response->successful()) {
@@ -48,7 +48,7 @@ class SitemapService
             if (!\App\Services\SecurityService::isSafeUrl($testUrl)) continue;
 
             try {
-                $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+                $response = \App\Services\SecurityService::http()
                     ->timeout(3)
                     ->head($testUrl);
                 if ($response->successful()) {
@@ -71,7 +71,7 @@ class SitemapService
         }
 
         try {
-            $response = Http::withMiddleware(\App\Services\SecurityService::redirectMiddleware())
+            $response = \App\Services\SecurityService::http()
                 ->timeout(10)
                 ->get($sitemapUrl);
             if (!$response->successful()) return [];
