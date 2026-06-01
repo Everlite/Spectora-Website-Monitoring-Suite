@@ -18,7 +18,7 @@
 
 Unlike standard public SaaS applications, Spectora is built as a **single-agency private instance**:
 * **Registration Disabled by Default:** The public registration endpoint is securely blocked by default (`SPECTORA_REGISTRATION_ENABLED=false`).
-* **Secure CLI Onboarding:** The first administrator account is initialized interactively via a secure terminal interface.
+* **Secure CLI Onboarding:** The first administrator account is initialized via `php artisan spectora:setup` (always created with admin privileges).
 * **Internal User Management:** Administrators can invite/create team members and extra users directly within the secure dashboard settings.
 * **Data Sovereignty:** All audit histories, uptime data, and client analytics remain 100% on your own infrastructure inside a fast SQLite database.
 
@@ -29,9 +29,9 @@ Unlike standard public SaaS applications, Spectora is built as a **single-agency
 ### Uptime & Performance
 - HTTP checking loops every **15 minutes** for the main domain and each active **monitored sub-URL**.
 - Automated tracking of response times, HTTP status codes, and SSL certificate expiry.
-- Beautiful 7-day sparkline charts generated from real history data.
+- Dashboard cards: **30-day uptime** KPI with **7-day sparkline** charts from check history.
 - Advanced filters including **must-contain** / **must-not-contain** keyword matches.
-- Optional monitoring rules: respect `robots.txt`, honour `noindex`, exclude URL patterns, and limit checks to public pages.
+- Optional monitoring rules: respect `robots.txt`, honour `noindex` (parsed from HTML via DOM), exclude URL patterns, and limit checks to public pages.
 
 ### Deep URL Monitoring
 - Discover internal links from the homepage, parse **XML sitemaps**, and pick which URLs to watch.
@@ -48,8 +48,10 @@ Unlike standard public SaaS applications, Spectora is built as a **single-agency
 
 ### Privacy-First Analytics (Optional)
 - Cookie-free tracking of client pageviews using a secure, lightweight `/js/sp-core.js` snippet.
-- Daily visitor hashing via `HMAC-SHA256` with a date-derived key (no persistent visitor IDs across days).
-- Origin validation on `/api/sync` (domain UUID + matching host); designed for privacy-friendly, first-party-style analytics (you remain responsible for client consent and privacy notices).
+- Daily visitor hashing via `HMAC-SHA256` with a date-derived subkey (no persistent visitor IDs across days).
+- Origin validation on `POST /api/sync` (domain UUID + matching host); rate-limited to **120 requests per minute** per IP.
+- Country detection uses the `CF-IPCountry` header **only when** `TRUSTED_PROXIES` is configured (avoids spoofing on direct connections).
+- Designed for privacy-friendly, first-party-style analytics — you remain responsible for client consent and privacy notices.
 
 ### Automated Reports & Warnings
 - **Monthly Agency Email Digest:** Dispatched on the 1st of each month (08:00) with a global health overview (email only, no PDF attachment).
@@ -58,15 +60,18 @@ Unlike standard public SaaS applications, Spectora is built as a **single-agency
 - **Browser Push Notifications (Optional):** Web Push via VAPID keys; subscribe from the dashboard when keys are configured.
 
 ### Collaboration & Branding
-- **Domain notes** per client site (team-visible on the domain detail page).
+- **Domain notes** per client site (team-visible on the domain detail page; each note stores the creating user for audit trails).
 - **Agency logo upload** in settings — embedded in generated PDF reports.
-- **Data retention:** Check history older than **90 days** is pruned automatically (`model:prune` daily).
+- **Data retention** (daily `php artisan model:prune` via scheduler):
+  - Uptime/audit rows in `checks_history`: **90 days**
+  - Analytics visits: **180 days**
 
 ### Multi-User Administration
 - Premium **User Management Panel** inside dashboard settings.
 - Admins can list active users, create new team members with administrative privileges, and delete obsolete users.
 - **Administrators see every monitored domain** on the dashboard; regular users only see domains they added.
 - Strict security blocks to prevent self-deletion, deleting the last administrator, or unauthorized non-admin access.
+- New team passwords created by admins must meet Laravel’s default password rules (`Rules\Password::defaults()`).
 
 ---
 
@@ -84,7 +89,7 @@ graph TD
     B --> E[CheckDomainJob every 15 min]
     B --> F[PerformSpectoraAudit hourly]
     B --> G[SendMonthlyReportsJob monthly]
-    B --> H[model:prune daily]
+    B --> H["model:prune daily (90d checks, 180d analytics)"]
 
     E --> C
     F --> C
@@ -137,6 +142,10 @@ php artisan spectora:setup
 ```
 
 Requires **PHP 8.2+** with extensions: `sqlite3`, `pdo_sqlite`, `mbstring`, `xml`, `curl`, `zip`, `intl`.
+
+### Continuous Integration
+
+Pushes and pull requests to `main` run [GitHub Actions](.github/workflows/tests.yml): `composer test` (PHPUnit) and `npm ci && npm run build` (Vite assets).
 
 ---
 
@@ -194,6 +203,8 @@ Copy `.env.example` to `.env` (automatically handled during Docker start) and ad
 | `QUEUE_CONNECTION` | `database` (default) — requires the queue worker (included in Docker via Supervisor). |
 | `MAIL_*` | SMTP for offline alerts and monthly digests (`MAIL_MAILER=log` only logs locally). |
 | `VAPID_SUBJECT`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Web Push (optional); generate with e.g. `web-push generate-vapid-keys`. |
+| `SESSION_ENCRYPT` | Set to `true` in production so session payloads are encrypted at rest (default in `.env.example` is `false` for simpler local setup). |
+| `APP_DEBUG` | Must be `false` in production. |
 
 ### Example SMTP Email Setup
 ```env
@@ -217,18 +228,21 @@ Spectora leverages modern web development technologies to ensure high performanc
 * **Queue:** Database-backed jobs (checks, audits, mail)
 * **Frontend Compilation:** [Vite](https://vite.dev) & Vanilla JS (Alpine.js on dashboard views)
 * **Design & Layout:** [Tailwind CSS](https://tailwindcss.com) v3 (dark mode throughout the dashboard)
-* **PDF:** [DomPDF](https://github.com/barryvdh/laravel-dompdf) for on-demand client reports
+* **PDF:** [DomPDF](https://github.com/barryvdh/laravel-dompdf) with on-server SVG charts (`ReportChartSvg`)
+* **HTML Parsing:** [Symfony DomCrawler](https://symfony.com/doc/current/components/dom_crawler.html) (audits, watchdog, monitoring filters)
 * **Server Runner:** Apache (included in the Docker image; Cron + Supervisor for scheduler and queue)
+* **CI:** GitHub Actions (PHP 8.4, `pdo_sqlite`, Vite build)
 
 ---
 
 ## Security & Hardening
 
-* **SSRF Prevention:** Outbound HTTP uses `SecurityService::http()` — DNS/IP validation, redirect checks, and connect-time IP pinning (`CURLOPT_RESOLVE`) so requests cannot pivot to internal addresses after resolution.
-* **Analytics `/api/sync`:** Throttled public endpoint; validates domain UUID and request origin/referrer host (no session cookies; CORS allows cross-origin beacons — protection is server-side origin matching).
-* **Login rate limiting:** Five failed attempts per email/IP (Laravel Breeze defaults) before lockout.
+* **SSRF Prevention:** Outbound HTTP uses `SecurityService::http()` — DNS/IP validation (cached per request), redirect re-validation, and connect-time IP pinning (`CURLOPT_RESOLVE`).
+* **Analytics `/api/sync`:** Public `POST` endpoint, **120 req/min** throttle, domain UUID + origin/referrer host check, daily HMAC visitor hashes. No session cookies; CORS may allow cross-origin beacons — enforcement is server-side.
+* **Login rate limiting:** Five failed attempts per `email|ip` (Laravel Breeze) before lockout.
+* **Authorization:** Laravel policies on domains; admin-only routes use `EnsureUserIsAdmin` middleware.
 * **TLS Termination:** Run production instances behind HTTPS. Browsers block analytics beacons from HTTPS client sites to an HTTP-only Spectora instance.
-* **PDF reports:** Charts are generated on-server as SVG; report data never leaves your instance for rendering.
+* **PDF reports:** Charts are generated on-server as SVG; report data never leaves your instance for rendering. Agency logos are read only from validated paths under `storage/app/public`.
 
 ---
 
