@@ -16,11 +16,7 @@ class ReportService
         $logoBase64 = null;
         $logoPath = null;
         
-        if ($user->agency_logo_path) {
-            $logoPath = public_path('storage/' . $user->agency_logo_path);
-        } else {
-            $logoPath = public_path('images/logo.png');
-        }
+        $logoPath = $this->resolveReadableLogoPath($user->agency_logo_path);
 
         if ($logoPath && file_exists($logoPath)) {
             $type = pathinfo($logoPath, PATHINFO_EXTENSION);
@@ -224,5 +220,30 @@ class ReportService
         $pdf->setOptions(['isRemoteEnabled' => false, 'defaultFont' => 'sans-serif']);
         
         return $pdf;
+    }
+
+    /**
+     * Resolve agency logo to a path under public/storage, blocking traversal.
+     */
+    private function resolveReadableLogoPath(?string $relativePath): string
+    {
+        $fallback = public_path('images/logo.png');
+
+        if ($relativePath === null || $relativePath === '') {
+            return $fallback;
+        }
+
+        $storageRoot = realpath(public_path('storage'));
+        if ($storageRoot === false) {
+            return $fallback;
+        }
+
+        $candidate = realpath($storageRoot.DIRECTORY_SEPARATOR.str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $relativePath));
+
+        if ($candidate !== false && str_starts_with($candidate, $storageRoot.DIRECTORY_SEPARATOR)) {
+            return $candidate;
+        }
+
+        return $fallback;
     }
 }

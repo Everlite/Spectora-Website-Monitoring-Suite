@@ -45,4 +45,13 @@ class SecurityServiceTest extends TestCase
 
         SecurityService::resolvePinsForUrl('http://127.0.0.1/');
     }
+
+    public function test_resolve_pins_uses_single_dns_resolution_for_public_ip_literal(): void
+    {
+        $pinsA = SecurityService::resolvePinsForUrl('https://1.1.1.1/');
+        $pinsB = SecurityService::resolvePinsForUrl('https://1.1.1.1/');
+
+        $this->assertSame($pinsA, $pinsB);
+        $this->assertContains('1.1.1.1:443:1.1.1.1', $pinsA);
+    }
 }

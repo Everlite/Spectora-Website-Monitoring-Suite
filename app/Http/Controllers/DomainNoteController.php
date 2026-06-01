@@ -25,6 +25,7 @@ class DomainNoteController extends Controller
 
         $note = $domain->notes()->create([
             'content' => $request->content,
+            'user_id' => $request->user()->id,
         ]);
 
         return response()->json($note);

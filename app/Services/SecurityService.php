@@ -8,6 +8,13 @@ use Illuminate\Support\Facades\Http;
 class SecurityService
 {
     /**
+     * Per-request DNS cache so validation and CURLOPT_RESOLVE use the same IPs.
+     *
+     * @var array<string, list<string>>
+     */
+    private static array $hostIpCache = [];
+
+    /**
      * Pre-configured HTTP client with SSRF connect-time pinning and redirect checks.
      */
     public static function http(): PendingRequest
@@ -35,7 +42,7 @@ class SecurityService
             return self::isSafeIp($host);
         }
 
-        $ips = self::resolveHostIps($host);
+        $ips = self::resolveHostIpsCached($host);
 
         if ($ips === []) {
             return false;
@@ -83,7 +90,7 @@ class SecurityService
 
         $ips = filter_var($host, FILTER_VALIDATE_IP)
             ? [$host]
-            : self::resolveHostIps($host);
+            : self::resolveHostIpsCached($host);
 
         $pins = [];
         foreach ($ips as $ip) {
@@ -132,6 +139,7 @@ class SecurityService
                         \Psr\Http\Message\ResponseInterface $res,
                         \Psr\Http\Message\UriInterface $uri
                     ) {
+                        self::$hostIpCache = [];
                         $redirectUrl = (string) $uri;
                         if (! self::isSafeUrl($redirectUrl)) {
                             throw new \RuntimeException('SSRF Protection: Blocked redirect to unsafe URL: '.$redirectUrl);
@@ -142,6 +150,18 @@ class SecurityService
                 return $handler($request, $options);
             };
         };
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function resolveHostIpsCached(string $host): array
+    {
+        if (! isset(self::$hostIpCache[$host])) {
+            self::$hostIpCache[$host] = self::resolveHostIps($host);
+        }
+
+        return self::$hostIpCache[$host];
     }
 
     /**
