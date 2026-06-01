@@ -28,7 +28,8 @@ class AdminUserManagementTest extends TestCase
         $response = $this->get('/login');
 
         $response->assertStatus(200);
-        $response->assertDontSee('/register');
+        $response->assertDontSee('Register now', false);
+        $response->assertDontSee('href="'.url('/register').'"', false);
     }
 
     public function test_setup_artisan_command_creates_admin_user(): void

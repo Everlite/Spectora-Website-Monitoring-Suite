@@ -92,17 +92,21 @@ class MonitoringFilterService
 
         try {
             $crawler = new Crawler($html);
+            $hasNoindex = false;
 
-            foreach ($crawler->filter('meta') as $node) {
-                $name = strtolower($node->attr('name') ?? '');
-                if ($name !== 'robots') {
-                    continue;
+            $crawler->filter('meta')->each(function (Crawler $meta) use (&$hasNoindex) {
+                if (strtolower($meta->attr('name') ?? '') !== 'robots') {
+                    return;
                 }
 
-                $content = strtolower($node->attr('content') ?? '');
+                $content = strtolower($meta->attr('content') ?? '');
                 if (preg_match('/\bnoindex\b/', $content)) {
-                    return true;
+                    $hasNoindex = true;
                 }
+            });
+
+            if ($hasNoindex) {
+                return true;
             }
         } catch (\Exception $e) {
             Log::debug('MonitoringFilter: DOM parse failed for noindex check: '.$e->getMessage());
