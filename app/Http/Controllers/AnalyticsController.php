@@ -49,9 +49,9 @@ class AnalyticsController extends Controller
         $ip = $request->ip();
         $userAgent = $request->userAgent() ?? 'Unknown';
         $date = now()->format('Y-m-d');
-        $salt = config('app.key');
+        $dailyKey = hash_hmac('sha256', $date, (string) config('app.key'));
 
-        $visitorHash = hash('sha256', $ip . $userAgent . $date . $salt);
+        $visitorHash = hash_hmac('sha256', $ip.'|'.$userAgent, $dailyKey);
 
         $urlPath = parse_url($validated['url'], PHP_URL_PATH) ?? '/';
 
@@ -70,7 +70,9 @@ class AnalyticsController extends Controller
 
         $browser = $this->getBrowser($userAgent);
         $os = $this->getOs($userAgent);
-        $country = $request->header('CF-IPCountry');
+        $country = env('TRUSTED_PROXIES')
+            ? $request->header('CF-IPCountry')
+            : null;
 
         \App\Models\AnalyticsVisit::create([
             'domain_id' => $domain->id,

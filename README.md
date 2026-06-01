@@ -48,12 +48,12 @@ Unlike standard public SaaS applications, Spectora is built as a **single-agency
 
 ### Privacy-First Analytics (Optional)
 - Cookie-free tracking of client pageviews using a secure, lightweight `/js/sp-core.js` snippet.
-- Dynamic visitor hashing (`IP + User-Agent + APP_KEY + Date`) rotated daily — no persistent visitor IDs across days.
+- Daily visitor hashing via `HMAC-SHA256` with a date-derived key (no persistent visitor IDs across days).
 - Origin validation on `/api/sync` (domain UUID + matching host); designed for privacy-friendly, first-party-style analytics (you remain responsible for client consent and privacy notices).
 
 ### Automated Reports & Warnings
 - **Monthly Agency Email Digest:** Dispatched on the 1st of each month (08:00) with a global health overview (email only, no PDF attachment).
-- **On-Demand PDF Reports:** Generate clean, premium PDF report files from the dashboard for client handovers or meetings (optional agency logo on reports). Chart images in PDFs are rendered via [QuickChart.io](https://quickchart.io) (aggregated metrics are sent to that service when you download a report).
+- **On-Demand PDF Reports:** Generate clean, premium PDF report files from the dashboard for client handovers or meetings (optional agency logo on reports). Charts are rendered locally as inline SVG — no third-party chart services.
 - **Instant Email Alerts:** Warnings fired immediately when client websites go offline (requires working `MAIL_*` configuration).
 - **Browser Push Notifications (Optional):** Web Push via VAPID keys; subscribe from the dashboard when keys are configured.
 
@@ -228,7 +228,7 @@ Spectora leverages modern web development technologies to ensure high performanc
 * **Analytics `/api/sync`:** Throttled public endpoint; validates domain UUID and request origin/referrer host (no session cookies; CORS allows cross-origin beacons — protection is server-side origin matching).
 * **Login rate limiting:** Five failed attempts per email/IP (Laravel Breeze defaults) before lockout.
 * **TLS Termination:** Run production instances behind HTTPS. Browsers block analytics beacons from HTTPS client sites to an HTTP-only Spectora instance.
-* **PDF chart generation:** On-demand PDF exports request chart images from QuickChart.io (HTTPS). If you require zero third-party data processing, replace this with local SVG/chart rendering in a future release.
+* **PDF reports:** Charts are generated on-server as SVG; report data never leaves your instance for rendering.
 
 ---
 

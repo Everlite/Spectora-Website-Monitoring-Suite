@@ -3,9 +3,8 @@
 namespace App\Services;
 
 use App\Models\Domain;
-use App\Services\RobotsTxtService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
+use Symfony\Component\DomCrawler\Crawler;
 
 class MonitoringFilterService
 {
@@ -64,8 +63,7 @@ class MonitoringFilterService
                 return ['ignore' => true, 'reason' => 'noindex header found'];
             }
 
-            // Meta Robots in Body
-            if (preg_match('/<meta[^>]*name=["\']robots["\'][^>]*content=["\'][^"\']*noindex[^"\']*["\'][^>]*>/i', $response->body())) {
+            if ($this->bodyHasNoindexMeta($response->body())) {
                 return ['ignore' => true, 'reason' => 'noindex meta tag found'];
             }
         }
@@ -84,6 +82,33 @@ class MonitoringFilterService
         }
 
         return ['ignore' => false, 'reason' => ''];
+    }
+
+    private function bodyHasNoindexMeta(string $html): bool
+    {
+        if ($html === '') {
+            return false;
+        }
+
+        try {
+            $crawler = new Crawler($html);
+
+            foreach ($crawler->filter('meta') as $node) {
+                $name = strtolower($node->attr('name') ?? '');
+                if ($name !== 'robots') {
+                    continue;
+                }
+
+                $content = strtolower($node->attr('content') ?? '');
+                if (preg_match('/\bnoindex\b/', $content)) {
+                    return true;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::debug('MonitoringFilter: DOM parse failed for noindex check: '.$e->getMessage());
+        }
+
+        return false;
     }
 
     /**
