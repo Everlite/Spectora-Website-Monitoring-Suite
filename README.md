@@ -11,7 +11,9 @@
 ---
 
 > [!IMPORTANT]
-> **Major overhaul (May 2026)** — Spectora went through a large stability, security, and architecture refresh (SSRF hardening, alerts, queue-based checks, expanded tests, ops docs). The project is in a **post-overhaul testing phase**: CI covers core flows, but we recommend validating upgrades on a **staging instance** before production. See [CHANGELOG.md](CHANGELOG.md) for details.
+> **Major overhaul (May 2026)** — Spectora went through a large stability, security, and architecture refresh (SSRF hardening, alerts, queue-based checks, expanded tests, ops docs). The project is in a **post-overhaul testing phase**: CI covers core flows, but we recommend validating upgrades on a **staging instance** before production.
+>
+> **Upgrading?** Read **[CHANGELOG.md](CHANGELOG.md)** — we maintain it for every release (`[Unreleased]` on `main`, versioned sections when we ship). Latest: **[1.1.0] (2026-06-04)**.
 
 **Spectora** is a premium, open-source, **Private by Design Self-Hosted Website Monitoring Suite** custom-tailored for freelancers and small web agencies. It allows you to monitor all your client websites (uptime, SSL, security keywords, lightweight audits, and optional cookie-free analytics) from one gorgeous, central dashboard on your own server—completely free of SaaS fees and per-seat subscription models.
 
@@ -152,6 +154,15 @@ Requires **PHP 8.2+** with extensions: `sqlite3`, `pdo_sqlite`, `mbstring`, `xml
 ### Continuous Integration
 
 Pushes and pull requests to `main` run [GitHub Actions](.github/workflows/tests.yml): `composer test` (PHPUnit), Laravel Pint on core changed paths, and `npm ci && npm run build` (Vite assets).
+
+### Changelog
+
+We keep a project **[CHANGELOG.md](CHANGELOG.md)** ([Keep a Changelog](https://keepachangelog.com/) style):
+
+- **`[Unreleased]`** — work in progress on `main`
+- **Versioned sections** (`1.0.0`, `1.1.0`, …) — what changed when you upgrade or deploy
+
+Before upgrading a production instance, read the changelog for your target version (migrations, env vars, Docker healthcheck, breaking notes). Contributors: add bullets under `[Unreleased]` for any user-visible change (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ---
 

@@ -16,7 +16,8 @@ Requires PHP 8.2+ with `pdo_sqlite`, and Node.js for Vite.
 
 1. Branch from `main`.
 2. Add or update tests for behavior changes.
-3. Run before opening a PR:
+3. Update **[CHANGELOG.md](CHANGELOG.md)** under `[Unreleased]` for anything operators or users should know (features, fixes, security, config, migrations).
+4. Run before opening a PR:
 
 ```bash
 composer test
@@ -26,7 +27,7 @@ composer audit
 npm audit
 ```
 
-4. Keep changes focused; match existing Laravel and Blade conventions.
+5. Keep changes focused; match existing Laravel and Blade conventions.
 
 ## Code Style
 
