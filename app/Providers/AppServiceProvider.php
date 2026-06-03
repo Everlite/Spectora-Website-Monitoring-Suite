@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\SecurityService;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(SecurityService::class);
     }
 
     public function boot(): void

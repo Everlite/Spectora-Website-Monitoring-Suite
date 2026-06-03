@@ -137,7 +137,7 @@ This interactive prompt will securely guide you to enter your **first name, last
 
 Once completed, navigate to **http://localhost:8000**, log in, and begin managing your client sites!
 
-> **Note:** The Docker image runs **Supervisor** with Apache, Cron (scheduler), and a **queue worker**. Uptime checks and audits are queued — no extra setup needed for the default container.
+> **Note:** The Docker image runs **Supervisor** with Apache on port **8080** (mapped to host `8000`), `schedule:work`, and a **queue worker** (all as `www-data`). Uptime checks and audits are queued — no extra setup needed for the default container.
 
 ### Local Development (without Docker)
 
@@ -177,7 +177,7 @@ Deploying Spectora in production behind a reverse proxy (such as Nginx Proxy Man
 5. **Production hardening:** set `APP_DEBUG=false`, `SESSION_ENCRYPT=true`, and keep `SPECTORA_REGISTRATION_ENABLED=false` unless you intentionally allow public sign-up.
 6. **Queue worker is mandatory:** Scheduled uptime checks are queued (`QUEUE_CONNECTION=database`). The Docker image runs `queue:work` via Supervisor — if you deploy without Docker, you must run a worker process yourself or monitoring will not run.
 7. **Analytics geo:** For city/country stats, set `TRUSTED_PROXIES` when using Cloudflare, **or** install [GeoLite2-City](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) at `storage/app/geoip/GeoLite2-City.mmdb`. See [`docs/PRIVACY.md`](docs/PRIVACY.md).
-8. **Health monitoring:** Docker uses `GET /health/ops` (loopback only) which verifies the scheduler heartbeat. `GET /up` is the generic Laravel health endpoint.
+8. **Health monitoring:** Docker uses `GET /health/ops` on loopback port **8080** (scheduler heartbeat). `GET /up` is the generic Laravel health endpoint. See [`docs/STAGING_CHECKLIST.md`](docs/STAGING_CHECKLIST.md) before releases.
 
 ### Scaling & SQLite backups
 
@@ -267,7 +267,7 @@ Spectora leverages modern web development technologies to ensure high performanc
 * **Design & Layout:** [Tailwind CSS](https://tailwindcss.com) v3 (dark mode throughout the dashboard)
 * **PDF:** [DomPDF](https://github.com/barryvdh/laravel-dompdf) with on-server SVG charts (`ReportChartSvg`)
 * **HTML Parsing:** [Symfony DomCrawler](https://symfony.com/doc/current/components/dom_crawler.html) (audits, watchdog, monitoring filters)
-* **Server Runner:** Apache (included in the Docker image; Cron + Supervisor for scheduler and queue)
+* **Server Runner:** Apache on 8080 (Docker; Supervisor runs `schedule:work` + queue worker as `www-data`)
 * **CI:** GitHub Actions (PHP 8.4, `pdo_sqlite`, PHPUnit, Laravel Pint, Vite build)
 * **API tokens:** Laravel Sanctum is installed for potential future API use; there are no public Sanctum API routes in this release.
 
@@ -275,7 +275,7 @@ Spectora leverages modern web development technologies to ensure high performanc
 
 ## Security & Hardening
 
-* **SSRF Prevention:** Outbound HTTP uses `SecurityService::http()` — DNS/IP validation (cached per request), redirect re-validation, and connect-time IP pinning (`CURLOPT_RESOLVE`).
+* **SSRF Prevention:** Outbound HTTP uses `SecurityService::resolve()->httpClient()` — DNS/IP validation (cached per request), redirect re-validation, and connect-time IP pinning (`CURLOPT_RESOLVE`).
 * **Analytics `/api/sync`:** Public `POST` endpoint, **120 req/min** throttle, domain UUID + origin/referrer host check, daily HMAC visitor hashes. No session cookies; CORS may allow cross-origin beacons — enforcement is server-side.
 * **Login rate limiting:** Five failed attempts per `email|ip` (Laravel Breeze) before lockout.
 * **Authorization:** Laravel policies on domains and user management (`UserPolicy`); admin-only routes use `EnsureUserIsAdmin` middleware.

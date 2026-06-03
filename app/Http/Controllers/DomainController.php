@@ -208,7 +208,7 @@ class DomainController extends Controller
         }
 
         // SSRF Protection
-        if (! SecurityService::isSafeUrl($url)) {
+        if (! SecurityService::resolve()->isSafeUrl($url)) {
             return back()->withErrors(['url' => 'This URL is prohibited for security reasons (internal/private IP).']);
         }
 

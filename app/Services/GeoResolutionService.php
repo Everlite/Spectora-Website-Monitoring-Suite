@@ -82,7 +82,7 @@ class GeoResolutionService
             return ['country' => null, 'region' => null, 'city' => null];
         }
 
-        if (! SecurityService::isSafeIp($ip)) {
+        if (! SecurityService::resolve()->isSafeIp($ip)) {
             return ['country' => null, 'region' => null, 'city' => null];
         }
 

@@ -11,7 +11,7 @@
 </head>
 <body>
     <p>Hello,</p>
-    <p>Your website <strong>{{ $domain->url }}</strong> is reporting the following warning:</p>
+    <p>Your website <strong>{{ $domain->url }}</strong>@if(!empty($checkedUrl) && $checkedUrl !== $domain->url) — checked URL: <strong>{{ $checkedUrl }}</strong>@endif is reporting the following warning:</p>
     
     <ul>
         @foreach($issues as $issue)

@@ -41,7 +41,7 @@ class WatchdogService
         }
 
         // SSRF Protection
-        if (! SecurityService::isSafeUrl($url)) {
+        if (! SecurityService::resolve()->isSafeUrl($url)) {
             return [
                 'status' => 'error',
                 'issues' => [[
@@ -76,7 +76,7 @@ class WatchdogService
                 }
                 $body = $prefetchedBody;
             } else {
-                $response = SecurityService::http()
+                $response = SecurityService::resolve()->httpClient()
                     ->withUserAgent('SpectoraBot/1.0 (+'.rtrim((string) config('app.url'), '/').'/bot)')
                     ->timeout(15)
                     ->get($url);

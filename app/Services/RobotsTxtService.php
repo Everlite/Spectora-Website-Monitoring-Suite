@@ -16,12 +16,12 @@ class RobotsTxtService
         $robotsUrl = $baseUrl.'/robots.txt';
 
         $content = Cache::remember('robots_txt_'.md5($baseUrl), 3600, function () use ($robotsUrl) {
-            if (! SecurityService::isSafeUrl($robotsUrl)) {
+            if (! SecurityService::resolve()->isSafeUrl($robotsUrl)) {
                 return '';
             }
 
             try {
-                $response = SecurityService::http()
+                $response = SecurityService::resolve()->httpClient()
                     ->timeout(5)
                     ->get($robotsUrl);
 

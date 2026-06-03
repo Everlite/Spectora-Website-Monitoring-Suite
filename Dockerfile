@@ -10,7 +10,6 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
 # System dependencies
 RUN apt-get update && apt-get install -y \
-    cron \
     supervisor \
     zip \
     unzip \
@@ -34,12 +33,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
 RUN docker-php-ext-configure intl \
     && docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip intl
 
-# Configure Cron for Laravel Scheduler
-COPY ./docker/laravel.cron /etc/cron.d/laravel-cron
-RUN chmod 0644 /etc/cron.d/laravel-cron
-RUN crontab -u www-data /etc/cron.d/laravel-cron
+# Apache listens on 8080 (non-privileged port; workers run as www-data)
+RUN sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf \
+    && sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/' /etc/apache2/sites-available/000-default.conf
 
-# Copy Supervisor configuration
+# Copy Supervisor configuration (schedule:work + queue — no system cron daemon)
 COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Install Composer
@@ -69,8 +67,8 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database /var/www/html/public/build \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
-# Expose port 80
-EXPOSE 80
+# Expose port 8080 (map to host 8000 in compose)
+EXPOSE 8080
 
 # Use custom entrypoint for automation (keys, migrations, supervisor)
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

@@ -11,25 +11,24 @@ use Psr\Http\Message\UriInterface;
 class SecurityService
 {
     /**
-     * Per-request DNS cache so validation and CURLOPT_RESOLVE use the same IPs.
+     * Per-resolution DNS cache so validation and CURLOPT_RESOLVE use the same IPs.
      *
      * @var array<string, list<string>>
      */
-    private static array $hostIpCache = [];
+    private array $hostIpCache = [];
 
-    /**
-     * Pre-configured HTTP client with SSRF connect-time pinning and redirect checks.
-     */
-    public static function http(): PendingRequest
+    public function resetHostIpCache(): void
     {
-        return Http::withMiddleware(self::connectTimeMiddleware())
-            ->withMiddleware(self::redirectMiddleware());
+        $this->hostIpCache = [];
     }
 
-    /**
-     * Checks if a URL points to a private/reserved IP address (SSRF protection).
-     */
-    public static function isSafeUrl(string $url): bool
+    public function httpClient(): PendingRequest
+    {
+        return Http::withMiddleware($this->buildConnectTimeMiddleware())
+            ->withMiddleware($this->buildRedirectMiddleware());
+    }
+
+    public function isSafeUrl(string $url): bool
     {
         $host = parse_url($url, PHP_URL_HOST);
 
@@ -42,17 +41,17 @@ class SecurityService
         }
 
         if (filter_var($host, FILTER_VALIDATE_IP)) {
-            return self::isSafeIp($host);
+            return $this->isSafeIp($host);
         }
 
-        $ips = self::resolveHostIpsCached($host);
+        $ips = $this->resolveHostIpsCached($host);
 
         if ($ips === []) {
             return false;
         }
 
         foreach ($ips as $ip) {
-            if (! self::isSafeIp($ip)) {
+            if (! $this->isSafeIp($ip)) {
                 return false;
             }
         }
@@ -60,10 +59,7 @@ class SecurityService
         return true;
     }
 
-    /**
-     * Checks if an IP is public and safe.
-     */
-    public static function isSafeIp(string $ip): bool
+    public function isSafeIp(string $ip): bool
     {
         if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
             return false;
@@ -77,13 +73,11 @@ class SecurityService
     }
 
     /**
-     * Build CURLOPT_RESOLVE entries so the TCP connect uses only pre-validated IPs.
-     *
      * @return list<string>
      */
-    public static function resolvePinsForUrl(string $url): array
+    public function resolvePinsForUrl(string $url): array
     {
-        if (! self::isSafeUrl($url)) {
+        if (! $this->isSafeUrl($url)) {
             throw new \RuntimeException('SSRF Protection: Blocked unsafe URL: '.$url);
         }
 
@@ -93,11 +87,11 @@ class SecurityService
 
         $ips = filter_var($host, FILTER_VALIDATE_IP)
             ? [$host]
-            : self::resolveHostIpsCached($host);
+            : $this->resolveHostIpsCached($host);
 
         $pins = [];
         foreach ($ips as $ip) {
-            if (! self::isSafeIp($ip)) {
+            if (! $this->isSafeIp($ip)) {
                 throw new \RuntimeException('SSRF Protection: Blocked unsafe IP: '.$ip);
             }
             $pins[] = $host.':'.$port.':'.$ip;
@@ -106,15 +100,14 @@ class SecurityService
         return $pins;
     }
 
-    /**
-     * Guzzle middleware: validate URL and pin DNS at connect time.
-     */
-    public static function connectTimeMiddleware(): callable
+    public function buildConnectTimeMiddleware(): callable
     {
-        return function (callable $handler) {
-            return function (RequestInterface $request, array $options) use ($handler) {
+        $service = $this;
+
+        return function (callable $handler) use ($service) {
+            return function (RequestInterface $request, array $options) use ($handler, $service) {
                 $url = (string) $request->getUri();
-                $pins = self::resolvePinsForUrl($url);
+                $pins = $service->resolvePinsForUrl($url);
 
                 $curl = $options['curl'] ?? [];
                 $existing = $curl[CURLOPT_RESOLVE] ?? [];
@@ -129,22 +122,21 @@ class SecurityService
         };
     }
 
-    /**
-     * Guzzle middleware to prevent SSRF in redirects.
-     */
-    public static function redirectMiddleware(): callable
+    public function buildRedirectMiddleware(): callable
     {
-        return function (callable $handler) {
-            return function (RequestInterface $request, array $options) use ($handler) {
+        $service = $this;
+
+        return function (callable $handler) use ($service) {
+            return function (RequestInterface $request, array $options) use ($handler, $service) {
                 if (! empty($options['allow_redirects'])) {
                     $options['allow_redirects']['on_redirect'] = function (
                         RequestInterface $req,
                         ResponseInterface $res,
                         UriInterface $uri
-                    ) {
-                        self::$hostIpCache = [];
+                    ) use ($service) {
+                        $service->resetHostIpCache();
                         $redirectUrl = (string) $uri;
-                        if (! self::isSafeUrl($redirectUrl)) {
+                        if (! $service->isSafeUrl($redirectUrl)) {
                             throw new \RuntimeException('SSRF Protection: Blocked redirect to unsafe URL: '.$redirectUrl);
                         }
                     };
@@ -158,19 +150,19 @@ class SecurityService
     /**
      * @return list<string>
      */
-    private static function resolveHostIpsCached(string $host): array
+    private function resolveHostIpsCached(string $host): array
     {
-        if (! isset(self::$hostIpCache[$host])) {
-            self::$hostIpCache[$host] = self::resolveHostIps($host);
+        if (! isset($this->hostIpCache[$host])) {
+            $this->hostIpCache[$host] = $this->resolveHostIps($host);
         }
 
-        return self::$hostIpCache[$host];
+        return $this->hostIpCache[$host];
     }
 
     /**
      * @return list<string>
      */
-    private static function resolveHostIps(string $host): array
+    private function resolveHostIps(string $host): array
     {
         $ips = [];
 
@@ -192,5 +184,24 @@ class SecurityService
         }
 
         return array_values(array_unique($ips));
+    }
+
+    private static ?self $fallback = null;
+
+    public static function resolve(): self
+    {
+        if (function_exists('app')) {
+            try {
+                return app(self::class);
+            } catch (\Throwable) {
+            }
+        }
+
+        return self::$fallback ??= new self;
+    }
+
+    public static function clearHostIpCache(): void
+    {
+        self::resolve()->resetHostIpCache();
     }
 }

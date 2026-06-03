@@ -43,7 +43,7 @@ class PerformSpectoraAudit implements ShouldQueue
         }
 
         // 0.5 SSRF Protection
-        if (! SecurityService::isSafeUrl($url)) {
+        if (! SecurityService::resolve()->isSafeUrl($url)) {
             Log::warning("SSRF Protection: Blocked prohibited audit for {$url}");
 
             return;
@@ -56,7 +56,7 @@ class PerformSpectoraAudit implements ShouldQueue
 
         try {
             // 1. Download & Measure with SSRF Middleware
-            $response = SecurityService::http()
+            $response = SecurityService::resolve()->httpClient()
                 ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
                 ->withOptions([
                     'on_stats' => function (TransferStats $stats) use (&$ttfb, &$totalTime) {
@@ -248,6 +248,8 @@ class PerformSpectoraAudit implements ShouldQueue
 
         } catch (\Exception $e) {
             Log::error("Spectora Audit Exception for {$url}: ".$e->getMessage());
+        } finally {
+            SecurityService::clearHostIpCache();
         }
     }
 }

@@ -13,6 +13,7 @@ class MonitoredUrl extends Model
         'domain_id',
         'url',
         'is_active',
+        'notify_sent',
         'last_status_code',
         'last_safety_status',
         'last_response_time',
@@ -21,6 +22,7 @@ class MonitoredUrl extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'notify_sent' => 'boolean',
         'last_checked' => 'datetime',
     ];
 

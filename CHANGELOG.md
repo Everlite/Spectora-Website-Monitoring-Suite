@@ -20,11 +20,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Sub-URL downtime alerts (`notify_sent` on `monitored_urls`, per-URL e-mail subject)
+- `docs/STAGING_CHECKLIST.md` pre-release gate
+- Tests: monitored URL alerts, `PerformSpectoraAudit`, `WatchdogService` spam detection
+
+### Changed
+
+- `SecurityService` instance singleton with per-job `clearHostIpCache()` (queue-safe DNS cache)
+- Docker: Apache on **8080** as `www-data`, `schedule:work` instead of root cron
+- RUNBOOK: scheduler/health port 8080
+
 ### Planned
 
-- Sub-URL downtime alerts (not only the main domain URL)
 - Blade component split for `dashboard.blade.php`
-- Optional Docker hardening (Apache non-root)
 
 ---
 

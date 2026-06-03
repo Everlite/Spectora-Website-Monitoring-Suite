@@ -31,15 +31,21 @@ Verify: `docker compose exec app supervisorctl status` or watch `jobs` / `failed
 
 ## Scheduler (required)
 
-Cron must run `php artisan schedule:run` every minute (included in Docker via Supervisor `cron`).
+Docker runs `php artisan schedule:work` as **www-data** (Supervisor program `scheduler`). Do not rely on system cron inside the container.
+
+Bare-metal: use cron `* * * * * cd /path && php artisan schedule:run` or a systemd unit running `schedule:work`.
 
 ## Health
 
 - `GET /up` — Laravel default health (app boot)
 - `GET /health/ops` — **loopback only** (`127.0.0.1` / `::1`); returns 503 if scheduler heartbeat is older than 20 minutes
-- Docker `healthcheck` uses `/health/ops`
+- Docker `healthcheck` uses `http://127.0.0.1:8080/health/ops` (Apache listens on **8080**, workers as `www-data`)
 
-After deploy, confirm heartbeat: `docker compose exec app php artisan schedule:run` then `curl -f http://127.0.0.1/health/ops` inside the container.
+After deploy, confirm heartbeat: `docker compose exec app php artisan schedule:run` then `curl -f http://127.0.0.1:8080/health/ops` inside the container.
+
+## Pre-release gate
+
+See [`STAGING_CHECKLIST.md`](STAGING_CHECKLIST.md) before tagging a release.
 
 ## Production Checklist
 

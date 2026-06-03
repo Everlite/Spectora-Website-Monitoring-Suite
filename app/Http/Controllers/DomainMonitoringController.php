@@ -65,14 +65,14 @@ class DomainMonitoringController extends Controller
         $allUrls = [];
         $domainHost = preg_replace('/^www\./', '', parse_url($domain->url, PHP_URL_HOST));
 
-        if (! SecurityService::isSafeUrl($domain->url)) {
+        if (! SecurityService::resolve()->isSafeUrl($domain->url)) {
             Log::warning("Blocked unsafe homepage scan: {$domain->url}");
 
             return response()->json(['message' => 'URL blocked for security reasons.'], 422);
         }
 
         try {
-            $response = SecurityService::http()
+            $response = SecurityService::resolve()->httpClient()
                 ->timeout(10)
                 ->withUserAgent('SpectoraBot/1.0')
                 ->get($domain->url);

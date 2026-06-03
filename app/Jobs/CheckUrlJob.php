@@ -53,7 +53,7 @@ class CheckUrlJob implements ShouldQueue
         }
 
         // 0.5 SSRF Protection
-        if (! SecurityService::isSafeUrl($url)) {
+        if (! SecurityService::resolve()->isSafeUrl($url)) {
             Log::warning("SSRF Protection: Blocked prohibited URL check for {$url}");
 
             return;
@@ -68,7 +68,7 @@ class CheckUrlJob implements ShouldQueue
 
         try {
             // 1. Perform HTTP Check with SpectoraBot UA and SSRF Middleware
-            $response = SecurityService::http()
+            $response = SecurityService::resolve()->httpClient()
                 ->withUserAgent('SpectoraBot/1.0')
                 ->timeout(15)
                 ->get($url);
@@ -189,21 +189,30 @@ class CheckUrlJob implements ShouldQueue
             'created_at' => now(),
         ]);
 
-        // --- Handle Notifications (Only if it's the main domain for now to avoid spam) ---
-        if (! $this->monitoredUrl) {
+        // --- Handle Notifications (main URL and each monitored sub-URL) ---
+        if ($this->monitoredUrl) {
+            if (! empty($issues)) {
+                if (! $this->monitoredUrl->notify_sent) {
+                    DomainAlertService::sendDowntimeAlerts($this->domain, $issues, $this->url);
+                    $this->monitoredUrl->update(['notify_sent' => true]);
+                }
+            } elseif ($this->monitoredUrl->notify_sent) {
+                $this->monitoredUrl->update(['notify_sent' => false]);
+                Log::info("Resetting notify_sent for monitored URL {$this->url} (Healthy again)");
+            }
+        } else {
             if (! empty($issues)) {
                 if (! $this->domain->notify_sent) {
                     DomainAlertService::sendDowntimeAlerts($this->domain, $issues);
                     $this->domain->update(['notify_sent' => true]);
                 }
-            } else {
-                // If the domain is healthy again and a notification was sent previously, reset the flag
-                if ($this->domain->notify_sent) {
-                    $this->domain->update(['notify_sent' => false]);
-                    Log::info("Resetting notify_sent for {$this->domain->url} (Healthy again)");
-                }
+            } elseif ($this->domain->notify_sent) {
+                $this->domain->update(['notify_sent' => false]);
+                Log::info("Resetting notify_sent for {$this->domain->url} (Healthy again)");
             }
         }
+
+        SecurityService::clearHostIpCache();
     }
 
     private function getSSLDays($url)
@@ -213,7 +222,7 @@ class CheckUrlJob implements ShouldQueue
                 $url = 'https://'.$url;
             }
 
-            if (! SecurityService::isSafeUrl($url)) {
+            if (! SecurityService::resolve()->isSafeUrl($url)) {
                 return null;
             }
 
@@ -222,7 +231,7 @@ class CheckUrlJob implements ShouldQueue
                 return null;
             }
 
-            $pins = SecurityService::resolvePinsForUrl($url);
+            $pins = SecurityService::resolve()->resolvePinsForUrl($url);
             if ($pins === []) {
                 return null;
             }
@@ -234,7 +243,7 @@ class CheckUrlJob implements ShouldQueue
                 return null;
             }
             $ip = substr($pins[0], $pinPos + strlen($pinSuffix));
-            if (! SecurityService::isSafeIp($ip)) {
+            if (! SecurityService::resolve()->isSafeIp($ip)) {
                 return null;
             }
 

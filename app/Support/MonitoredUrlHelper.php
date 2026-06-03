@@ -29,7 +29,7 @@ class MonitoredUrlHelper
             return null;
         }
 
-        if (! SecurityService::isSafeUrl($url)) {
+        if (! SecurityService::resolve()->isSafeUrl($url)) {
             return null;
         }
 

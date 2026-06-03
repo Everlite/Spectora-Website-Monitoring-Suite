@@ -18,11 +18,11 @@ class SitemapService
         // 1. Check robots.txt for "Sitemap:" entries
         try {
             $robotsUrl = $baseUrl.'/robots.txt';
-            if (! SecurityService::isSafeUrl($robotsUrl)) {
+            if (! SecurityService::resolve()->isSafeUrl($robotsUrl)) {
                 return [];
             }
 
-            $response = SecurityService::http()
+            $response = SecurityService::resolve()->httpClient()
                 ->timeout(5)
                 ->get($robotsUrl);
             if ($response->successful()) {
@@ -49,12 +49,12 @@ class SitemapService
             if (in_array($testUrl, $sitemaps)) {
                 continue;
             }
-            if (! SecurityService::isSafeUrl($testUrl)) {
+            if (! SecurityService::resolve()->isSafeUrl($testUrl)) {
                 continue;
             }
 
             try {
-                $response = SecurityService::http()
+                $response = SecurityService::resolve()->httpClient()
                     ->timeout(3)
                     ->head($testUrl);
                 if ($response->successful()) {
@@ -72,14 +72,14 @@ class SitemapService
      */
     public function parse(string $sitemapUrl): array
     {
-        if (! SecurityService::isSafeUrl($sitemapUrl)) {
+        if (! SecurityService::resolve()->isSafeUrl($sitemapUrl)) {
             Log::warning("Blocked unsafe sitemap URL: {$sitemapUrl}");
 
             return [];
         }
 
         try {
-            $response = SecurityService::http()
+            $response = SecurityService::resolve()->httpClient()
                 ->timeout(10)
                 ->get($sitemapUrl);
             if (! $response->successful()) {

@@ -32,7 +32,7 @@ class DomainAlertService
     /**
      * Send downtime e-mail and Web Push to alert recipients.
      */
-    public static function sendDowntimeAlerts(Domain $domain, array $issues): void
+    public static function sendDowntimeAlerts(Domain $domain, array $issues, ?string $checkedUrl = null): void
     {
         $issues = self::sanitizeIssuesForNotification($issues);
         $recipients = self::recipients($domain);
@@ -41,7 +41,7 @@ class DomainAlertService
 
         foreach ($emails as $email) {
             try {
-                Mail::to($email)->send(new DomainWarningMail($domain, $issues));
+                Mail::to($email)->send(new DomainWarningMail($domain, $issues, $checkedUrl));
             } catch (\Exception $e) {
                 Log::error('Failed to send domain warning mail to '.$email.': '.$e->getMessage());
             }
@@ -57,7 +57,7 @@ class DomainAlertService
             }
 
             try {
-                $user->notify(new DomainWarningNotification($domain, $issues));
+                $user->notify(new DomainWarningNotification($domain, $issues, $checkedUrl));
             } catch (\Exception $e) {
                 Log::error('Failed to send Web Push to user '.$user->id.': '.$e->getMessage());
             }

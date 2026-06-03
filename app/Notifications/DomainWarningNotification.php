@@ -14,7 +14,8 @@ class DomainWarningNotification extends Notification
 
     public function __construct(
         public Domain $domain,
-        public array $issues
+        public array $issues,
+        public ?string $checkedUrl = null,
     ) {}
 
     /**
@@ -27,7 +28,8 @@ class DomainWarningNotification extends Notification
 
     public function toWebPush(object $notifiable, Notification $notification): WebPushMessage
     {
-        $host = parse_url($this->domain->url, PHP_URL_HOST) ?: $this->domain->url;
+        $url = $this->checkedUrl ?? $this->domain->url;
+        $host = parse_url($url, PHP_URL_HOST) ?: $url;
         $summary = implode('; ', array_slice($this->issues, 0, 2));
 
         return (new WebPushMessage)
