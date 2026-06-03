@@ -26,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Removed
 
-- Internal `gh` maintainer docs from the repo (`.github/GH_COMMANDS.md`, `.github/REPO_DESCRIPTION.txt`)
+- Maintainer-only files from the public tree (`.github/GH_COMMANDS.md`, `.github/REPO_DESCRIPTION.txt`, `.github/RELEASE_v0.2.0.md`, `dashboard/partials/README.md`, `_ide_stubs.php`, obsolete `docker/laravel.cron`)
 
 ### Added
 
