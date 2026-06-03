@@ -10,6 +10,12 @@ class Domain extends Model
 {
     use HasFactory, HasUuids;
 
+    public const GEO_OFF = 'off';
+
+    public const GEO_COUNTRY = 'country';
+
+    public const GEO_CITY = 'city';
+
     /**
      * Get the columns that should receive a unique identifier.
      *
@@ -40,6 +46,7 @@ class Domain extends Model
         'exclude_patterns',
         'sitemap_urls',
         'included_sitemaps',
+        'analytics_geo_precision',
     ];
 
     protected $casts = [

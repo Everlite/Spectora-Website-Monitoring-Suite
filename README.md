@@ -51,10 +51,12 @@ Unlike standard public SaaS applications, Spectora is built as a **single-agency
 
 ### Privacy-First Analytics (Optional)
 - Cookie-free tracking of client pageviews using a secure, lightweight `/js/sp-core.js` snippet.
-- Daily visitor hashing via `HMAC-SHA256` with a date-derived subkey (no persistent visitor IDs across days).
+- Daily visitor hashing via `HMAC-SHA256` with a **truncated IP** + date-derived subkey (no persistent visitor IDs across days; raw IPs are not stored).
+- **Device type:** mobile, tablet, or desktop (from viewport width).
+- **Visitor location:** country, region, and city (aggregated “Top Countries / Top Cities”) — per-domain setting: off, country only, or city level.
+- Geo from **Cloudflare headers** when `TRUSTED_PROXIES` is set, or from a local **GeoLite2-City** database (`ANALYTICS_GEOLITE2_PATH`).
 - Origin validation on `POST /api/sync` (domain UUID + matching host); rate-limited to **120 requests per minute** per IP.
-- Country detection uses the `CF-IPCountry` header **only when** `TRUSTED_PROXIES` is configured (avoids spoofing on direct connections).
-- Designed for privacy-friendly, first-party-style analytics — you remain responsible for client consent and privacy notices.
+- GDPR-oriented, self-hosted alternative to Google Analytics for shops and local businesses — see [`docs/PRIVACY.md`](docs/PRIVACY.md) for notice templates and honest marketing wording.
 
 ### Automated Reports & Warnings
 - **Monthly Agency Email Digest:** Dispatched on the 1st of each month (08:00) with a global health overview (email only, no PDF attachment).
@@ -215,7 +217,8 @@ Copy `.env.example` to `.env` (automatically handled during Docker start) and ad
 | Variable | Purpose |
 |----------|---------|
 | `APP_URL` | Public URL of your instance (analytics snippet, emails, SpectoraBot UA). Use `https://` in production. |
-| `TRUSTED_PROXIES` | `*` or comma-separated IPs behind a reverse proxy; leave empty locally. |
+| `TRUSTED_PROXIES` | `*` or comma-separated IPs behind a reverse proxy; enables real client IPs and Cloudflare geo headers (`CF-IPCountry`, `CF-IPCity`). |
+| `ANALYTICS_GEOLITE2_PATH` | Optional path to `GeoLite2-City.mmdb` when not using Cloudflare (default: `storage/app/geoip/GeoLite2-City.mmdb`). |
 | `SPECTORA_FORCE_HTTPS` | `true` if TLS terminates at the proxy without `X-Forwarded-Proto` (optional; usually inferred from `APP_URL`). |
 | `SPECTORA_REGISTRATION_ENABLED` | `false` (default) — block public sign-up; create users in Settings or via `spectora:setup`. |
 | `DB_DATABASE` | SQLite file path (default in Docker: `/var/www/html/storage/database.sqlite`). |

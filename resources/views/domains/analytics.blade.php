@@ -54,12 +54,100 @@
             </div>
         </div>
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            <!-- Geo settings -->
+            <div class="p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
+                 x-data="{
+                    precision: @json($domain->analytics_geo_precision ?? 'city'),
+                    saving: false,
+                    async save() {
+                        this.saving = true;
+                        try {
+                            const res = await fetch('{{ route('domains.analytics.settings', $domain) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json',
+                                },
+                                body: JSON.stringify({ analytics_geo_precision: this.precision }),
+                            });
+                            if (res.ok) { window.location.reload(); }
+                        } finally { this.saving = false; }
+                    }
+                 }">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Visitor location (privacy)</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Cookie-free. No raw IP stored. Use <code class="text-xs">docs/PRIVACY.md</code> on this server for client privacy notice templates.</p>
+                <div class="flex flex-wrap items-center gap-4">
+                    <select x-model="precision" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
+                        <option value="city">Country + region + city</option>
+                        <option value="country">Country only</option>
+                        <option value="off">Off</option>
+                    </select>
+                    <button type="button" @click="save()" :disabled="saving"
+                            class="px-4 py-2 bg-spectora-cyan hover:bg-cyan-500 text-white text-sm font-bold rounded disabled:opacity-50">
+                        Save
+                    </button>
+                </div>
+            </div>
             
             <!-- Main Chart -->
             <div class="p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Visitors & Pageviews</h3>
                 <div class="relative h-80 w-full">
                     <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Grid: Geo -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Top Countries</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">Country</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Pageviews</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($topCountries as $row)
+                                    <tr class="border-b dark:border-gray-700">
+                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ $row->country }}</td>
+                                        <td class="px-4 py-3 text-right">{{ number_format($row->total, 0, ',', '.') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="2" class="px-4 py-3 text-center">No geo data yet</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Top Cities</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">City</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Pageviews</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($topCities as $row)
+                                    <tr class="border-b dark:border-gray-700">
+                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
+                                            {{ $row->city }}@if($row->country) <span class="text-gray-400 font-normal">({{ $row->country }})</span>@endif
+                                        </td>
+                                        <td class="px-4 py-3 text-right">{{ number_format($row->total, 0, ',', '.') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="2" class="px-4 py-3 text-center">No city data yet — enable geo or configure Cloudflare / GeoLite2</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 

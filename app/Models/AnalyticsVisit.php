@@ -23,6 +23,8 @@ class AnalyticsVisit extends Model
         'os',
         'device',
         'country',
+        'region',
+        'city',
     ];
 
     /**

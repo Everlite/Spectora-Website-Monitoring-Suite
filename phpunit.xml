@@ -33,5 +33,6 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="SPECTORA_REGISTRATION_ENABLED" value="false"/>
+        <env name="TRUSTED_PROXIES" value="*"/>
     </php>
 </phpunit>

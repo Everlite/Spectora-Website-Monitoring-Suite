@@ -45,6 +45,9 @@ Route::middleware('auth')->group(function () {
         ->name('domains.urls.sync');
     Route::delete('/domains/{domain}', [DomainController::class, 'destroy'])->name('domains.destroy');
     Route::get('/domains/{domain}/analytics', [AnalyticsController::class, 'show'])->name('domains.analytics');
+    Route::post('/domains/{domain}/analytics/settings', [AnalyticsController::class, 'updateSettings'])
+        ->middleware('throttle:30,1')
+        ->name('domains.analytics.settings');
     Route::get('/domains/{domain}/report', [ReportController::class, 'download'])->name('domains.report');
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');

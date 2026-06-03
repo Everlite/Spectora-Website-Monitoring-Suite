@@ -82,6 +82,22 @@ class AnalyticsQueryService
                 ->groupBy('date')
                 ->orderBy('date')
                 ->get(),
+            'topCountries' => AnalyticsVisit::where('domain_id', $domain->id)
+                ->where('created_at', '>=', $startDate)
+                ->whereNotNull('country')
+                ->select('country', DB::raw('count(*) as total'))
+                ->groupBy('country')
+                ->orderByDesc('total')
+                ->limit(10)
+                ->get(),
+            'topCities' => AnalyticsVisit::where('domain_id', $domain->id)
+                ->where('created_at', '>=', $startDate)
+                ->whereNotNull('city')
+                ->select('city', 'country', DB::raw('count(*) as total'))
+                ->groupBy('city', 'country')
+                ->orderByDesc('total')
+                ->limit(15)
+                ->get(),
         ];
     }
 }

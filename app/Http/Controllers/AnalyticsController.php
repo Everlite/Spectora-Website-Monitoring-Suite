@@ -4,14 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\AnalyticsVisit;
 use App\Models\Domain;
+use App\Services\AnalyticsIpService;
 use App\Services\AnalyticsQueryService;
+use App\Services\GeoResolutionService;
 use App\Support\HostHelper;
 use Illuminate\Http\Request;
 
 class AnalyticsController extends Controller
 {
     public function __construct(
-        private readonly AnalyticsQueryService $analyticsQuery
+        private readonly AnalyticsQueryService $analyticsQuery,
+        private readonly GeoResolutionService $geoResolution
     ) {}
 
     /**
@@ -51,8 +54,8 @@ class AnalyticsController extends Controller
         $userAgent = $request->userAgent() ?? 'Unknown';
         $date = now()->format('Y-m-d');
         $dailyKey = hash_hmac('sha256', $date, (string) config('app.key'));
-
-        $visitorHash = hash_hmac('sha256', $ip.'|'.$userAgent, $dailyKey);
+        $ipForHash = $ip ? AnalyticsIpService::anonymizeForHash($ip) : '';
+        $visitorHash = hash_hmac('sha256', $ipForHash.'|'.$userAgent, $dailyKey);
 
         $urlPath = parse_url($validated['url'], PHP_URL_PATH) ?? '/';
 
@@ -71,9 +74,8 @@ class AnalyticsController extends Controller
 
         $browser = $this->getBrowser($userAgent);
         $os = $this->getOs($userAgent);
-        $country = env('TRUSTED_PROXIES')
-            ? $request->header('CF-IPCountry')
-            : null;
+        $precision = $domain->analytics_geo_precision ?? Domain::GEO_CITY;
+        $geo = $this->geoResolution->resolve($ip, $request, $precision);
 
         AnalyticsVisit::create([
             'domain_id' => $domain->id,
@@ -85,7 +87,9 @@ class AnalyticsController extends Controller
             'browser' => $browser,
             'os' => $os,
             'device' => $device,
-            'country' => $country,
+            'country' => $geo['country'],
+            'region' => $geo['region'],
+            'city' => $geo['city'],
         ]);
 
         return response()->noContent();
@@ -101,6 +105,23 @@ class AnalyticsController extends Controller
             ['domain' => $domain],
             $metrics
         ));
+    }
+
+    public function updateSettings(Request $request, Domain $domain)
+    {
+        $this->authorize('update', $domain);
+
+        $validated = $request->validate([
+            'analytics_geo_precision' => 'required|in:off,country,city',
+        ]);
+
+        $domain->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Analytics settings saved.']);
+        }
+
+        return back()->with('status', 'Analytics settings saved.');
     }
 
     private function getBrowser(string $ua): string

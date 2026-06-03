@@ -34,6 +34,7 @@ Scheduled checks dispatch `CheckUrlJob` to the database queue. Ensure Supervisor
 - `APP_DEBUG=false`
 - `SESSION_ENCRYPT=true`
 - `APP_URL=https://…`
-- `TRUSTED_PROXIES` when behind a reverse proxy
+- `TRUSTED_PROXIES` when behind a reverse proxy (also enables Cloudflare geo headers for analytics)
+- Optional `ANALYTICS_GEOLITE2_PATH` or `storage/app/geoip/GeoLite2-City.mmdb` for city/country without Cloudflare
 - Working `MAIL_*` for alerts and monthly digests
 - Optional VAPID keys for Web Push

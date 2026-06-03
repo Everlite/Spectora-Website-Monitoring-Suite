@@ -1007,6 +1007,44 @@
                                 </div>
                             </div>
 
+                            <!-- Top Countries -->
+                            <div class="bg-spectora-card border border-gray-700/50 rounded-xl p-6 shadow-xl">
+                                <h3 class="text-lg font-bold text-white mb-4">Top Countries</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-sm">
+                                        <tbody class="divide-y divide-gray-700/50">
+                                            @forelse ($topCountries ?? [] as $row)
+                                                <tr>
+                                                    <td class="py-2 text-gray-300">{{ $row->country }}</td>
+                                                    <td class="py-2 text-right text-white font-bold">{{ number_format($row->total) }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr><td class="py-2 text-gray-500" colspan="2">No geo data yet</td></tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Top Cities -->
+                            <div class="bg-spectora-card border border-gray-700/50 rounded-xl p-6 shadow-xl">
+                                <h3 class="text-lg font-bold text-white mb-4">Top Cities</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-sm">
+                                        <tbody class="divide-y divide-gray-700/50">
+                                            @forelse ($topCities ?? [] as $row)
+                                                <tr>
+                                                    <td class="py-2 text-gray-300">{{ $row->city }}@if($row->country) ({{ $row->country }})@endif</td>
+                                                    <td class="py-2 text-right text-white font-bold">{{ number_format($row->total) }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr><td class="py-2 text-gray-500" colspan="2">No city data yet</td></tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
                             <!-- Devices -->
                             <div class="bg-spectora-card border border-gray-700/50 rounded-xl p-6 shadow-xl">
                                 <h3 class="text-lg font-bold text-white mb-4">Devices</h3>

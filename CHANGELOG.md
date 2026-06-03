@@ -2,6 +2,13 @@
 
 ## [Unreleased] — Major Overhaul (May 2026)
 
+### Analytics (privacy geo)
+
+- Country, region, and city storage with per-domain precision (`off` / `country` / `city`)
+- Top Countries / Top Cities in analytics UI; Cloudflare or GeoLite2-City resolution
+- Truncated IP before visitor hash; `docs/PRIVACY.md` for client notice templates
+- Optional dependency `geoip2/geoip2` for local MaxMind database
+
 Spectora received a large stability, security, and maintainability refresh. Treat this line as a **post-overhaul testing phase**: automated CI covers core flows; validate on a staging instance before production upgrades.
 
 ### Security
