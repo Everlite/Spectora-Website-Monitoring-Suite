@@ -12,7 +12,9 @@ class DomainNoteController extends Controller
     {
         $this->authorize('view', $domain);
 
-        return response()->json($domain->notes()->orderBy('created_at', 'desc')->get());
+        return response()->json(
+            $domain->notes()->with('user:id,first_name,last_name,email')->orderBy('created_at', 'desc')->get()
+        );
     }
 
     public function store(Request $request, Domain $domain)
@@ -27,6 +29,8 @@ class DomainNoteController extends Controller
             'content' => $request->content,
             'user_id' => $request->user()->id,
         ]);
+
+        $note->load('user:id,first_name,last_name,email');
 
         return response()->json($note);
     }

@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\CheckDomainJob;
+use App\Jobs\PerformSpectoraAudit;
 use App\Models\Domain;
-use App\Models\MonitoredUrl;
+use App\Models\User;
 use App\Services\AnalyticsQueryService;
-use App\Services\SitemapService;
 use App\Services\MonitoringFilterService;
+use App\Services\SecurityService;
+use App\Services\SitemapService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
 
 class DomainController extends Controller
@@ -44,14 +47,14 @@ class DomainController extends Controller
         $this->authorize('update', $domain);
 
         $sitemaps = $sitemapService->discover($domain->url);
-        
+
         $domain->update([
-            'sitemap_urls' => $sitemaps
+            'sitemap_urls' => $sitemaps,
         ]);
 
         return response()->json([
-            'message' => count($sitemaps) . ' sitemaps found.',
-            'sitemaps' => $sitemaps
+            'message' => count($sitemaps).' sitemaps found.',
+            'sitemaps' => $sitemaps,
         ]);
     }
 
@@ -63,14 +66,14 @@ class DomainController extends Controller
         $domainHost = preg_replace('/^www\./', '', parse_url($domain->url, PHP_URL_HOST));
 
         // 1. Scan Homepage Links with SSRF Middleware
-        if (!\App\Services\SecurityService::isSafeUrl($domain->url)) {
-            \Illuminate\Support\Facades\Log::warning("Blocked unsafe homepage scan: {$domain->url}");
+        if (! SecurityService::isSafeUrl($domain->url)) {
+            Log::warning("Blocked unsafe homepage scan: {$domain->url}");
 
             return response()->json(['message' => 'URL blocked for security reasons.'], 422);
         }
 
         try {
-            $response = \App\Services\SecurityService::http()
+            $response = SecurityService::http()
                 ->timeout(10)
                 ->withUserAgent('SpectoraBot/1.0')
                 ->get($domain->url);
@@ -78,28 +81,30 @@ class DomainController extends Controller
                 $crawler = new Crawler($response->body());
                 $crawler->filter('a[href]')->each(function (Crawler $node) use (&$allUrls, $domainHost, $domain) {
                     $href = $node->attr('href');
-                    if (!$href || str_starts_with($href, '#') || str_starts_with($href, 'javascript:')) return;
-                    
+                    if (! $href || str_starts_with($href, '#') || str_starts_with($href, 'javascript:')) {
+                        return;
+                    }
+
                     // Normalize relative links
                     if (str_starts_with($href, '//')) {
-                        $href = (parse_url($domain->url, PHP_URL_SCHEME) ?: 'https') . ':' . $href;
+                        $href = (parse_url($domain->url, PHP_URL_SCHEME) ?: 'https').':'.$href;
                     } elseif (str_starts_with($href, '/')) {
-                        $href = rtrim($domain->url, '/') . $href;
+                        $href = rtrim($domain->url, '/').$href;
                     }
-                    
+
                     $urlHost = preg_replace('/^www\./', '', parse_url($href, PHP_URL_HOST));
                     if ($urlHost === $domainHost) {
                         $allUrls[] = rtrim($href, '/');
                     }
                 });
             }
-        } catch (\Exception $e) { 
-            \Illuminate\Support\Facades\Log::warning("Homepage scan failed for {$domain->url}: " . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::warning("Homepage scan failed for {$domain->url}: ".$e->getMessage());
         }
 
         // 2. Scan Sitemaps
         $sitemapsToScan = $domain->included_sitemaps;
-        
+
         // If no sitemaps selected, try auto-discovery to give user some results
         if (empty($sitemapsToScan)) {
             $sitemapsToScan = $sitemapService->discover($domain->url);
@@ -108,12 +113,13 @@ class DomainController extends Controller
         foreach ($sitemapsToScan as $sitemapUrl) {
             try {
                 $parsed = $sitemapService->parse($sitemapUrl);
-                if (!empty($parsed['items'])) {
+                if (! empty($parsed['items'])) {
                     foreach ($parsed['items'] as $item) {
-                         $allUrls[] = rtrim($item, '/');
+                        $allUrls[] = rtrim($item, '/');
                     }
                 }
-            } catch (\Exception $e) { /* ignore single sitemap failure */ }
+            } catch (\Exception $e) { /* ignore single sitemap failure */
+            }
         }
 
         // 3. Unique & Clean
@@ -124,13 +130,13 @@ class DomainController extends Controller
             // Check if already monitored (normalize both for comparison)
             $existing = $domain->monitoredUrls()
                 ->where(function ($q) use ($url) {
-                    $q->where('url', $url)->orWhere('url', $url . '/');
+                    $q->where('url', $url)->orWhere('url', $url.'/');
                 })
                 ->first();
-            
+
             // Check if "public" per filter
             $filter = $filterService->shouldCheck($domain, $url);
-            
+
             $results[] = [
                 'url' => $url,
                 'is_monitored' => $existing ? $existing->is_active : false,
@@ -140,7 +146,7 @@ class DomainController extends Controller
         }
 
         return response()->json([
-            'urls' => array_values($results)
+            'urls' => array_values($results),
         ]);
     }
 
@@ -191,7 +197,7 @@ class DomainController extends Controller
             $chartData = $chartQuery->take(50)->get()->reverse();
         }
 
-        $labels = $chartData->map(fn($check) => $check->created_at->format('d.m. H:i'))->values();
+        $labels = $chartData->map(fn ($check) => $check->created_at->format('d.m. H:i'))->values();
         $dataPoints = $chartData->pluck('response_time')->values();
 
         return view('domains.history', compact('domain', 'checks', 'labels', 'dataPoints', 'showOnlyErrors', 'dateFilter'));
@@ -200,6 +206,8 @@ class DomainController extends Controller
     public function show(Domain $domain)
     {
         $this->authorize('view', $domain);
+
+        $domain->loadMissing('user');
 
         $analytics = $this->analyticsQuery->getDashboardData($domain);
 
@@ -225,21 +233,20 @@ class DomainController extends Controller
         $avgResponseTime = $domain->uptimeHistory()
             ->where('created_at', '>=', now()->subDay())
             ->avg('response_time');
-        
+
         // Stored as seconds in history, so convert to ms for the dashboard
         $avgResponseTime = round(($avgResponseTime ?? 0) * 1000);
 
         // Recent Checks (Logbook)
         $recentChecks = $domain->uptimeHistory()->orderBy('created_at', 'desc')->paginate(20);
-        
+
         // Monitored URLs for the Overview tab
         $monitoredUrls = $domain->monitoredUrls()->where('is_active', true)->get();
 
         // History Chart (Response Time) - Align with Analytics Chart if possible
         $historyChartData = $domain->uptimeHistory()->orderBy('created_at', 'desc')->take(50)->get()->reverse();
-        $historyLabels = $historyChartData->map(fn($h) => $h->created_at->format('d.m. H:i'))->values();
-        $historyResponseTimes = $historyChartData->map(fn($h) => round($h->response_time * 1000))->values();
-
+        $historyLabels = $historyChartData->map(fn ($h) => $h->created_at->format('d.m. H:i'))->values();
+        $historyResponseTimes = $historyChartData->map(fn ($h) => round($h->response_time * 1000))->values();
 
         // --- 3. Performance & Security ---
         // SSL
@@ -252,7 +259,7 @@ class DomainController extends Controller
             ->take(20)
             ->get()
             ->reverse();
-        $psHistoryLabels = $psHistory->map(fn($h) => $h->created_at->format('d.m.'))->values();
+        $psHistoryLabels = $psHistory->map(fn ($h) => $h->created_at->format('d.m.'))->values();
         $psHistoryScores = $psHistory->pluck('pagespeed_score_desktop')->values();
 
         // Main Performance Score
@@ -263,7 +270,10 @@ class DomainController extends Controller
         $watchdogData = $domain->safety_details['watchdog'] ?? [];
 
         // --- 4. Notes ---
-        $notes = $domain->notes()->orderBy('created_at', 'desc')->get();
+        $notes = $domain->notes()
+            ->with('user:id,first_name,last_name,email')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // --- 5. Security & Audit Summary (Restored Fix) ---
         $auditDetails = $domain->last_pagespeed_details ?? [];
@@ -300,14 +310,14 @@ class DomainController extends Controller
         $this->authorize('update', $domain);
 
         // Dispatch Jobs Synchronously
-        \App\Jobs\PerformSpectoraAudit::dispatchSync($domain);
-        \App\Jobs\CheckDomainJob::dispatchSync($domain);
+        PerformSpectoraAudit::dispatchSync($domain);
+        CheckDomainJob::dispatchSync($domain);
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'Analysis started']);
         }
 
-        return back()->with('status', "Spectora audit started. Refresh in a few seconds.");
+        return back()->with('status', 'Spectora audit started. Refresh in a few seconds.');
     }
 
     public function status(Domain $domain)
@@ -327,7 +337,7 @@ class DomainController extends Controller
             'pagespeed_desktop' => $domain->pagespeed_score_desktop,
             'updated_at' => $domain->updated_at->toIso8601String(),
             'details' => $domain->last_pagespeed_details,
-            'history_labels' => $history->map(fn($h) => $h->created_at->setTimezone('Europe/Berlin')->format('d.m. H:i'))->values(),
+            'history_labels' => $history->map(fn ($h) => $h->created_at->setTimezone('Europe/Berlin')->format('d.m. H:i'))->values(),
             'history_scores' => $history->pluck('pagespeed_score_desktop')->values(),
         ]);
     }
@@ -342,22 +352,22 @@ class DomainController extends Controller
             'keyword_must_not_contain' => 'nullable|string',
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $url = trim($request->url);
-        if (!preg_match('#^https?://#', $url)) {
-            $url = 'https://' . $url;
+        if (! preg_match('#^https?://#', $url)) {
+            $url = 'https://'.$url;
         }
 
         // SSRF Protection
-        if (!\App\Services\SecurityService::isSafeUrl($url)) {
+        if (! SecurityService::isSafeUrl($url)) {
             return back()->withErrors(['url' => 'This URL is prohibited for security reasons (internal/private IP).']);
         }
 
         // Check for duplicates
         if (Domain::where('user_id', $user->id)->where('url', $url)->exists()) {
-             return back()->withErrors(['url' => 'You are already monitoring this domain.']);
+            return back()->withErrors(['url' => 'You are already monitoring this domain.']);
         }
 
         $domain = Domain::create([
@@ -368,7 +378,7 @@ class DomainController extends Controller
         ]);
 
         // Dispatch Job
-        \App\Jobs\PerformSpectoraAudit::dispatchSync($domain);
+        PerformSpectoraAudit::dispatchSync($domain);
 
         return redirect()->route('dashboard')->with('status', 'Domain successfully added!');
     }

@@ -1275,7 +1275,10 @@
                                         <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-4 relative group">
                                             <p class="text-gray-300 text-sm whitespace-pre-wrap" x-text="note.content"></p>
                                             <div class="mt-2 flex justify-between items-center text-xs text-gray-500">
-                                                <span x-text="new Date(note.created_at).toLocaleString()"></span>
+                                                <span>
+                                                    <span x-text="new Date(note.created_at).toLocaleString()"></span>
+                                                    <span x-show="note.author_name" x-text="' · ' + note.author_name"></span>
+                                                </span>
                                                 <div class="flex gap-2">
                                                     <button @click="editNote(note)"
                                                         class="text-blue-400 hover:text-blue-300 font-bold">Edit</button>

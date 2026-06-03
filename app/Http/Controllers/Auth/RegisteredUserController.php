@@ -19,9 +19,10 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        if (!config('auth.registration_enabled', true)) {
+        if (! config('auth.registration_enabled', false)) {
             abort(403, 'Registration is currently disabled.');
         }
+
         return view('auth.register');
     }
 
@@ -30,17 +31,17 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if (!config('auth.registration_enabled', true)) {
+        if (! config('auth.registration_enabled', false)) {
             abort(403, 'Registration is currently disabled.');
         }
 
         $request->validate([
-            'first_name'    => ['required', 'string', 'max:255'],
-            'last_name'     => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password'      => ['required', 'confirmed', Rules\Password::defaults()],
-            'company_name'  => ['required', 'string', 'max:255'],
-            'logo'          => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'company_name' => ['required', 'string', 'max:255'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ]);
 
         $logoPath = null;
@@ -49,11 +50,11 @@ class RegisteredUserController extends Controller
         }
 
         $user = User::create([
-            'first_name'    => $request->first_name,
-            'last_name'     => $request->last_name,
-            'email'         => $request->email,
-            'password'      => Hash::make($request->password),
-            'company_name'  => $request->company_name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'company_name' => $request->company_name,
             'agency_logo_path' => $logoPath,
         ]);
 

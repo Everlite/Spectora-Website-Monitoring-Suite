@@ -56,11 +56,11 @@ Unlike standard public SaaS applications, Spectora is built as a **single-agency
 ### Automated Reports & Warnings
 - **Monthly Agency Email Digest:** Dispatched on the 1st of each month (08:00) with a global health overview (email only, no PDF attachment).
 - **On-Demand PDF Reports:** Generate clean, premium PDF report files from the dashboard for client handovers or meetings (optional agency logo on reports). Charts are rendered locally as inline SVG — no third-party chart services.
-- **Instant Email Alerts:** Warnings fired immediately when client websites go offline (requires working `MAIL_*` configuration).
-- **Browser Push Notifications (Optional):** Web Push via VAPID keys; subscribe from the dashboard when keys are configured.
+- **Instant Email Alerts:** Warnings fired immediately when the **main URL** of a domain fails a check (requires working `MAIL_*` configuration). Recipients are the **domain owner** and **every administrator** (deduplicated by e-mail).
+- **Browser Push Notifications (Optional):** Same downtime events also send Web Push to subscribed users among those recipients when VAPID keys are configured; subscribe from the dashboard.
 
 ### Collaboration & Branding
-- **Domain notes** per client site (team-visible on the domain detail page; each note stores the creating user for audit trails).
+- **Domain notes** per client site (team-visible on the domain detail page; each note stores the creating user and shows the author name in the notes list).
 - **Agency logo upload** in settings — embedded in generated PDF reports.
 - **Data retention** (daily `php artisan model:prune` via scheduler):
   - Uptime/audit rows in `checks_history`: **90 days**
@@ -145,7 +145,7 @@ Requires **PHP 8.2+** with extensions: `sqlite3`, `pdo_sqlite`, `mbstring`, `xml
 
 ### Continuous Integration
 
-Pushes and pull requests to `main` run [GitHub Actions](.github/workflows/tests.yml): `composer test` (PHPUnit) and `npm ci && npm run build` (Vite assets).
+Pushes and pull requests to `main` run [GitHub Actions](.github/workflows/tests.yml): `composer test` (PHPUnit), Laravel Pint on core changed paths, and `npm ci && npm run build` (Vite assets).
 
 ---
 
@@ -157,6 +157,13 @@ Deploying Spectora in production behind a reverse proxy (such as Nginx Proxy Man
 2. **Reverse proxy / TLS termination**: Set `TRUSTED_PROXIES=*` (or comma-separated proxy IPs) so Laravel reads `X-Forwarded-Proto` and real client IPs correctly. Leave empty for local HTTP development.
 3. **Proxy without `X-Forwarded-Proto`**: If your proxy terminates TLS but does not forward protocol headers, set `SPECTORA_FORCE_HTTPS=true` in addition to `APP_URL=https://…`.
 4. **Configure SMTP** for offline alerts and monthly digests; optional **VAPID** keys for Web Push (see Configuration table below).
+5. **Production hardening:** set `APP_DEBUG=false`, `SESSION_ENCRYPT=true`, and keep `SPECTORA_REGISTRATION_ENABLED=false` unless you intentionally allow public sign-up.
+
+### Scaling & SQLite backups
+
+Spectora is optimized for **small teams and up to roughly 50 monitored domains** on a single instance. The scheduler dispatches uptime checks for all domains **every 15 minutes**; the queue worker runs each domain’s main URL and active sub-URLs synchronously (`dispatchSync`) — beyond ~50 domains, expect longer check cycles unless you split workloads or scale workers.
+
+Back up the SQLite file regularly (Docker volume `spectora-storage` or your `DB_DATABASE` path). With `DB_JOURNAL_MODE=wal`, copy the database during low traffic or use SQLite’s backup API; include `-wal` / `-shm` sidecar files if present.
 
 ---
 
@@ -167,7 +174,14 @@ Deploying Spectora in production behind a reverse proxy (such as Nginx Proxy Man
 >
 > We have completed a transition to a cleaner relational model for user names. In earlier versions, a single flat `name` column was used; this has been refactored into distinct `first_name` and `last_name` fields.
 > 
-> If you are updating from an installation of Spectora prior to May 2026, you **must** perform a fresh database setup to align your SQLite file with the new database schema:
+> If you are updating from an installation of Spectora prior to May 2026, you **must** align your SQLite schema with the current migrations.
+>
+> **Recommended for existing data:** run a normal migration after pulling the latest code (includes domain-notes schema repair and `first_name` / `last_name` changes):
+> ```bash
+> docker compose exec app php artisan migrate --force
+> ```
+>
+> **Only if migrations fail or you want a clean slate**, perform a fresh database setup:
 >
 > 1. Clear any active volumes and spin down:
 >    ```bash
@@ -231,7 +245,8 @@ Spectora leverages modern web development technologies to ensure high performanc
 * **PDF:** [DomPDF](https://github.com/barryvdh/laravel-dompdf) with on-server SVG charts (`ReportChartSvg`)
 * **HTML Parsing:** [Symfony DomCrawler](https://symfony.com/doc/current/components/dom_crawler.html) (audits, watchdog, monitoring filters)
 * **Server Runner:** Apache (included in the Docker image; Cron + Supervisor for scheduler and queue)
-* **CI:** GitHub Actions (PHP 8.4, `pdo_sqlite`, Vite build)
+* **CI:** GitHub Actions (PHP 8.4, `pdo_sqlite`, PHPUnit, Laravel Pint, Vite build)
+* **API tokens:** Laravel Sanctum is installed for potential future API use; there are no public Sanctum API routes in this release.
 
 ---
 
@@ -240,7 +255,8 @@ Spectora leverages modern web development technologies to ensure high performanc
 * **SSRF Prevention:** Outbound HTTP uses `SecurityService::http()` — DNS/IP validation (cached per request), redirect re-validation, and connect-time IP pinning (`CURLOPT_RESOLVE`).
 * **Analytics `/api/sync`:** Public `POST` endpoint, **120 req/min** throttle, domain UUID + origin/referrer host check, daily HMAC visitor hashes. No session cookies; CORS may allow cross-origin beacons — enforcement is server-side.
 * **Login rate limiting:** Five failed attempts per `email|ip` (Laravel Breeze) before lockout.
-* **Authorization:** Laravel policies on domains; admin-only routes use `EnsureUserIsAdmin` middleware.
+* **Authorization:** Laravel policies on domains and user management (`UserPolicy`); admin-only routes use `EnsureUserIsAdmin` middleware.
+* **Rate limits:** Sensitive actions (`domains.store`, `domains.analyze`, `domains.urls.scan`) are throttled per authenticated user.
 * **TLS Termination:** Run production instances behind HTTPS. Browsers block analytics beacons from HTTPS client sites to an HTTP-only Spectora instance.
 * **PDF reports:** Charts are generated on-server as SVG; report data never leaves your instance for rendering. Agency logos are read only from validated paths under `storage/app/public`.
 

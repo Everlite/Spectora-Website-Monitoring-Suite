@@ -49,6 +49,26 @@ jobs:
       - name: Run tests
         run: composer test
 
+      - name: Run Laravel Pint (audit-touched paths)
+        run: |
+          vendor/bin/pint --test \
+            app/Services/DomainAlertService.php \
+            app/Notifications/DomainWarningNotification.php \
+            app/Policies/UserPolicy.php \
+            app/Models/DomainNote.php \
+            app/Http/Controllers/DomainNoteController.php \
+            app/Http/Controllers/UserController.php \
+            app/Jobs/CheckUrlJob.php \
+            database/migrations/2026_05_30_120000_align_domain_notes_schema.php \
+            database/migrations/2025_11_27_232432_create_helper_tables.php \
+            database/migrations/2025_11_28_190653_create_domain_notes_table.php \
+            routes/auth.php \
+            routes/web.php \
+            tests/Feature/DomainNoteTest.php \
+            tests/Feature/CheckUrlJobTest.php \
+            tests/Unit/ReportServicePdfTest.php \
+            tests/Unit/SecurityServiceTest.php
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

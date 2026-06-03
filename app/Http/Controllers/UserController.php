@@ -14,6 +14,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', User::class);
+
         $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
@@ -39,9 +41,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        if ($user->id === auth()->id()) {
-            return redirect()->back()->withErrors(['delete_user' => 'You cannot delete your own account.']);
-        }
+        $this->authorize('delete', $user);
 
         if ($user->is_admin && ! User::where('is_admin', true)->where('id', '!=', $user->id)->exists()) {
             return redirect()->back()->withErrors(['delete_user' => 'You cannot delete the last administrator account.']);

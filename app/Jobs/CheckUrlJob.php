@@ -2,10 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Models\ChecksHistory;
 use App\Models\Domain;
 use App\Models\MonitoredUrl;
-use App\Models\ChecksHistory;
+use App\Services\DomainAlertService;
 use App\Services\MonitoringFilterService;
+use App\Services\SecurityService;
 use App\Services\WatchdogService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,8 +16,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\DomainWarningMail;
 
 class CheckUrlJob implements ShouldQueue
 {
@@ -33,21 +33,23 @@ class CheckUrlJob implements ShouldQueue
     {
         $filterService = app(MonitoringFilterService::class);
         $url = $this->url;
-        
-        if (!str_starts_with($url, 'http')) {
-            $url = 'https://' . $url;
+
+        if (! str_starts_with($url, 'http')) {
+            $url = 'https://'.$url;
         }
 
         // 0. Pre-check Filter (Excludes, Robots.txt)
         $filter = $filterService->shouldCheck($this->domain, $url);
-        if (!$filter['should_check']) {
+        if (! $filter['should_check']) {
             Log::info("Skipping check for {$url}: {$filter['reason']}");
+
             return;
         }
 
         // 0.5 SSRF Protection
-        if (!\App\Services\SecurityService::isSafeUrl($url)) {
+        if (! SecurityService::isSafeUrl($url)) {
             Log::warning("SSRF Protection: Blocked prohibited URL check for {$url}");
+
             return;
         }
 
@@ -60,11 +62,11 @@ class CheckUrlJob implements ShouldQueue
 
         try {
             // 1. Perform HTTP Check with SpectoraBot UA and SSRF Middleware
-            $response = \App\Services\SecurityService::http()
+            $response = SecurityService::http()
                 ->withUserAgent('SpectoraBot/1.0')
                 ->timeout(15)
                 ->get($url);
-            
+
             // 1.5 Post-fetch Filter (noindex, auth)
             $postFilter = $filterService->shouldIgnoreResponse($this->domain, $response);
             if ($postFilter['ignore']) {
@@ -72,6 +74,7 @@ class CheckUrlJob implements ShouldQueue
                 if ($this->monitoredUrl) {
                     $this->monitoredUrl->update(['last_safety_status' => 'ignored']);
                 }
+
                 return;
             }
 
@@ -87,8 +90,8 @@ class CheckUrlJob implements ShouldQueue
             if ($this->domain->keyword_must_contain) {
                 $requiredKeywords = array_map('trim', explode(',', $this->domain->keyword_must_contain));
                 foreach ($requiredKeywords as $keyword) {
-                    if (!empty($keyword) && !str_contains($body, strtolower($keyword))) {
-                        $issues[] = '❌ Required keyword missing: ' . htmlspecialchars($keyword);
+                    if (! empty($keyword) && ! str_contains($body, strtolower($keyword))) {
+                        $issues[] = '❌ Required keyword missing: '.htmlspecialchars($keyword);
                         $safetyStatus = 'danger';
                         $safetyDetails['keywords_missing'][] = $keyword;
                     }
@@ -99,8 +102,8 @@ class CheckUrlJob implements ShouldQueue
             if ($this->domain->keyword_must_not_contain) {
                 $forbiddenKeywords = array_map('trim', explode(',', $this->domain->keyword_must_not_contain));
                 foreach ($forbiddenKeywords as $keyword) {
-                    if (!empty($keyword) && str_contains($body, strtolower($keyword))) {
-                        $issues[] = '❌ Error keyword found: ' . htmlspecialchars($keyword);
+                    if (! empty($keyword) && str_contains($body, strtolower($keyword))) {
+                        $issues[] = '❌ Error keyword found: '.htmlspecialchars($keyword);
                         $safetyStatus = 'danger';
                         $safetyDetails['keywords_found'][] = $keyword;
                     }
@@ -109,9 +112,9 @@ class CheckUrlJob implements ShouldQueue
 
             // 5. Watchdog Service (reuse response body — no second HTTP request)
             try {
-                $watchdog = new WatchdogService();
+                $watchdog = new WatchdogService;
                 $scanResult = $watchdog->scan($this->domain, $url, $rawBody, $statusCode);
-                
+
                 $safetyDetails['watchdog'] = $scanResult;
                 if ($scanResult['status'] === 'danger') {
                     $safetyStatus = 'danger';
@@ -124,7 +127,7 @@ class CheckUrlJob implements ShouldQueue
                     $safetyStatus = 'warning';
                 }
             } catch (\Exception $e) {
-                Log::error("Watchdog scan failed for {$url}: " . $e->getMessage());
+                Log::error("Watchdog scan failed for {$url}: ".$e->getMessage());
             }
 
             if ($statusCode >= 400 || $statusCode === 0) {
@@ -133,9 +136,9 @@ class CheckUrlJob implements ShouldQueue
 
         } catch (\Exception $e) {
             $responseTime = microtime(true) - $startTime;
-            Log::error("Check failed for {$url}: " . $e->getMessage());
+            Log::error("Check failed for {$url}: ".$e->getMessage());
             $statusCode = 0;
-            $issues[] = "❌ Check failed: " . $e->getMessage();
+            $issues[] = '❌ Check failed: '.$e->getMessage();
             $safetyStatus = 'danger';
         }
 
@@ -149,7 +152,7 @@ class CheckUrlJob implements ShouldQueue
                 'last_response_time' => round(($responseTime ?? 0) * 1000),
                 'last_checked' => now(),
             ]);
-            
+
             // Still update the domain's last_checked to show activity on the dashboard
             $this->domain->update(['last_checked' => now()]);
         } else {
@@ -165,7 +168,7 @@ class CheckUrlJob implements ShouldQueue
                     'last_checked' => now(),
                 ]);
             } catch (\Exception $e) {
-                Log::error("Failed to update domain record: " . $e->getMessage());
+                Log::error('Failed to update domain record: '.$e->getMessage());
             }
         }
 
@@ -181,18 +184,11 @@ class CheckUrlJob implements ShouldQueue
         ]);
 
         // --- Handle Notifications (Only if it's the main domain for now to avoid spam) ---
-        if (!$this->monitoredUrl) {
-            if (!empty($issues)) {
-                if (!$this->domain->notify_sent) {
-                    try {
-                        $user = $this->domain->user;
-                        if ($user) {
-                            Mail::to($user->email)->send(new DomainWarningMail($this->domain, $issues));
-                            $this->domain->update(['notify_sent' => true]);
-                        }
-                    } catch (\Exception $e) {
-                        Log::error("Failed to send mail: " . $e->getMessage());
-                    }
+        if (! $this->monitoredUrl) {
+            if (! empty($issues)) {
+                if (! $this->domain->notify_sent) {
+                    DomainAlertService::sendDowntimeAlerts($this->domain, $issues);
+                    $this->domain->update(['notify_sent' => true]);
                 }
             } else {
                 // If the domain is healthy again and a notification was sent previously, reset the flag
@@ -204,52 +200,60 @@ class CheckUrlJob implements ShouldQueue
         }
     }
 
-    private function getSSLDays($url) {
+    private function getSSLDays($url)
+    {
         try {
             $host = parse_url($url, PHP_URL_HOST);
-            if (!$host) return null;
+            if (! $host) {
+                return null;
+            }
 
             $context = stream_context_create([
-                "ssl" => [
-                    "capture_peer_cert" => true, 
-                    "verify_peer" => false, 
-                    "verify_peer_name" => false
-                ]
+                'ssl' => [
+                    'capture_peer_cert' => true,
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ],
             ]);
 
             $client = @stream_socket_client(
-                "ssl://{$host}:443", 
-                $errno, 
-                $errstr, 
-                10, 
-                STREAM_CLIENT_CONNECT, 
+                "ssl://{$host}:443",
+                $errno,
+                $errstr,
+                10,
+                STREAM_CLIENT_CONNECT,
                 $context
             );
 
-            if (!$client) {
+            if (! $client) {
                 Log::warning("SSL Socket failed for {$host}: {$errstr} ({$errno})");
+
                 return null;
             }
 
             $params = stream_context_get_params($client);
-            if (!isset($params["options"]["ssl"]["peer_certificate"])) {
+            if (! isset($params['options']['ssl']['peer_certificate'])) {
                 Log::warning("SSL Certificate capture failed for {$host}");
                 fclose($client);
+
                 return null;
             }
 
-            $cert = openssl_x509_parse($params["options"]["ssl"]["peer_certificate"]);
+            $cert = openssl_x509_parse($params['options']['ssl']['peer_certificate']);
             fclose($client);
 
-            if (!$cert || !isset($cert['validTo_time_t'])) {
+            if (! $cert || ! isset($cert['validTo_time_t'])) {
                 Log::warning("SSL Certificate parsing failed for {$host}");
+
                 return null;
             }
 
             $days = floor(($cert['validTo_time_t'] - time()) / 86400);
+
             return max(0, $days);
         } catch (\Exception $e) {
-            Log::error("SSL check exception for {$url}: " . $e->getMessage());
+            Log::error("SSL check exception for {$url}: ".$e->getMessage());
+
             return null;
         }
     }

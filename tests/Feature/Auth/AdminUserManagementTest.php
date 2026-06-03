@@ -154,8 +154,7 @@ class AdminUserManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->delete("/users/{$admin->id}")
-            ->assertRedirect()
-            ->assertSessionHasErrors(['delete_user']);
+            ->assertForbidden();
 
         $this->assertModelExists($admin);
     }

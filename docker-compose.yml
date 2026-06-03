@@ -25,5 +25,4 @@ services:
       retries: 3
 
 volumes:
-  spectora-db:
   spectora-storage:

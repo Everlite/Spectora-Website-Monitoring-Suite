@@ -3,6 +3,9 @@
 namespace Tests\Unit;
 
 use App\Services\SecurityService;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
 
 class SecurityServiceTest extends TestCase
@@ -53,5 +56,26 @@ class SecurityServiceTest extends TestCase
 
         $this->assertSame($pinsA, $pinsB);
         $this->assertContains('1.1.1.1:443:1.1.1.1', $pinsA);
+    }
+
+    public function test_redirect_middleware_blocks_unsafe_redirect_target(): void
+    {
+        $middleware = SecurityService::redirectMiddleware();
+        $handler = fn () => null;
+        $wrapped = $middleware($handler);
+
+        $request = new Request('GET', 'https://1.1.1.1/');
+        $options = ['allow_redirects' => ['max' => 3]];
+
+        $wrapped($request, $options);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('SSRF Protection');
+
+        $options['allow_redirects']['on_redirect'](
+            $request,
+            new Response(302),
+            new Uri('http://127.0.0.1/internal')
+        );
     }
 }

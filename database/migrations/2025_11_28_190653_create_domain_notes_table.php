@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('domain_notes')) {
+        if (! Schema::hasTable('domain_notes')) {
             Schema::create('domain_notes', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('domain_id')->constrained()->onDelete('cascade');
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
                 $table->text('content');
                 $table->timestamps();
             });

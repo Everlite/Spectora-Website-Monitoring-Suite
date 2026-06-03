@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('discount_rules')) {
+        if (! Schema::hasTable('discount_rules')) {
             Schema::create('discount_rules', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('trigger_module_id')->constrained('modules')->onDelete('cascade');
@@ -20,7 +20,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('domain_add_limits')) {
+        if (! Schema::hasTable('domain_add_limits')) {
             Schema::create('domain_add_limits', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Note: Legacy didn't cascade, but it makes sense
@@ -30,7 +30,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('domain_deletion_log')) {
+        if (! Schema::hasTable('domain_deletion_log')) {
             Schema::create('domain_deletion_log', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Note: Legacy didn't cascade
@@ -39,17 +39,17 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('domain_notes')) {
+        if (! Schema::hasTable('domain_notes')) {
             Schema::create('domain_notes', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('domain_id')->constrained()->onDelete('cascade'); // Legacy didn't cascade
                 $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Legacy didn't cascade
-                $table->text('note_content');
-                $table->timestamp('created_at')->useCurrent();
+                $table->text('content');
+                $table->timestamps();
             });
         }
 
-        if (!Schema::hasTable('manual_check_limits')) {
+        if (! Schema::hasTable('manual_check_limits')) {
             Schema::create('manual_check_limits', function (Blueprint $table) {
                 $table->foreignId('user_id')->primary()->constrained()->onDelete('cascade');
                 $table->integer('manual_checks_today')->default(0);
@@ -57,7 +57,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('stripe_events')) {
+        if (! Schema::hasTable('stripe_events')) {
             Schema::create('stripe_events', function (Blueprint $table) {
                 $table->id();
                 $table->string('event_id')->unique();
@@ -68,7 +68,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('settings')) {
+        if (! Schema::hasTable('settings')) {
             Schema::create('settings', function (Blueprint $table) {
                 $table->id();
                 $table->string('key')->unique();
@@ -77,7 +77,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('notifications')) {
+        if (! Schema::hasTable('notifications')) {
             Schema::create('notifications', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('user_id'); // Removed constrained() to prevent errno 150
@@ -85,7 +85,7 @@ return new class extends Migration
                 $table->text('message');
                 $table->boolean('read')->default(false);
                 $table->timestamps();
-                
+
                 // Optional: Add index for performance without enforcing FK constraint
                 $table->index('user_id');
             });
