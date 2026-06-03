@@ -10,6 +10,7 @@ use App\Services\AnalyticsQueryService;
 use App\Services\MonitoringFilterService;
 use App\Services\SecurityService;
 use App\Services\SitemapService;
+use App\Support\MonitoredUrlHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -156,13 +157,38 @@ class DomainController extends Controller
 
         $validated = $request->validate([
             'urls' => 'required|array',
-            'urls.*.url' => 'required|string',
+            'urls.*.url' => 'required|string|max:2048',
             'urls.*.is_monitored' => 'required|boolean',
         ]);
 
+        $rejected = [];
+        $accepted = [];
+
         foreach ($validated['urls'] as $urlData) {
+            $normalized = MonitoredUrlHelper::normalizeForDomain($urlData['url'], $domain);
+
+            if ($normalized === null) {
+                $rejected[] = $urlData['url'];
+
+                continue;
+            }
+
+            $accepted[] = [
+                'url' => $normalized,
+                'is_monitored' => $urlData['is_monitored'],
+            ];
+        }
+
+        if ($rejected !== []) {
+            return response()->json([
+                'message' => 'Some URLs were rejected (must belong to this domain and use a safe public host).',
+                'rejected' => $rejected,
+            ], 422);
+        }
+
+        foreach ($accepted as $urlData) {
             $domain->monitoredUrls()->updateOrCreate(
-                ['url' => rtrim($urlData['url'], '/')],
+                ['url' => $urlData['url']],
                 ['is_active' => $urlData['is_monitored']]
             );
         }

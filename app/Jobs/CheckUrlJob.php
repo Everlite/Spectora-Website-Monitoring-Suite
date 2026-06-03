@@ -203,21 +203,50 @@ class CheckUrlJob implements ShouldQueue
     private function getSSLDays($url)
     {
         try {
+            if (! str_starts_with($url, 'http')) {
+                $url = 'https://'.$url;
+            }
+
+            if (! SecurityService::isSafeUrl($url)) {
+                return null;
+            }
+
             $host = parse_url($url, PHP_URL_HOST);
             if (! $host) {
                 return null;
             }
+
+            $pins = SecurityService::resolvePinsForUrl($url);
+            if ($pins === []) {
+                return null;
+            }
+
+            $port = parse_url($url, PHP_URL_PORT) ?? 443;
+            $pinSuffix = ':'.$port.':';
+            $pinPos = strrpos($pins[0], $pinSuffix);
+            if ($pinPos === false) {
+                return null;
+            }
+            $ip = substr($pins[0], $pinPos + strlen($pinSuffix));
+            if (! SecurityService::isSafeIp($ip)) {
+                return null;
+            }
+
+            $connectTarget = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+                ? "ssl://[{$ip}]:{$port}"
+                : "ssl://{$ip}:{$port}";
 
             $context = stream_context_create([
                 'ssl' => [
                     'capture_peer_cert' => true,
                     'verify_peer' => false,
                     'verify_peer_name' => false,
+                    'peer_name' => $host,
                 ],
             ]);
 
             $client = @stream_socket_client(
-                "ssl://{$host}:443",
+                $connectTarget,
                 $errno,
                 $errstr,
                 10,
