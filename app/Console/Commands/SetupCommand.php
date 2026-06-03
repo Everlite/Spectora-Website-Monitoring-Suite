@@ -109,9 +109,11 @@ class SetupCommand extends Command
             'last_name' => $lastName,
             'email' => $email,
             'password' => Hash::make($password),
-            'is_admin' => true,
             'timezone' => config('app.timezone'),
         ]);
+
+        $user->is_admin = true;
+        $user->save();
 
         $this->newLine();
         $this->info('==================================================');

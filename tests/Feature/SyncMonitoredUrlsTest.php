@@ -16,7 +16,7 @@ class SyncMonitoredUrlsTest extends TestCase
         $user = User::factory()->create();
         $domain = Domain::factory()->create([
             'user_id' => $user->id,
-            'url' => 'https://client.example',
+            'url' => 'https://example.com',
         ]);
 
         $this->actingAs($user)
@@ -36,20 +36,20 @@ class SyncMonitoredUrlsTest extends TestCase
         $user = User::factory()->create();
         $domain = Domain::factory()->create([
             'user_id' => $user->id,
-            'url' => 'https://client.example',
+            'url' => 'https://example.com',
         ]);
 
         $this->actingAs($user)
             ->postJson("/domains/{$domain->uuid}/urls/monitored", [
                 'urls' => [
-                    ['url' => 'https://client.example/about', 'is_monitored' => true],
+                    ['url' => 'https://example.com/about', 'is_monitored' => true],
                 ],
             ])
             ->assertOk();
 
         $this->assertDatabaseHas('monitored_urls', [
             'domain_id' => $domain->id,
-            'url' => 'https://client.example/about',
+            'url' => 'https://example.com/about',
             'is_active' => true,
         ]);
     }
