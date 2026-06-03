@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Groups: `Added`, `Changed`, `Fixed`, `Security`, `Deprecated`, `Removed`.
 - See [README.md](README.md) when upgrading between tagged versions.
 
-**Releases:** [GitHub Releases](https://github.com/Everlite/Spectora-Website-Monitoring-Suite/releases) — latest tag: **v0.1.0** (first stable). `main` is ahead; next tag is planned as **v0.2.0**.
+**Releases:** [GitHub Releases](https://github.com/Everlite/Spectora-Website-Monitoring-Suite/releases) — latest tag: **v0.2.0**.
 
 ---
 
@@ -29,8 +29,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ---
 
 ## [0.2.0] - 2026-06-04
-
-> **Not tagged yet.** Summarizes all changes on `main` since **v0.1.0**. After validation, tag `v0.2.0` and publish the GitHub release.
 
 ### Added
 

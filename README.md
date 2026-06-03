@@ -13,7 +13,7 @@
 > [!IMPORTANT]
 > **Major overhaul (May 2026)** — Spectora went through a large stability, security, and architecture refresh (SSRF hardening, alerts, queue-based checks, expanded tests, ops docs). The project is in a **post-overhaul testing phase**: CI covers core flows, but we recommend validating upgrades on a **staging instance** before production.
 >
-> **Upgrading?** Read **[CHANGELOG.md](CHANGELOG.md)** — we maintain it for every release. Latest GitHub tag: **[v0.1.0](https://github.com/Everlite/Spectora-Website-Monitoring-Suite/releases/tag/v0.1.0)** (2026-05-23, first stable). `main` is ahead; upcoming **[0.2.0](CHANGELOG.md)**.
+> **Upgrading?** Read **[CHANGELOG.md](CHANGELOG.md)** — we maintain it for every release. Latest: **[v0.2.0](https://github.com/Everlite/Spectora-Website-Monitoring-Suite/releases/tag/v0.2.0)** (from **v0.1.0**, run `php artisan migrate --force` and review the changelog).
 
 **Spectora** is a premium, open-source, **Private by Design Self-Hosted Website Monitoring Suite** custom-tailored for freelancers and small web agencies. It allows you to monitor all your client websites (uptime, SSL, security keywords, lightweight audits, and optional cookie-free analytics) from one gorgeous, central dashboard on your own server—completely free of SaaS fees and per-seat subscription models.
 
