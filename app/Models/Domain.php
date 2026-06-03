@@ -33,6 +33,7 @@ class Domain extends Model
         'safety_details',
         'visitors_today',
         'last_checked',
+        'notify_sent',
         'only_check_public_pages',
         'respect_robots_txt',
         'respect_noindex',

@@ -61,7 +61,12 @@ class SecurityServiceTest extends TestCase
     public function test_redirect_middleware_blocks_unsafe_redirect_target(): void
     {
         $middleware = SecurityService::redirectMiddleware();
-        $handler = fn () => null;
+        $onRedirect = null;
+        $handler = function ($request, array $options) use (&$onRedirect) {
+            $onRedirect = $options['allow_redirects']['on_redirect'] ?? null;
+
+            return new \GuzzleHttp\Promise\FulfilledPromise(new Response(200));
+        };
         $wrapped = $middleware($handler);
 
         $request = new Request('GET', 'https://1.1.1.1/');
@@ -69,10 +74,12 @@ class SecurityServiceTest extends TestCase
 
         $wrapped($request, $options);
 
+        $this->assertIsCallable($onRedirect);
+
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('SSRF Protection');
 
-        $options['allow_redirects']['on_redirect'](
+        $onRedirect(
             $request,
             new Response(302),
             new Uri('http://127.0.0.1/internal')
