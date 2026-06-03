@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Domain;
-use App\Jobs\PerformSpectoraAudit;
 use App\Jobs\CheckUrlJob;
+use App\Jobs\PerformSpectoraAudit;
+use App\Models\Domain;
+use Illuminate\Console\Command;
 
 class ReAuditDomains extends Command
 {
@@ -29,10 +29,10 @@ class ReAuditDomains extends Command
     public function handle()
     {
         $this->info('Starting re-audit for all domains...');
-        
+
         $domains = Domain::all();
         $count = $domains->count();
-        
+
         $bar = $this->output->createProgressBar($count);
         $bar->start();
 
@@ -45,6 +45,6 @@ class ReAuditDomains extends Command
 
         $bar->finish();
         $this->newLine();
-        $this->info('Dispatched audits for ' . $count . ' domains successfully.');
+        $this->info('Dispatched audits for '.$count.' domains successfully.');
     }
 }

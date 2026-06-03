@@ -24,11 +24,12 @@ class MonitoringFilterService
 
         // 1. URL Pattern Exclusions
         if ($domain->exclude_patterns) {
-            $patterns = array_filter(explode("\n", str_replace("\r", "", $domain->exclude_patterns)));
+            $patterns = array_filter(explode("\n", str_replace("\r", '', $domain->exclude_patterns)));
             foreach ($patterns as $pattern) {
                 if ($this->matchPattern(trim($pattern), $url)) {
-                    $reason = 'URL matched exclude pattern: ' . $pattern;
+                    $reason = 'URL matched exclude pattern: '.$pattern;
                     Log::info("MonitoringFilter: Skipping {$url} - {$reason}");
+
                     return ['should_check' => false, 'reason' => $reason];
                 }
             }
@@ -36,9 +37,10 @@ class MonitoringFilterService
 
         // 2. Robots.txt Respect
         if ($domain->respect_robots_txt) {
-            if (!$this->robotsTxt->isAllowed($url)) {
+            if (! $this->robotsTxt->isAllowed($url)) {
                 $reason = 'Disallowed by robots.txt';
                 Log::info("MonitoringFilter: Skipping {$url} - {$reason}");
+
                 return ['should_check' => false, 'reason' => $reason];
             }
         }
@@ -77,7 +79,7 @@ class MonitoringFilterService
                 return ['ignore' => true, 'reason' => 'Authentication required (login form detected)'];
             }
             if ($response->status() === 401 || $response->status() === 403) {
-                return ['ignore' => true, 'reason' => 'Access denied (HTTP ' . $response->status() . ')'];
+                return ['ignore' => true, 'reason' => 'Access denied (HTTP '.$response->status().')'];
             }
         }
 
@@ -122,11 +124,11 @@ class MonitoringFilterService
     {
         // Remove host to match relative path or just use shell pattern
         $path = parse_url($url, PHP_URL_PATH) ?: '/';
-        
+
         // Convert shell-style wildcard to regex
         // E.g. */downloads/* -> #/.*/downloads/.*#
-        $regex = '#' . str_replace('\*', '.*', preg_quote($pattern, '#')) . '#i';
-        
+        $regex = '#'.str_replace('\*', '.*', preg_quote($pattern, '#')).'#i';
+
         return (bool) preg_match($regex, $url) || (bool) preg_match($regex, $path);
     }
 }

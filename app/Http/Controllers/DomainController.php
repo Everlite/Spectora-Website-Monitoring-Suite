@@ -32,7 +32,15 @@ class DomainController extends Controller
             'respect_noindex' => 'boolean',
             'exclude_patterns' => 'nullable|string',
             'included_sitemaps' => 'nullable|array',
+            'included_sitemaps.*' => 'string|max:2048',
         ]);
+
+        if (isset($validated['included_sitemaps'])) {
+            $validated['included_sitemaps'] = MonitoredUrlHelper::filterSitemapsForDomain(
+                $validated['included_sitemaps'],
+                $domain
+            );
+        }
 
         $domain->update($validated);
 

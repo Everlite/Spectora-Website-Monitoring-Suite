@@ -2,9 +2,9 @@
 
 namespace App\Mail;
 
-use App\Models\Domain;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -15,6 +15,7 @@ class MonthlyAgencyReportMail extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
+
     public $stats;
 
     /**
@@ -32,8 +33,9 @@ class MonthlyAgencyReportMail extends Mailable
     public function envelope(): Envelope
     {
         $month = now()->subMonth()->translatedFormat('F');
+
         return new Envelope(
-            from: new \Illuminate\Mail\Mailables\Address(config('mail.from.address'), 'Spectora Monitoring'),
+            from: new Address(config('mail.from.address'), 'Spectora Monitoring'),
             subject: "Your Monthly Report for {$month}: {$this->stats['total']} Domains Checked",
         );
     }
@@ -51,7 +53,7 @@ class MonthlyAgencyReportMail extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

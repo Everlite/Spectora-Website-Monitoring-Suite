@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('plans')) {
+        if (! Schema::hasTable('plans')) {
             Schema::create('plans', function (Blueprint $table) {
                 $table->id();
                 $table->string('name', 50);
@@ -28,7 +28,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('modules')) {
+        if (! Schema::hasTable('modules')) {
             Schema::create('modules', function (Blueprint $table) {
                 $table->id();
                 $table->string('name', 50);
@@ -37,7 +37,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('plan_modules')) {
+        if (! Schema::hasTable('plan_modules')) {
             Schema::create('plan_modules', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('plan_id')->constrained()->onDelete('cascade');
@@ -45,7 +45,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('plan_prices')) {
+        if (! Schema::hasTable('plan_prices')) {
             Schema::create('plan_prices', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('plan_id')->constrained()->onDelete('cascade');
@@ -57,7 +57,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('user_subscriptions')) {
+        if (! Schema::hasTable('user_subscriptions')) {
             Schema::create('user_subscriptions', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->onDelete('cascade');

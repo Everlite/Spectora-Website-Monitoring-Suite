@@ -11,20 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('domains')) {
+        if (! Schema::hasTable('domains')) {
             return;
         }
         try {
             Schema::table('domains', function (Blueprint $table) {
-                if (!Schema::hasColumn('domains', 'pagespeed_score')) {
+                if (! Schema::hasColumn('domains', 'pagespeed_score')) {
                     $table->integer('pagespeed_score')->nullable()->after('safety_status');
                 }
-                if (!Schema::hasColumn('domains', 'pagespeed_score_desktop')) {
+                if (! Schema::hasColumn('domains', 'pagespeed_score_desktop')) {
                     $table->integer('pagespeed_score_desktop')->nullable()->after('pagespeed_score');
                 }
             });
-        } catch (\Exception $e) {
-            if (!str_contains($e->getMessage(), 'duplicate column name')) {
+        } catch (Exception $e) {
+            if (! str_contains($e->getMessage(), 'duplicate column name')) {
                 throw $e;
             }
         }

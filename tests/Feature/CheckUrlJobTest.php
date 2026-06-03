@@ -20,7 +20,7 @@ class CheckUrlJobTest extends TestCase
         Mail::fake();
 
         $owner = User::factory()->create(['email' => 'owner@example.test']);
-        User::factory()->create(['is_admin' => true, 'email' => 'admin@example.test']);
+        User::factory()->admin()->create(['email' => 'admin@example.test']);
 
         $domain = Domain::factory()->create([
             'user_id' => $owner->id,

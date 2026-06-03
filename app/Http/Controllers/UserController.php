@@ -24,14 +24,16 @@ class UserController extends Controller
             'timezone' => ['required', 'string', 'max:255'],
         ]);
 
-        User::create([
+        $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'is_admin' => $request->has('is_admin'),
             'timezone' => $request->timezone,
         ]);
+
+        $user->is_admin = $request->boolean('is_admin');
+        $user->save();
 
         return redirect()->back()->with('status', 'user-created');
     }

@@ -13,8 +13,8 @@ class DashboardVisibilityTest extends TestCase
 
     public function test_admin_sees_all_team_domains_on_dashboard(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
-        $member = User::factory()->create(['is_admin' => false]);
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->create();
 
         $memberDomain = Domain::factory()->create([
             'user_id' => $member->id,
@@ -35,8 +35,8 @@ class DashboardVisibilityTest extends TestCase
 
     public function test_non_admin_sees_only_own_domains_on_dashboard(): void
     {
-        $member = User::factory()->create(['is_admin' => false]);
-        $other = User::factory()->create(['is_admin' => false]);
+        $member = User::factory()->create();
+        $other = User::factory()->create();
 
         $own = Domain::factory()->create([
             'user_id' => $member->id,

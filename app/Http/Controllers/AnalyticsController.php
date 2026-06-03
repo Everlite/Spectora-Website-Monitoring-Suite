@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnalyticsVisit;
 use App\Models\Domain;
 use App\Services\AnalyticsQueryService;
 use App\Support\HostHelper;
@@ -34,15 +35,15 @@ class AnalyticsController extends Controller
         $isLocal = ($origin && (str_contains($origin, 'localhost') || str_contains($origin, '127.0.0.1')))
             || ($referer && (str_contains($referer, 'localhost') || str_contains($referer, '127.0.0.1')));
 
-        if (!$isLocal) {
+        if (! $isLocal) {
             $originHost = $origin ? parse_url($origin, PHP_URL_HOST) : null;
             $refererHost = $referer ? parse_url($referer, PHP_URL_HOST) : null;
 
             $isAuthorized = HostHelper::matches($originHost, $expectedHost)
-                || (!$originHost && HostHelper::matches($refererHost, $expectedHost));
+                || (! $originHost && HostHelper::matches($refererHost, $expectedHost));
 
-            if (!$isAuthorized) {
-                abort(403, 'Unauthorized tracking origin (Expected: ' . $expectedHost . ')');
+            if (! $isAuthorized) {
+                abort(403, 'Unauthorized tracking origin (Expected: '.$expectedHost.')');
             }
         }
 
@@ -56,7 +57,7 @@ class AnalyticsController extends Controller
         $urlPath = parse_url($validated['url'], PHP_URL_PATH) ?? '/';
 
         $referrerDomain = null;
-        if (!empty($validated['referrer'])) {
+        if (! empty($validated['referrer'])) {
             $referrerDomain = parse_url($validated['referrer'], PHP_URL_HOST);
         }
 
@@ -74,7 +75,7 @@ class AnalyticsController extends Controller
             ? $request->header('CF-IPCountry')
             : null;
 
-        \App\Models\AnalyticsVisit::create([
+        AnalyticsVisit::create([
             'domain_id' => $domain->id,
             'visitor_hash' => $visitorHash,
             'url' => $validated['url'],
@@ -111,7 +112,7 @@ class AnalyticsController extends Controller
         if (str_contains($ua, 'firefox')) {
             return 'Firefox';
         }
-        if (str_contains($ua, 'safari') && !str_contains($ua, 'chrome')) {
+        if (str_contains($ua, 'safari') && ! str_contains($ua, 'chrome')) {
             return 'Safari';
         }
         if (str_contains($ua, 'edge')) {

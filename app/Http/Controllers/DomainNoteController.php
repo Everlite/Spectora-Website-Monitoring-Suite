@@ -22,7 +22,7 @@ class DomainNoteController extends Controller
         $this->authorize('update', $domain);
 
         $request->validate([
-            'content' => 'required|string',
+            'content' => 'required|string|max:10000',
         ]);
 
         $note = $domain->notes()->create([
@@ -40,7 +40,7 @@ class DomainNoteController extends Controller
         $this->authorize('update', $note->domain);
 
         $request->validate([
-            'content' => 'required|string',
+            'content' => 'required|string|max:10000',
         ]);
 
         $note->update([

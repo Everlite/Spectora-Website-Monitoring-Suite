@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class SitemapService
@@ -13,26 +12,29 @@ class SitemapService
     public function discover(string $url): array
     {
         $parsedUrl = parse_url($url);
-        $baseUrl = ($parsedUrl['scheme'] ?? 'https') . '://' . ($parsedUrl['host'] ?? '');
+        $baseUrl = ($parsedUrl['scheme'] ?? 'https').'://'.($parsedUrl['host'] ?? '');
         $sitemaps = [];
 
         // 1. Check robots.txt for "Sitemap:" entries
         try {
-            $robotsUrl = $baseUrl . '/robots.txt';
-            if (!\App\Services\SecurityService::isSafeUrl($robotsUrl)) return [];
+            $robotsUrl = $baseUrl.'/robots.txt';
+            if (! SecurityService::isSafeUrl($robotsUrl)) {
+                return [];
+            }
 
-            $response = \App\Services\SecurityService::http()
+            $response = SecurityService::http()
                 ->timeout(5)
                 ->get($robotsUrl);
             if ($response->successful()) {
                 preg_match_all('/^Sitemap:\s*(.*)$/im', $response->body(), $matches);
-                if (!empty($matches[1])) {
+                if (! empty($matches[1])) {
                     foreach ($matches[1] as $match) {
                         $sitemaps[] = trim($match);
                     }
                 }
             }
-        } catch (\Exception $e) { /* ignore */ }
+        } catch (\Exception $e) { /* ignore */
+        }
 
         // 2. Common locations
         $commonLocations = [
@@ -43,18 +45,23 @@ class SitemapService
         ];
 
         foreach ($commonLocations as $location) {
-            $testUrl = $baseUrl . $location;
-            if (in_array($testUrl, $sitemaps)) continue;
-            if (!\App\Services\SecurityService::isSafeUrl($testUrl)) continue;
+            $testUrl = $baseUrl.$location;
+            if (in_array($testUrl, $sitemaps)) {
+                continue;
+            }
+            if (! SecurityService::isSafeUrl($testUrl)) {
+                continue;
+            }
 
             try {
-                $response = \App\Services\SecurityService::http()
+                $response = SecurityService::http()
                     ->timeout(3)
                     ->head($testUrl);
                 if ($response->successful()) {
                     $sitemaps[] = $testUrl;
                 }
-            } catch (\Exception $e) { /* ignore */ }
+            } catch (\Exception $e) { /* ignore */
+            }
         }
 
         return array_unique($sitemaps);
@@ -65,19 +72,24 @@ class SitemapService
      */
     public function parse(string $sitemapUrl): array
     {
-        if (!\App\Services\SecurityService::isSafeUrl($sitemapUrl)) {
+        if (! SecurityService::isSafeUrl($sitemapUrl)) {
             Log::warning("Blocked unsafe sitemap URL: {$sitemapUrl}");
+
             return [];
         }
 
         try {
-            $response = \App\Services\SecurityService::http()
+            $response = SecurityService::http()
                 ->timeout(10)
                 ->get($sitemapUrl);
-            if (!$response->successful()) return [];
+            if (! $response->successful()) {
+                return [];
+            }
 
             $xml = simplexml_load_string($response->body());
-            if (!$xml) return [];
+            if (! $xml) {
+                return [];
+            }
 
             $result = [
                 'type' => $xml->getName() === 'sitemapindex' ? 'index' : 'urlset',
@@ -96,7 +108,8 @@ class SitemapService
 
             return $result;
         } catch (\Exception $e) {
-            Log::error("Sitemap parsing failed for {$sitemapUrl}: " . $e->getMessage());
+            Log::error("Sitemap parsing failed for {$sitemapUrl}: ".$e->getMessage());
+
             return [];
         }
     }

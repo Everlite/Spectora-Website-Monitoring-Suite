@@ -2,10 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\User;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class SetupCommand extends Command
 {
@@ -57,18 +56,21 @@ class SetupCommand extends Command
             $email = trim($this->ask('Enter administrator email address'));
             if (empty($email)) {
                 $this->error('Email address cannot be empty.');
+
                 continue;
             }
 
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->error('Please enter a valid email address.');
                 $email = null;
+
                 continue;
             }
 
             if (User::where('email', $email)->exists()) {
                 $this->error('A user with this email address already exists.');
                 $email = null;
+
                 continue;
             }
         }
@@ -79,12 +81,14 @@ class SetupCommand extends Command
             $password = $this->secret('Enter administrator password (min. 8 characters)');
             if (empty($password)) {
                 $this->error('Password cannot be empty.');
+
                 continue;
             }
 
             if (strlen($password) < 8) {
                 $this->error('Password must be at least 8 characters long.');
                 $password = null;
+
                 continue;
             }
 
@@ -92,6 +96,7 @@ class SetupCommand extends Command
             if ($password !== $confirmPassword) {
                 $this->error('Passwords do not match. Please try again.');
                 $password = null;
+
                 continue;
             }
         }
@@ -111,7 +116,7 @@ class SetupCommand extends Command
         $this->newLine();
         $this->info('==================================================');
         $this->info('  Success! Administrator account created.');
-        $this->info('  Email: ' . $user->email);
+        $this->info('  Email: '.$user->email);
         $this->info('==================================================');
         $this->newLine();
 

@@ -13,9 +13,9 @@ return new class extends Migration
     {
         if (Schema::hasTable('users')) {
             Schema::table('users', function (Blueprint $table) {
-                if (Schema::hasColumn('users', 'logo_path') && !Schema::hasColumn('users', 'agency_logo_path')) {
+                if (Schema::hasColumn('users', 'logo_path') && ! Schema::hasColumn('users', 'agency_logo_path')) {
                     $table->renameColumn('logo_path', 'agency_logo_path');
-                } elseif (!Schema::hasColumn('users', 'agency_logo_path')) {
+                } elseif (! Schema::hasColumn('users', 'agency_logo_path')) {
                     $table->string('agency_logo_path')->nullable()->after('email');
                 }
             });

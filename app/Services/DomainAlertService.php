@@ -34,6 +34,7 @@ class DomainAlertService
      */
     public static function sendDowntimeAlerts(Domain $domain, array $issues): void
     {
+        $issues = self::sanitizeIssuesForNotification($issues);
         $recipients = self::recipients($domain);
 
         $emails = $recipients->pluck('email')->unique()->filter()->values();
@@ -61,5 +62,22 @@ class DomainAlertService
                 Log::error('Failed to send Web Push to user '.$user->id.': '.$e->getMessage());
             }
         }
+    }
+
+    /**
+     * Strip internal exception details from outbound alert text.
+     *
+     * @param  list<string>  $issues
+     * @return list<string>
+     */
+    public static function sanitizeIssuesForNotification(array $issues): array
+    {
+        return array_map(function (string $issue): string {
+            if (str_starts_with($issue, '❌ Check failed:')) {
+                return '❌ Check failed: The site could not be reached.';
+            }
+
+            return $issue;
+        }, $issues);
     }
 }

@@ -13,10 +13,10 @@ return new class extends Migration
     {
         if (Schema::hasTable('monitored_urls')) {
             Schema::table('monitored_urls', function (Blueprint $table) {
-                if (!Schema::hasColumn('monitored_urls', 'last_response_time')) {
+                if (! Schema::hasColumn('monitored_urls', 'last_response_time')) {
                     $table->integer('last_response_time')->nullable()->after('last_safety_status');
                 }
-                if (!Schema::hasColumn('monitored_urls', 'last_checked')) {
+                if (! Schema::hasColumn('monitored_urls', 'last_checked')) {
                     $table->timestamp('last_checked')->nullable()->after('last_response_time');
                 }
             });

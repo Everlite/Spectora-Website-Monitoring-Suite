@@ -37,4 +37,16 @@ class MonitoredUrlHelperTest extends TestCase
             MonitoredUrlHelper::normalizeForDomain('https://192.168.0.1/', $domain)
         );
     }
+
+    public function test_filter_sitemaps_keeps_same_host_only(): void
+    {
+        $domain = new Domain(['url' => 'https://client.example']);
+
+        $filtered = MonitoredUrlHelper::filterSitemapsForDomain([
+            'https://client.example/sitemap.xml',
+            'https://evil.example/sitemap.xml',
+        ], $domain);
+
+        $this->assertSame(['https://client.example/sitemap.xml'], $filtered);
+    }
 }

@@ -20,8 +20,8 @@ return new class extends Migration
                 $table->json('sitemap_urls')->nullable()->after('exclude_patterns');
                 $table->json('included_sitemaps')->nullable()->after('sitemap_urls');
             });
-        } catch (\Exception $e) {
-            if (!str_contains($e->getMessage(), 'duplicate column name')) {
+        } catch (Exception $e) {
+            if (! str_contains($e->getMessage(), 'duplicate column name')) {
                 throw $e;
             }
         }
@@ -39,7 +39,7 @@ return new class extends Migration
                 'respect_noindex',
                 'exclude_patterns',
                 'sitemap_urls',
-                'included_sitemaps'
+                'included_sitemaps',
             ]);
         });
     }

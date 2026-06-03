@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schedule;
-use App\Models\Domain;
 use App\Jobs\CheckDomainJob;
+use App\Jobs\PerformSpectoraAudit;
+use App\Jobs\SendMonthlyReportsJob;
+use App\Models\Domain;
+use Illuminate\Support\Facades\Schedule;
 
 // Uptime, SSL, Watchdog — every 15 minutes
 Schedule::call(function () {
@@ -14,7 +16,7 @@ Schedule::call(function () {
 // Spectora Audit (heuristic score) — hourly
 Schedule::call(function () {
     foreach (Domain::all() as $domain) {
-        \App\Jobs\PerformSpectoraAudit::dispatch($domain);
+        PerformSpectoraAudit::dispatch($domain);
     }
 })->hourly()->name('spectora_audit')->withoutOverlapping();
 
@@ -22,4 +24,4 @@ Schedule::call(function () {
 Schedule::command('model:prune')->daily();
 
 // Agency digest email — 1st of month at 08:00 (no PDF; see README)
-Schedule::job(new \App\Jobs\SendMonthlyReportsJob)->monthlyOn(1, '08:00');
+Schedule::job(new SendMonthlyReportsJob)->monthlyOn(1, '08:00');

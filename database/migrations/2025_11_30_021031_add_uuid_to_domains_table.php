@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('domains')) {
+        if (! Schema::hasTable('domains')) {
             return;
         }
 
         Schema::table('domains', function (Blueprint $table) {
-            if (!Schema::hasColumn('domains', 'uuid')) {
+            if (! Schema::hasColumn('domains', 'uuid')) {
                 $table->uuid('uuid')->nullable()->after('id');
             }
         });

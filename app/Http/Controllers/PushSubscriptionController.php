@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class PushSubscriptionController extends Controller
 {
     /**
      * Store the Push Subscription.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
         try {
             $request->validate([
-                'endpoint'    => 'required',
-                'keys.auth'   => 'required',
+                'endpoint' => 'required',
+                'keys.auth' => 'required',
                 'keys.p256dh' => 'required',
             ]);
 
@@ -32,10 +34,11 @@ class PushSubscriptionController extends Controller
             $user->updatePushSubscription($endpoint, $key, $token);
 
             return response()->json(['success' => true], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json(['error' => $e->errors()], 422);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Push Subscription Error: ' . $e->getMessage());
+            Log::error('Push Subscription Error: '.$e->getMessage());
+
             return response()->json(['error' => 'Subscription failed. Please try again later.'], 500);
         }
     }

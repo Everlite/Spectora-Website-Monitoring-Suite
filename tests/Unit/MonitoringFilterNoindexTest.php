@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\Domain;
 use App\Services\MonitoringFilterService;
 use App\Services\RobotsTxtService;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Client\Response as HttpClientResponse;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +18,7 @@ class MonitoringFilterNoindexTest extends TestCase
 
     private function fakeResponse(int $status, string $body, array $headers = []): HttpClientResponse
     {
-        $psr = new \GuzzleHttp\Psr7\Response($status, $headers, $body);
+        $psr = new Response($status, $headers, $body);
 
         return new HttpClientResponse($psr);
     }

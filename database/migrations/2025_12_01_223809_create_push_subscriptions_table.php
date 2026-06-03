@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -15,8 +15,8 @@ return new class extends Migration
     {
         $tableName = config('webpush.table_name') ?? 'push_subscriptions';
         $connection = config('webpush.database_connection');
-        
-        if (!Schema::connection($connection)->hasTable($tableName)) {
+
+        if (! Schema::connection($connection)->hasTable($tableName)) {
             Schema::connection($connection)->create($tableName, function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->morphs('subscribable', 'push_subscriptions_subscribable_morph_idx');

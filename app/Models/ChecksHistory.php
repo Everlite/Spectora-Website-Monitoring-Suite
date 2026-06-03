@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Prunable;
 
 class ChecksHistory extends Model
@@ -12,10 +11,10 @@ class ChecksHistory extends Model
     use HasFactory, Prunable;
 
     protected $table = 'checks_history';
-    
+
     // WICHTIG: Wir haben timestamps (created_at, updated_at) jetzt in der DB,
     // also aktivieren wir sie hier, damit Laravel sie automatisch füllt.
-    public $timestamps = true; 
+    public $timestamps = true;
 
     protected $fillable = [
         'domain_id',

@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('checks_history')) {
+        if (! Schema::hasTable('checks_history')) {
             return;
         }
 
-        if (!Schema::hasColumn('checks_history', 'checked_at')) {
+        if (! Schema::hasColumn('checks_history', 'checked_at')) {
             Schema::table('checks_history', function (Blueprint $table) {
                 $table->timestamp('checked_at')->nullable()->after('domain_id');
             });

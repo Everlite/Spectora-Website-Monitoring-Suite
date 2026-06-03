@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -12,16 +12,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('domains')) {
+        if (! Schema::hasTable('domains')) {
             return;
         }
 
         Schema::table('domains', function (Blueprint $table) {
             // Add new columns if they don't exist
-            if (!Schema::hasColumn('domains', 'status_code')) {
+            if (! Schema::hasColumn('domains', 'status_code')) {
                 $table->integer('status_code')->nullable()->after('url');
             }
-            if (!Schema::hasColumn('domains', 'response_time')) {
+            if (! Schema::hasColumn('domains', 'response_time')) {
                 $table->decimal('response_time', 8, 4)->nullable()->after('ssl_days_left');
             }
         });
@@ -42,12 +42,12 @@ return new class extends Migration
             if (Schema::hasColumn('domains', 'last_response_time')) {
                 $table->dropColumn('last_response_time');
             }
-            
+
             // Handle renames if columns exist
-            if (Schema::hasColumn('domains', 'last_response_time') && !Schema::hasColumn('domains', 'response_time')) {
+            if (Schema::hasColumn('domains', 'last_response_time') && ! Schema::hasColumn('domains', 'response_time')) {
                 $table->renameColumn('last_response_time', 'response_time');
             }
-            if (Schema::hasColumn('domains', 'last_ip') && !Schema::hasColumn('domains', 'ip_address')) {
+            if (Schema::hasColumn('domains', 'last_ip') && ! Schema::hasColumn('domains', 'ip_address')) {
                 $table->renameColumn('last_ip', 'ip_address');
             }
         });
@@ -59,10 +59,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('domains', function (Blueprint $table) {
-            if (!Schema::hasColumn('domains', 'last_status')) {
+            if (! Schema::hasColumn('domains', 'last_status')) {
                 $table->string('last_status')->nullable();
             }
-            if (!Schema::hasColumn('domains', 'last_response_time')) {
+            if (! Schema::hasColumn('domains', 'last_response_time')) {
                 $table->decimal('last_response_time', 6, 3)->nullable();
             }
         });

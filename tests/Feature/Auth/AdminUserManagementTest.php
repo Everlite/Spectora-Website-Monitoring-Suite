@@ -86,7 +86,7 @@ class AdminUserManagementTest extends TestCase
 
     public function test_non_admins_cannot_access_user_management_endpoints(): void
     {
-        $user = User::factory()->create(['is_admin' => false]);
+        $user = User::factory()->create();
         $anotherUser = User::factory()->create();
 
         // 1. Guest post request
@@ -112,7 +112,7 @@ class AdminUserManagementTest extends TestCase
 
     public function test_admins_can_create_new_users(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)
             ->post('/users', [
@@ -137,7 +137,7 @@ class AdminUserManagementTest extends TestCase
 
     public function test_admins_can_delete_other_users(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->admin()->create();
         $otherUser = User::factory()->create();
 
         $this->actingAs($admin)
@@ -150,7 +150,7 @@ class AdminUserManagementTest extends TestCase
 
     public function test_admins_cannot_delete_themselves(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)
             ->delete("/users/{$admin->id}")
@@ -161,8 +161,8 @@ class AdminUserManagementTest extends TestCase
 
     public function test_admin_can_delete_another_admin_when_multiple_exist(): void
     {
-        $adminA = User::factory()->create(['is_admin' => true]);
-        $adminB = User::factory()->create(['is_admin' => true]);
+        $adminA = User::factory()->admin()->create();
+        $adminB = User::factory()->admin()->create();
 
         $this->actingAs($adminA)
             ->delete("/users/{$adminB->id}")

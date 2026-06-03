@@ -12,6 +12,7 @@ class DomainWarningMail extends Mailable
     use Queueable, SerializesModels;
 
     public $domain;
+
     public $issues;
 
     public function __construct(Domain $domain, array $issues)
@@ -22,7 +23,7 @@ class DomainWarningMail extends Mailable
 
     public function build()
     {
-        return $this->subject('⚠️ Spectora Monitor Warning: ' . $this->domain->url)
-                    ->view('emails.domain_warning');
+        return $this->subject('⚠️ Spectora Monitor Warning: '.$this->domain->url)
+            ->view('emails.domain_warning');
     }
 }

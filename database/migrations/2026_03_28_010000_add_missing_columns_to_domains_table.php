@@ -8,28 +8,28 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('domains')) {
+        if (! Schema::hasTable('domains')) {
             return;
         }
 
         try {
             Schema::table('domains', function (Blueprint $table) {
-                if (!Schema::hasColumn('domains', 'safety_details')) {
+                if (! Schema::hasColumn('domains', 'safety_details')) {
                     $table->json('safety_details')->nullable()->after('safety_status');
                 }
-                if (!Schema::hasColumn('domains', 'visitors_today')) {
+                if (! Schema::hasColumn('domains', 'visitors_today')) {
                     $table->integer('visitors_today')->default(0)->after('response_time');
                 }
             });
-        } catch (\Exception $e) {
-            if (!str_contains($e->getMessage(), 'duplicate column name')) {
+        } catch (Exception $e) {
+            if (! str_contains($e->getMessage(), 'duplicate column name')) {
                 throw $e;
             }
         }
 
         if (Schema::hasTable('checks_history')) {
             Schema::table('checks_history', function (Blueprint $table) {
-                if (!Schema::hasColumn('checks_history', 'created_at')) {
+                if (! Schema::hasColumn('checks_history', 'created_at')) {
                     $table->timestamps();
                 }
             });
@@ -38,7 +38,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!Schema::hasTable('domains')) {
+        if (! Schema::hasTable('domains')) {
             return;
         }
 

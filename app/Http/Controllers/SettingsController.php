@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SettingsUpdateRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
@@ -21,7 +21,7 @@ class SettingsController extends Controller
         ];
 
         if ($request->user()->is_admin) {
-            $data['users'] = \App\Models\User::all();
+            $data['users'] = User::all();
         }
 
         return view('settings.edit', $data);

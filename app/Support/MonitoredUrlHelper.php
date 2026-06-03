@@ -35,4 +35,27 @@ class MonitoredUrlHelper
 
         return rtrim($url, '/');
     }
+
+    /**
+     * @param  list<mixed>  $sitemaps
+     * @return list<string>
+     */
+    public static function filterSitemapsForDomain(array $sitemaps, Domain $domain): array
+    {
+        $allowed = [];
+
+        foreach ($sitemaps as $sitemap) {
+            if (! is_string($sitemap)) {
+                continue;
+            }
+
+            $normalized = self::normalizeForDomain($sitemap, $domain);
+
+            if ($normalized !== null) {
+                $allowed[] = $normalized;
+            }
+        }
+
+        return array_values(array_unique($allowed));
+    }
 }

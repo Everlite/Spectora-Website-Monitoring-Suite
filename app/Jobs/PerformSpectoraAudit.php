@@ -2,45 +2,47 @@
 
 namespace App\Jobs;
 
+use App\Models\ChecksHistory;
 use App\Models\Domain;
+use App\Services\MonitoringFilterService;
+use App\Services\SecurityService;
+use GuzzleHttp\TransferStats;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
-use GuzzleHttp\TransferStats;
 
 class PerformSpectoraAudit implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public Domain $domain)
-    {
-    }
+    public function __construct(public Domain $domain) {}
 
     public function handle(): void
     {
-        $filterService = app(\App\Services\MonitoringFilterService::class);
+        $filterService = app(MonitoringFilterService::class);
         set_time_limit(120); // Allow 2 minutes for execution
 
         $url = $this->domain->url;
-        if (!str_starts_with($url, 'http')) {
-            $url = 'https://' . $url;
+        if (! str_starts_with($url, 'http')) {
+            $url = 'https://'.$url;
         }
 
         // 0. Pre-check Filter (Excludes, Robots.txt)
         $filter = $filterService->shouldCheck($this->domain, $url);
-        if (!$filter['should_check']) {
+        if (! $filter['should_check']) {
             Log::info("Skipping audit for {$url}: {$filter['reason']}");
+
             return;
         }
 
         // 0.5 SSRF Protection
-        if (!\App\Services\SecurityService::isSafeUrl($url)) {
+        if (! SecurityService::isSafeUrl($url)) {
             Log::warning("SSRF Protection: Blocked prohibited audit for {$url}");
+
             return;
         }
 
@@ -51,7 +53,7 @@ class PerformSpectoraAudit implements ShouldQueue
 
         try {
             // 1. Download & Measure with SSRF Middleware
-            $response = \App\Services\SecurityService::http()
+            $response = SecurityService::http()
                 ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
                 ->withOptions([
                     'on_stats' => function (TransferStats $stats) use (&$ttfb, &$totalTime) {
@@ -60,7 +62,7 @@ class PerformSpectoraAudit implements ShouldQueue
                             $ttfb = $stats->getHandlerStats()['starttransfer_time'];
                         }
                         $totalTime = $stats->getTransferTime();
-                    }
+                    },
                 ])
                 ->timeout(15)
                 ->get($url);
@@ -69,11 +71,13 @@ class PerformSpectoraAudit implements ShouldQueue
             $postFilter = $filterService->shouldIgnoreResponse($this->domain, $response);
             if ($postFilter['ignore']) {
                 Log::info("Ignoring audit response for {$url}: {$postFilter['reason']}");
+
                 return;
             }
 
             if ($response->failed()) {
-                Log::error("Spectora Audit failed for {$url}: HTTP " . $response->status());
+                Log::error("Spectora Audit failed for {$url}: HTTP ".$response->status());
+
                 return;
             }
 
@@ -92,14 +96,14 @@ class PerformSpectoraAudit implements ShouldQueue
                     'category' => 'performance',
                     'label' => 'Server response time (TTFB)',
                     'status' => 'error',
-                    'message' => 'The server is responding slowly (' . round($ttfbMs) . 'ms). Target: < 500ms.'
+                    'message' => 'The server is responding slowly ('.round($ttfbMs).'ms). Target: < 500ms.',
                 ];
             } else {
                 $details[] = [
                     'category' => 'performance',
                     'label' => 'Server response time (TTFB)',
                     'status' => 'success',
-                    'message' => 'Fast response time (' . round($ttfbMs) . 'ms).'
+                    'message' => 'Fast response time ('.round($ttfbMs).'ms).',
                 ];
             }
 
@@ -110,14 +114,14 @@ class PerformSpectoraAudit implements ShouldQueue
                     'category' => 'performance',
                     'label' => 'Page size',
                     'status' => 'error',
-                    'message' => 'The HTML size is very large (' . round($sizeBytes / 1024 / 1024, 2) . ' MB).'
+                    'message' => 'The HTML size is very large ('.round($sizeBytes / 1024 / 1024, 2).' MB).',
                 ];
             } else {
                 $details[] = [
                     'category' => 'performance',
                     'label' => 'Page size',
                     'status' => 'success',
-                    'message' => 'HTML size is optimal (' . round($sizeBytes / 1024) . ' KB).'
+                    'message' => 'HTML size is optimal ('.round($sizeBytes / 1024).' KB).',
                 ];
             }
 
@@ -130,14 +134,14 @@ class PerformSpectoraAudit implements ShouldQueue
                     'category' => 'seo',
                     'label' => 'H1 heading',
                     'status' => 'error',
-                    'message' => 'No H1 heading found.'
+                    'message' => 'No H1 heading found.',
                 ];
             } else {
                 $details[] = [
                     'category' => 'seo',
                     'label' => 'H1 heading',
                     'status' => 'success',
-                    'message' => "H1 found ($h1Count)."
+                    'message' => "H1 found ($h1Count).",
                 ];
             }
 
@@ -149,36 +153,36 @@ class PerformSpectoraAudit implements ShouldQueue
                     'category' => 'seo',
                     'label' => 'Page title',
                     'status' => 'error',
-                    'message' => 'The <title> tag is missing or empty.'
+                    'message' => 'The <title> tag is missing or empty.',
                 ];
             } else {
                 $details[] = [
                     'category' => 'seo',
                     'label' => 'Page title',
                     'status' => 'success',
-                    'message' => 'Title present.'
+                    'message' => 'Title present.',
                 ];
             }
 
             // Meta Description
-            $metaDesc = $crawler->filter('meta[name="description"]')->count() > 0 
-                ? $crawler->filter('meta[name="description"]')->attr('content') 
+            $metaDesc = $crawler->filter('meta[name="description"]')->count() > 0
+                ? $crawler->filter('meta[name="description"]')->attr('content')
                 : '';
-            
+
             if (empty($metaDesc)) {
                 $score -= 5;
                 $details[] = [
                     'category' => 'seo',
                     'label' => 'Meta description',
                     'status' => 'warning',
-                    'message' => 'No meta description found.'
+                    'message' => 'No meta description found.',
                 ];
             } else {
                 $details[] = [
                     'category' => 'seo',
                     'label' => 'Meta description',
                     'status' => 'success',
-                    'message' => 'Meta description present.'
+                    'message' => 'Meta description present.',
                 ];
             }
 
@@ -193,33 +197,33 @@ class PerformSpectoraAudit implements ShouldQueue
                     'category' => 'accessibility',
                     'label' => 'Image alt texts',
                     'status' => 'warning',
-                    'message' => "$imagesWithoutAlt images have no alt attribute."
+                    'message' => "$imagesWithoutAlt images have no alt attribute.",
                 ];
             } else {
                 $details[] = [
                     'category' => 'accessibility',
                     'label' => 'Image alt texts',
                     'status' => 'success',
-                    'message' => 'All images have alt attributes.'
+                    'message' => 'All images have alt attributes.',
                 ];
             }
 
             // E) Sicherheit (HTTPS)
             $parsedUrl = parse_url($url);
-            if (!isset($parsedUrl['scheme']) || $parsedUrl['scheme'] !== 'https') {
+            if (! isset($parsedUrl['scheme']) || $parsedUrl['scheme'] !== 'https') {
                 $score -= 20;
                 $details[] = [
                     'category' => 'security',
                     'label' => 'HTTPS encryption',
                     'status' => 'error',
-                    'message' => 'The page does not use HTTPS.'
+                    'message' => 'The page does not use HTTPS.',
                 ];
             } else {
                 $details[] = [
                     'category' => 'security',
                     'label' => 'HTTPS encryption',
                     'status' => 'success',
-                    'message' => 'HTTPS is active.'
+                    'message' => 'HTTPS is active.',
                 ];
             }
 
@@ -233,14 +237,14 @@ class PerformSpectoraAudit implements ShouldQueue
             $this->domain->save();
 
             // Save to History
-            \App\Models\ChecksHistory::create([
+            ChecksHistory::create([
                 'domain_id' => $this->domain->id,
                 'pagespeed_score_desktop' => $score,
                 'created_at' => now(),
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Spectora Audit Exception for {$url}: " . $e->getMessage());
+            Log::error("Spectora Audit Exception for {$url}: ".$e->getMessage());
         }
     }
 }

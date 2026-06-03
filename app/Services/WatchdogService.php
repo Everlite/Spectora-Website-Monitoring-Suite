@@ -36,12 +36,12 @@ class WatchdogService
     public function scan(Domain $domain, ?string $url = null, ?string $prefetchedBody = null, ?int $prefetchedStatus = null): array
     {
         $url = $url ?? $domain->url;
-        if (!str_starts_with($url, 'http')) {
-            $url = 'https://' . $url;
+        if (! str_starts_with($url, 'http')) {
+            $url = 'https://'.$url;
         }
 
         // SSRF Protection
-        if (!\App\Services\SecurityService::isSafeUrl($url)) {
+        if (! SecurityService::isSafeUrl($url)) {
             return [
                 'status' => 'error',
                 'issues' => [[
@@ -50,7 +50,7 @@ class WatchdogService
                     'title' => 'SSRF Blocked',
                     'description' => 'The destination IP is prohibited.',
                 ]],
-                'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0]
+                'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0],
             ];
         }
 
@@ -67,16 +67,16 @@ class WatchdogService
                             'type' => 'connection_error',
                             'severity' => 'critical',
                             'title' => 'Website unreachable',
-                            'description' => 'The website could not be loaded (HTTP ' . $httpStatus . ').',
+                            'description' => 'The website could not be loaded (HTTP '.$httpStatus.').',
                             'explanation' => 'SpectoraBot cannot crawl the page. This significantly harms SEO ranking.',
                             'recommendation' => 'Check if the website is online and if SpectoraBot is not being blocked (robots.txt, .htaccess).',
                         ]],
-                        'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0]
+                        'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0],
                     ];
                 }
                 $body = $prefetchedBody;
             } else {
-                $response = \App\Services\SecurityService::http()
+                $response = SecurityService::http()
                     ->withUserAgent('SpectoraBot/1.0 (+'.rtrim((string) config('app.url'), '/').'/bot)')
                     ->timeout(15)
                     ->get($url);
@@ -88,11 +88,11 @@ class WatchdogService
                             'type' => 'connection_error',
                             'severity' => 'critical',
                             'title' => 'Website unreachable',
-                            'description' => 'The website could not be loaded (HTTP ' . $response->status() . ').',
+                            'description' => 'The website could not be loaded (HTTP '.$response->status().').',
                             'explanation' => 'SpectoraBot cannot crawl the page. This significantly harms SEO ranking.',
                             'recommendation' => 'Check if the website is online and if SpectoraBot is not being blocked (robots.txt, .htaccess).',
                         ]],
-                        'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0]
+                        'summary' => ['critical' => 1, 'warning' => 0, 'info' => 0],
                     ];
                 }
 
@@ -181,11 +181,11 @@ class WatchdogService
                     'type' => 'scan_error',
                     'severity' => 'warning',
                     'title' => 'Scan failed',
-                    'description' => 'Error during scan: ' . $e->getMessage(),
+                    'description' => 'Error during scan: '.$e->getMessage(),
                     'explanation' => 'The watchdog could not fully analyze the page.',
                     'recommendation' => 'Check if the URL is correct and the page is reachable.',
                 ]],
-                'summary' => ['critical' => 0, 'warning' => 1, 'info' => 0]
+                'summary' => ['critical' => 0, 'warning' => 1, 'info' => 0],
             ];
         }
 
@@ -200,7 +200,7 @@ class WatchdogService
         return [
             'status' => $status,
             'issues' => $issues,
-            'summary' => $summary
+            'summary' => $summary,
         ];
     }
 
@@ -211,7 +211,7 @@ class WatchdogService
     private function checkTitle(Crawler $crawler): ?array
     {
         $titleNode = $crawler->filter('title');
-        
+
         if ($titleNode->count() === 0) {
             return [
                 'type' => 'missing_title',
@@ -242,7 +242,7 @@ class WatchdogService
                 'type' => 'title_hijacked',
                 'severity' => 'critical',
                 'title' => 'Title possibly hijacked',
-                'description' => 'Foreign characters found in title: "' . mb_substr($title, 0, 50) . '..."',
+                'description' => 'Foreign characters found in title: "'.mb_substr($title, 0, 50).'..."',
                 'explanation' => 'Japanese or Chinese characters in an English title often indicate an SEO spam hack.',
                 'recommendation' => 'Check the website for malware immediately. Change all passwords (FTP, CMS, Database).',
             ];
@@ -254,7 +254,7 @@ class WatchdogService
                 'type' => 'generic_title',
                 'severity' => 'info',
                 'title' => 'Generic title',
-                'description' => 'The title "' . $title . '" is not optimal.',
+                'description' => 'The title "'.$title.'" is not optimal.',
                 'explanation' => 'Generic titles like "Home" waste SEO potential.',
                 'recommendation' => 'Use a unique, descriptive title with relevant keywords.',
             ];
@@ -275,7 +275,7 @@ class WatchdogService
                     $start = max(0, $pos - 40);
                     $context = substr($bodyLower, $start, 100);
                     $context = preg_replace('/\s+/', ' ', $context); // Normalize whitespace
-                    
+
                     $categoryNames = [
                         'pharma' => 'Pharma spam detected',
                         'gambling' => 'Gambling spam detected',
@@ -288,8 +288,8 @@ class WatchdogService
                         'type' => 'spam_keyword',
                         'severity' => 'critical',
                         'title' => $categoryNames[$category],
-                        'description' => 'Suspicious keyword found: "' . $keyword . '"',
-                        'context' => '..."' . trim($context) . '"...',
+                        'description' => 'Suspicious keyword found: "'.$keyword.'"',
+                        'context' => '..."'.trim($context).'"...',
                         'explanation' => 'Such keywords indicate a hijacked website or SEO spam. Search engines may penalize the page.',
                         'recommendation' => 'Search the source code for this term. Check if the page has been hijacked. Scan with a malware scanner.',
                     ];
@@ -308,12 +308,12 @@ class WatchdogService
         foreach ($crawler->filter('a[href]') as $element) {
             $node = new Crawler($element);
             $href = $node->attr('href');
-            if (!$href || str_starts_with($href, '#') || str_starts_with($href, '/')) {
+            if (! $href || str_starts_with($href, '#') || str_starts_with($href, '/')) {
                 continue;
             }
 
             $linkHost = parse_url($href, PHP_URL_HOST);
-            if (!$linkHost || $linkHost === $ownHost) {
+            if (! $linkHost || $linkHost === $ownHost) {
                 continue;
             }
 
@@ -324,10 +324,11 @@ class WatchdogService
                         'type' => 'url_shortener',
                         'severity' => 'warning',
                         'title' => 'URL shortener found',
-                        'description' => 'Link to: ' . mb_substr($href, 0, 60),
+                        'description' => 'Link to: '.mb_substr($href, 0, 60),
                         'explanation' => 'URL shorteners hide the real destination. Hackers use them to disguise suspicious links.',
                         'recommendation' => 'Replace the shortener with the direct link or remove the link if unknown.',
                     ];
+
                     continue 2;
                 }
             }
@@ -339,10 +340,11 @@ class WatchdogService
                         'type' => 'suspicious_tld',
                         'severity' => 'warning',
                         'title' => 'Link to suspicious domain',
-                        'description' => 'External link to: ' . $linkHost,
+                        'description' => 'External link to: '.$linkHost,
                         'explanation' => 'These TLDs are often used for spam or phishing.',
                         'recommendation' => 'Verify if this link is intentional. If not, the page may have been hijacked.',
                     ];
+
                     continue 2;
                 }
             }
@@ -351,19 +353,18 @@ class WatchdogService
         return $issues;
     }
 
-
     private function checkHiddenContent(string $body): ?array
     {
         // Search for display:none or visibility:hidden with text content
         if (preg_match('/<[^>]+style=["\'][^"\']*(?:display:\s*none|visibility:\s*hidden)[^"\']*["\'][^>]*>([^<]{20,})/i', $body, $matches)) {
             $hiddenText = trim(strip_tags($matches[1]));
             $hiddenText = mb_substr($hiddenText, 0, 100);
-            
+
             return [
                 'type' => 'hidden_content',
                 'severity' => 'critical',
                 'title' => 'Hidden content found',
-                'description' => 'Text in hidden element: "' . $hiddenText . '..."',
+                'description' => 'Text in hidden element: "'.$hiddenText.'..."',
                 'explanation' => 'Hidden text is a black-hat SEO technique. Search engines penalize this with ranking loss.',
                 'recommendation' => 'Remove the hidden content. Check if the page has been hijacked.',
             ];
@@ -379,7 +380,9 @@ class WatchdogService
         foreach ($crawler->filter('iframe') as $element) {
             $node = new Crawler($element);
             $src = $node->attr('src');
-            if (!$src) continue;
+            if (! $src) {
+                continue;
+            }
 
             // Known safe domains
             $safeDomains = ['vimeo.com', 'facebook.com', 'twitter.com'];
@@ -391,12 +394,12 @@ class WatchdogService
                 }
             }
 
-            if (!$isSafe) {
+            if (! $isSafe) {
                 $issues[] = [
                     'type' => 'suspicious_iframe',
                     'severity' => 'warning',
                     'title' => 'Suspicious iframe found',
-                    'description' => 'Iframe loads: ' . mb_substr($src, 0, 80),
+                    'description' => 'Iframe loads: '.mb_substr($src, 0, 80),
                     'explanation' => 'Unknown iframes can load malware, phishing pages, or tracking scripts.',
                     'recommendation' => 'Verify if this iframe is intentional. Remove it if you don\'t know the source.',
                 ];
@@ -406,19 +409,18 @@ class WatchdogService
         return $issues;
     }
 
-
     private function checkMetaRedirect(Crawler $crawler): ?array
     {
         $metaRefresh = $crawler->filter('meta[http-equiv="refresh"]');
-        
+
         if ($metaRefresh->count() > 0) {
             $content = $metaRefresh->attr('content') ?? '';
-            
+
             return [
                 'type' => 'meta_redirect',
                 'severity' => 'warning',
                 'title' => 'Meta-refresh redirect found',
-                'description' => 'Redirect configured: ' . mb_substr($content, 0, 60),
+                'description' => 'Redirect configured: '.mb_substr($content, 0, 60),
                 'explanation' => 'Meta-refresh redirects are deprecated and can be abused for cloaking.',
                 'recommendation' => 'Replace meta-refresh with a server-side 301 redirect.',
             ];
@@ -451,16 +453,20 @@ class WatchdogService
         foreach ($crawler->filter('script[src]') as $element) {
             $node = new Crawler($element);
             $src = $node->attr('src');
-            if (!$src) continue;
+            if (! $src) {
+                continue;
+            }
 
             // Known safe domains (CDN/Social)
             $safeDomains = [
                 'cloudflare.com', 'jquery.com', 'jsdelivr.net', 'unpkg.com',
-                'facebook.net', 'twitter.com', 'stripe.com', 'paypal.com'
+                'facebook.net', 'twitter.com', 'stripe.com', 'paypal.com',
             ];
-            
+
             $host = parse_url($src, PHP_URL_HOST);
-            if (!$host) continue;
+            if (! $host) {
+                continue;
+            }
 
             $isSafe = false;
             foreach ($safeDomains as $safe) {
@@ -470,7 +476,7 @@ class WatchdogService
                 }
             }
 
-            if (!$isSafe) {
+            if (! $isSafe) {
                 // Suspicious TLDs
                 foreach (['.ru', '.cn', '.tk', '.ml', '.ga', '.cf'] as $tld) {
                     if (str_ends_with($host, $tld)) {
@@ -478,7 +484,7 @@ class WatchdogService
                             'type' => 'suspicious_script',
                             'severity' => 'critical',
                             'title' => 'Suspicious external script',
-                            'description' => 'Script loads from: ' . $host,
+                            'description' => 'Script loads from: '.$host,
                             'explanation' => 'External scripts from suspicious domains can contain malware or cryptominers.',
                             'recommendation' => 'Remove this script immediately if you didn\'t install it yourself. Check the page for hacks.',
                         ];
@@ -491,4 +497,3 @@ class WatchdogService
         return $issues;
     }
 }
-

@@ -44,4 +44,12 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function admin(): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user) {
+            $user->is_admin = true;
+            $user->save();
+        });
+    }
 }

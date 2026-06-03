@@ -4,6 +4,9 @@ namespace App\Services;
 
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 class SecurityService
 {
@@ -109,7 +112,7 @@ class SecurityService
     public static function connectTimeMiddleware(): callable
     {
         return function (callable $handler) {
-            return function (\Psr\Http\Message\RequestInterface $request, array $options) use ($handler) {
+            return function (RequestInterface $request, array $options) use ($handler) {
                 $url = (string) $request->getUri();
                 $pins = self::resolvePinsForUrl($url);
 
@@ -132,12 +135,12 @@ class SecurityService
     public static function redirectMiddleware(): callable
     {
         return function (callable $handler) {
-            return function (\Psr\Http\Message\RequestInterface $request, array $options) use ($handler) {
+            return function (RequestInterface $request, array $options) use ($handler) {
                 if (! empty($options['allow_redirects'])) {
                     $options['allow_redirects']['on_redirect'] = function (
-                        \Psr\Http\Message\RequestInterface $req,
-                        \Psr\Http\Message\ResponseInterface $res,
-                        \Psr\Http\Message\UriInterface $uri
+                        RequestInterface $req,
+                        ResponseInterface $res,
+                        UriInterface $uri
                     ) {
                         self::$hostIpCache = [];
                         $redirectUrl = (string) $uri;

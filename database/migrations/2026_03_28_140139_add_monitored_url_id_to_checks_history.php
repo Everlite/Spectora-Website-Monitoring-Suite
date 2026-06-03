@@ -13,12 +13,12 @@ return new class extends Migration
     {
         try {
             Schema::table('checks_history', function (Blueprint $table) {
-                if (!Schema::hasColumn('checks_history', 'monitored_url_id')) {
+                if (! Schema::hasColumn('checks_history', 'monitored_url_id')) {
                     $table->foreignId('monitored_url_id')->nullable()->after('domain_id')->constrained('monitored_urls')->onDelete('cascade');
                 }
             });
-        } catch (\Exception $e) {
-            if (!str_contains($e->getMessage(), 'duplicate column name')) {
+        } catch (Exception $e) {
+            if (! str_contains($e->getMessage(), 'duplicate column name')) {
                 throw $e;
             }
         }
