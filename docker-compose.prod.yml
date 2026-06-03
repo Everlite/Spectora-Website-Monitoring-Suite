@@ -1,0 +1,27 @@
+# Production-oriented Compose file (no source bind-mounts).
+# Usage: docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spectora-app:latest
+    container_name: spectora-app
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./.env:/var/www/html/.env:ro
+      - spectora-storage:/var/www/html/storage
+    environment:
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/storage/database.sqlite
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  spectora-storage:

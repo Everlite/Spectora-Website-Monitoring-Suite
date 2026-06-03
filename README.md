@@ -10,6 +10,9 @@
 
 ---
 
+> [!IMPORTANT]
+> **Major overhaul (May 2026)** — Spectora went through a large stability, security, and architecture refresh (SSRF hardening, alerts, queue-based checks, expanded tests, ops docs). The project is in a **post-overhaul testing phase**: CI covers core flows, but we recommend validating upgrades on a **staging instance** before production. See [CHANGELOG.md](CHANGELOG.md) for details.
+
 **Spectora** is a premium, open-source, **Private by Design Self-Hosted Website Monitoring Suite** custom-tailored for freelancers and small web agencies. It allows you to monitor all your client websites (uptime, SSL, security keywords, lightweight audits, and optional cookie-free analytics) from one gorgeous, central dashboard on your own server—completely free of SaaS fees and per-seat subscription models.
 
 ---
@@ -95,8 +98,9 @@ graph TD
     F --> C
     G --> C
 
-    C --> I[HTTP Checks via SpectoraBot]
-    I --> J[Client Websites]
+    C --> I[CheckUrlJob queue]
+    I --> J[HTTP Checks via SpectoraBot]
+    J --> K[Client Websites]
 
     A --> D
     C --> D
@@ -161,9 +165,11 @@ Deploying Spectora in production behind a reverse proxy (such as Nginx Proxy Man
 
 ### Scaling & SQLite backups
 
-Spectora is optimized for **small teams and up to roughly 50 monitored domains** on a single instance. The scheduler dispatches uptime checks for all domains **every 15 minutes**; the queue worker runs each domain’s main URL and active sub-URLs synchronously (`dispatchSync`) — beyond ~50 domains, expect longer check cycles unless you split workloads or scale workers.
+Spectora is optimized for **small teams and up to roughly 50 monitored domains** on a single instance. The scheduler dispatches checks **every 15 minutes** in chunks; each domain’s main URL and active sub-URLs are processed as **async queue jobs** (manual “Analyze” in the dashboard still runs synchronously). Beyond ~50 domains, add queue workers or split instances.
 
-Back up the SQLite file regularly (Docker volume `spectora-storage` or your `DB_DATABASE` path). With `DB_JOURNAL_MODE=wal`, copy the database during low traffic or use SQLite’s backup API; include `-wal` / `-shm` sidecar files if present.
+Back up the SQLite file regularly — use [`scripts/backup-sqlite.sh`](scripts/backup-sqlite.sh) or copy the Docker volume `spectora-storage`. With `DB_JOURNAL_MODE=wal`, include `-wal` / `-shm` sidecar files when present. See [docs/RUNBOOK.md](docs/RUNBOOK.md).
+
+**Production Docker:** use [`docker-compose.prod.yml`](docker-compose.prod.yml) (no source bind-mounts). Development can keep the default [`docker-compose.yml`](docker-compose.yml).
 
 ---
 

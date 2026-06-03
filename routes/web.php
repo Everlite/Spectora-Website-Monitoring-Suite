@@ -4,6 +4,7 @@ use App\Http\Controllers\AgencySettingsController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DomainController;
+use App\Http\Controllers\DomainMonitoringController;
 use App\Http\Controllers\DomainNoteController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\ReportController;
@@ -30,16 +31,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/domains', [DomainController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('domains.store');
-    Route::post('/domains/{domain}/settings', [DomainController::class, 'updateSettings'])
+    Route::post('/domains/{domain}/settings', [DomainMonitoringController::class, 'updateSettings'])
         ->middleware('throttle:30,1')
         ->name('domains.settings.update');
-    Route::post('/domains/{domain}/sitemaps/detect', [DomainController::class, 'detectSitemaps'])
+    Route::post('/domains/{domain}/sitemaps/detect', [DomainMonitoringController::class, 'detectSitemaps'])
         ->middleware('throttle:6,1')
         ->name('domains.sitemaps.detect');
-    Route::post('/domains/{domain}/urls/scan', [DomainController::class, 'scanUrls'])
+    Route::post('/domains/{domain}/urls/scan', [DomainMonitoringController::class, 'scanUrls'])
         ->middleware('throttle:6,1')
         ->name('domains.urls.scan');
-    Route::post('/domains/{domain}/urls/monitored', [DomainController::class, 'syncMonitoredUrls'])
+    Route::post('/domains/{domain}/urls/monitored', [DomainMonitoringController::class, 'syncMonitoredUrls'])
         ->middleware('throttle:30,1')
         ->name('domains.urls.sync');
     Route::delete('/domains/{domain}', [DomainController::class, 'destroy'])->name('domains.destroy');

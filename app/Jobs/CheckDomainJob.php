@@ -13,22 +13,21 @@ class CheckDomainJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $domain;
-
-    public function __construct(Domain $domain)
-    {
-        $this->domain = $domain;
-    }
+    public function __construct(
+        public Domain $domain,
+        public bool $synchronous = false,
+    ) {}
 
     public function handle(): void
     {
-        // 1. Check Main Domain URL - Force synchronous for manual analysis compatibility
-        CheckUrlJob::dispatchSync($this->domain);
+        $dispatch = $this->synchronous
+            ? fn (Domain $domain, ?string $url = null, $monitoredUrl = null) => CheckUrlJob::dispatchSync($domain, $url, $monitoredUrl)
+            : fn (Domain $domain, ?string $url = null, $monitoredUrl = null) => CheckUrlJob::dispatch($domain, $url, $monitoredUrl);
 
-        // 2. Check all active sub-URLs
-        $activeUrls = $this->domain->monitoredUrls()->where('is_active', true)->get();
-        foreach ($activeUrls as $monitoredUrl) {
-            CheckUrlJob::dispatchSync($this->domain, null, $monitoredUrl);
-        }
+        $dispatch($this->domain);
+
+        $this->domain->monitoredUrls()
+            ->where('is_active', true)
+            ->each(fn ($monitoredUrl) => $dispatch($this->domain, null, $monitoredUrl));
     }
 }

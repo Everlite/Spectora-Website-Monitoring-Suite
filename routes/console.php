@@ -6,18 +6,22 @@ use App\Jobs\SendMonthlyReportsJob;
 use App\Models\Domain;
 use Illuminate\Support\Facades\Schedule;
 
-// Uptime, SSL, Watchdog — every 15 minutes
+// Uptime, SSL, Watchdog — every 15 minutes (chunked; checks run async via queue)
 Schedule::call(function () {
-    foreach (Domain::all() as $domain) {
-        CheckDomainJob::dispatch($domain);
-    }
+    Domain::query()->orderBy('id')->chunkById(50, function ($domains) {
+        foreach ($domains as $domain) {
+            CheckDomainJob::dispatch($domain);
+        }
+    });
 })->everyFifteenMinutes()->name('check_domains')->withoutOverlapping();
 
 // Spectora Audit (heuristic score) — hourly
 Schedule::call(function () {
-    foreach (Domain::all() as $domain) {
-        PerformSpectoraAudit::dispatch($domain);
-    }
+    Domain::query()->orderBy('id')->chunkById(50, function ($domains) {
+        foreach ($domains as $domain) {
+            PerformSpectoraAudit::dispatch($domain);
+        }
+    });
 })->hourly()->name('spectora_audit')->withoutOverlapping();
 
 // Prune checks_history older than 90 days (ChecksHistory::prunable)

@@ -32,6 +32,10 @@ npm audit
 
 PHP formatting uses [Laravel Pint](https://laravel.com/docs/pint).
 
+## Operations
+
+See [docs/RUNBOOK.md](docs/RUNBOOK.md) for backups, production Compose, and upgrades.
+
 ## Security
 
 See [SECURITY.md](SECURITY.md).
