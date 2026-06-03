@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Domain dashboard refactor: partials under `resources/views/domains/dashboard/partials/`, header/overhaul banner components; prominent **untested overhaul** notice on the dashboard
 - Sub-URL downtime alerts (`notify_sent` on `monitored_urls`, per-URL e-mail subject)
 - `docs/STAGING_CHECKLIST.md` pre-release gate
 - Tests: monitored URL alerts, `PerformSpectoraAudit`, `WatchdogService` spam detection
@@ -34,7 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Planned
 
-- Blade component split for `dashboard.blade.php`
+- Further dashboard sub-partials (overview stat cards, etc.) after weekend QA
 
 ---
 
