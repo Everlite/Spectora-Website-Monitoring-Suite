@@ -2,7 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "everlite/spectora",
     "type": "project",
-    "description": "Private self-hosted website monitoring suite for freelancers and agencies.",
+    "description": "Self-hosted website monitoring and privacy-first analytics (Laravel 12, Docker). No Google Analytics; GDPR-oriented.",
     "keywords": [
         "laravel",
         "monitoring",

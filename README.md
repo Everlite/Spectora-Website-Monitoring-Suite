@@ -6,7 +6,15 @@
   [![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php)](https://php.net)
   [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+
+  <p align="center">
+    <strong>Self-hosted website monitoring &amp; privacy-first analytics.</strong><br>
+    Laravel 12 · Docker · No Google Analytics · Cookie-free first-party stats · GDPR-oriented (with privacy notice on client sites) · No ad or cross-site tracking
+  </p>
 </div>
+
+> **GitHub About (repo description):** copy the line above, or:
+> `Self-hosted website monitoring & privacy-first analytics. Laravel 12, Docker. No Google Analytics; cookie-free stats. GDPR-oriented. No ad or cross-site tracking.`
 
 ---
 

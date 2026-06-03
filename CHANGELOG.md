@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- README / package description: honest positioning (GDPR-oriented, no Google Analytics, cookie-free analytics — not “no tracking” / “no third parties”)
+
 ### Added
 
 - Domain dashboard refactor: partials under `resources/views/domains/dashboard/partials/`, header/overhaul banner components; prominent **untested overhaul** notice on the dashboard
