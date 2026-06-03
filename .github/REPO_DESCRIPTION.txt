@@ -1,4 +1,0 @@
-Self-hosted website monitoring & privacy-first analytics. Laravel 12, Docker. No Google Analytics; cookie-free stats. GDPR-oriented. No ad or cross-site tracking.
-
-# Paste into GitHub: Settings → General → Description (About)
-# Or: gh repo edit --description "$(cat .github/REPO_DESCRIPTION.txt | head -1)"

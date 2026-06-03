@@ -13,10 +13,6 @@
   </p>
 </div>
 
-> **GitHub About (repo description):** copy the line above, or:
-> `Self-hosted website monitoring & privacy-first analytics. Laravel 12, Docker. No Google Analytics; cookie-free stats. GDPR-oriented. No ad or cross-site tracking.`  
-> **Alle `gh`-Befehle (CI, PR, Release):** [`.github/GH_COMMANDS.md`](.github/GH_COMMANDS.md)
-
 ---
 
 > [!IMPORTANT]

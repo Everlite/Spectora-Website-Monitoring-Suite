@@ -24,6 +24,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - README / package description: honest positioning (GDPR-oriented, no Google Analytics, cookie-free analytics — not “no tracking” / “no third parties”)
 
+### Removed
+
+- Internal `gh` maintainer docs from the repo (`.github/GH_COMMANDS.md`, `.github/REPO_DESCRIPTION.txt`)
+
 ### Added
 
 - Domain dashboard refactor: partials under `resources/views/domains/dashboard/partials/`, header/overhaul banner components; prominent **untested overhaul** notice on the dashboard
