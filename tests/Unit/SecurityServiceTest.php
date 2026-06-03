@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Services\SecurityService;
+use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Uri;
@@ -65,7 +66,7 @@ class SecurityServiceTest extends TestCase
         $handler = function ($request, array $options) use (&$onRedirect) {
             $onRedirect = $options['allow_redirects']['on_redirect'] ?? null;
 
-            return new \GuzzleHttp\Promise\FulfilledPromise(new Response(200));
+            return new FulfilledPromise(new Response(200));
         };
         $wrapped = $middleware($handler);
 
