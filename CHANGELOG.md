@@ -2,6 +2,14 @@
 
 ## [Unreleased] — Major Overhaul (May 2026)
 
+### Audit follow-up (June 2026)
+
+- Fix manual **Analyze** button (`CheckDomainJob::dispatchSync` arguments)
+- Correct analytics **browser detection** order (Edge/Opera before Chrome)
+- Job `$tries` / `$timeout` on queue jobs; remove ineffective `set_time_limit` in audits
+- Scheduler **heartbeat** + Docker healthcheck via `GET /health/ops`
+- Tests: analyze flow, domain store SSRF, browser UA, ops health
+
 ### Analytics (privacy geo)
 
 - Country, region, and city storage with per-domain precision (`off` / `country` / `city`)

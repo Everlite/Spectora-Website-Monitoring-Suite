@@ -4,10 +4,18 @@ use App\Jobs\CheckDomainJob;
 use App\Jobs\PerformSpectoraAudit;
 use App\Jobs\SendMonthlyReportsJob;
 use App\Models\Domain;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
+
+// Heartbeat for Docker /health/ops (proves cron + scheduler are alive)
+Schedule::call(function () {
+    Cache::put('spectora:ops:heartbeat', now(), 3600);
+})->everyMinute()->name('ops_heartbeat');
 
 // Uptime, SSL, Watchdog — every 15 minutes (chunked; checks run async via queue)
 Schedule::call(function () {
+    Cache::put('spectora:ops:heartbeat', now(), 3600);
+
     Domain::query()->orderBy('id')->chunkById(50, function ($domains) {
         foreach ($domains as $domain) {
             CheckDomainJob::dispatch($domain);

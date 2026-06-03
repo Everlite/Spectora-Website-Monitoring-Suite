@@ -7,6 +7,7 @@ use App\Models\Domain;
 use App\Services\AnalyticsIpService;
 use App\Services\AnalyticsQueryService;
 use App\Services\GeoResolutionService;
+use App\Support\AnalyticsUserAgent;
 use App\Support\HostHelper;
 use Illuminate\Http\Request;
 
@@ -72,8 +73,8 @@ class AnalyticsController extends Controller
             $device = 'tablet';
         }
 
-        $browser = $this->getBrowser($userAgent);
-        $os = $this->getOs($userAgent);
+        $browser = AnalyticsUserAgent::browser($userAgent);
+        $os = AnalyticsUserAgent::os($userAgent);
         $precision = $domain->analytics_geo_precision ?? Domain::GEO_CITY;
         $geo = $this->geoResolution->resolve($ip, $request, $precision);
 
@@ -122,49 +123,5 @@ class AnalyticsController extends Controller
         }
 
         return back()->with('status', 'Analytics settings saved.');
-    }
-
-    private function getBrowser(string $ua): string
-    {
-        $ua = strtolower($ua);
-        if (str_contains($ua, 'chrome')) {
-            return 'Chrome';
-        }
-        if (str_contains($ua, 'firefox')) {
-            return 'Firefox';
-        }
-        if (str_contains($ua, 'safari') && ! str_contains($ua, 'chrome')) {
-            return 'Safari';
-        }
-        if (str_contains($ua, 'edge')) {
-            return 'Edge';
-        }
-        if (str_contains($ua, 'opera') || str_contains($ua, 'opr')) {
-            return 'Opera';
-        }
-
-        return 'Other';
-    }
-
-    private function getOs(string $ua): string
-    {
-        $ua = strtolower($ua);
-        if (str_contains($ua, 'windows')) {
-            return 'Windows';
-        }
-        if (str_contains($ua, 'mac os')) {
-            return 'macOS';
-        }
-        if (str_contains($ua, 'android')) {
-            return 'Android';
-        }
-        if (str_contains($ua, 'iphone') || str_contains($ua, 'ipad')) {
-            return 'iOS';
-        }
-        if (str_contains($ua, 'linux')) {
-            return 'Linux';
-        }
-
-        return 'Other';
     }
 }

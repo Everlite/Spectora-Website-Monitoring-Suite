@@ -19,12 +19,15 @@ class PerformSpectoraAudit implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 2;
+
+    public int $timeout = 180;
+
     public function __construct(public Domain $domain) {}
 
     public function handle(): void
     {
         $filterService = app(MonitoringFilterService::class);
-        set_time_limit(120); // Allow 2 minutes for execution
 
         $url = $this->domain->url;
         if (! str_starts_with($url, 'http')) {

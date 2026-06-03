@@ -20,14 +20,26 @@ DB_DATABASE=./storage/database.sqlite ./scripts/backup-sqlite.sh
 
 Copy the `backups/` folder off the server regularly. With WAL mode, include `-wal` and `-shm` sidecar files when present.
 
-## Queue Worker
+## Queue Worker (required)
 
-Scheduled checks dispatch `CheckUrlJob` to the database queue. Ensure Supervisor (Docker image) or `php artisan queue:work` is running.
+Scheduled checks dispatch `CheckUrlJob` to the database queue. **Without a running worker, domains are not checked.**
+
+- Docker: Supervisor program `queue-worker` (user `www-data`)
+- Manual: `php artisan queue:work database --sleep=3 --tries=3`
+
+Verify: `docker compose exec app supervisorctl status` or watch `jobs` / `failed_jobs` tables.
+
+## Scheduler (required)
+
+Cron must run `php artisan schedule:run` every minute (included in Docker via Supervisor `cron`).
 
 ## Health
 
-- HTTP: `GET /up` (Laravel health route)
-- Login page: Docker healthcheck uses `/login`
+- `GET /up` — Laravel default health (app boot)
+- `GET /health/ops` — **loopback only** (`127.0.0.1` / `::1`); returns 503 if scheduler heartbeat is older than 20 minutes
+- Docker `healthcheck` uses `/health/ops`
+
+After deploy, confirm heartbeat: `docker compose exec app php artisan schedule:run` then `curl -f http://127.0.0.1/health/ops` inside the container.
 
 ## Production Checklist
 

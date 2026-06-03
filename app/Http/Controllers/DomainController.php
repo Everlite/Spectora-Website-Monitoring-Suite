@@ -158,7 +158,7 @@ class DomainController extends Controller
 
         // Dispatch Jobs Synchronously
         PerformSpectoraAudit::dispatchSync($domain);
-        CheckDomainJob::dispatchSync(new CheckDomainJob($domain, synchronous: true));
+        CheckDomainJob::dispatchSync($domain, synchronous: true);
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'Analysis started']);

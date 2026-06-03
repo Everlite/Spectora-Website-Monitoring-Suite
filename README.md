@@ -3,7 +3,7 @@
   <h1>Spectora: Private Self-Hosted Website Monitoring Suite</h1>
   
   [![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
-  [![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=for-the-badge&logo=php)](https://php.net)
+  [![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php)](https://php.net)
   [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 </div>
@@ -164,10 +164,13 @@ Deploying Spectora in production behind a reverse proxy (such as Nginx Proxy Man
 3. **Proxy without `X-Forwarded-Proto`**: If your proxy terminates TLS but does not forward protocol headers, set `SPECTORA_FORCE_HTTPS=true` in addition to `APP_URL=https://…`.
 4. **Configure SMTP** for offline alerts and monthly digests; optional **VAPID** keys for Web Push (see Configuration table below).
 5. **Production hardening:** set `APP_DEBUG=false`, `SESSION_ENCRYPT=true`, and keep `SPECTORA_REGISTRATION_ENABLED=false` unless you intentionally allow public sign-up.
+6. **Queue worker is mandatory:** Scheduled uptime checks are queued (`QUEUE_CONNECTION=database`). The Docker image runs `queue:work` via Supervisor — if you deploy without Docker, you must run a worker process yourself or monitoring will not run.
+7. **Analytics geo:** For city/country stats, set `TRUSTED_PROXIES` when using Cloudflare, **or** install [GeoLite2-City](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) at `storage/app/geoip/GeoLite2-City.mmdb`. See [`docs/PRIVACY.md`](docs/PRIVACY.md).
+8. **Health monitoring:** Docker uses `GET /health/ops` (loopback only) which verifies the scheduler heartbeat. `GET /up` is the generic Laravel health endpoint.
 
 ### Scaling & SQLite backups
 
-Spectora is optimized for **small teams and up to roughly 50 monitored domains** on a single instance. The scheduler dispatches checks **every 15 minutes** in chunks; each domain’s main URL and active sub-URLs are processed as **async queue jobs** (manual “Analyze” in the dashboard still runs synchronously). Beyond ~50 domains, add queue workers or split instances.
+Spectora is optimized for **small teams and up to roughly 50 monitored domains** on a single instance (not hundreds of domains — SQLite and the 15-minute scheduler have intentional limits). The scheduler dispatches checks **every 15 minutes** in chunks; each domain’s main URL and active sub-URLs are processed as **async queue jobs** (manual “Analyze” in the dashboard still runs synchronously). Beyond ~50 domains, add queue workers or split instances.
 
 Back up the SQLite file regularly — use [`scripts/backup-sqlite.sh`](scripts/backup-sqlite.sh) or copy the Docker volume `spectora-storage`. With `DB_JOURNAL_MODE=wal`, include `-wal` / `-shm` sidecar files when present. See [docs/RUNBOOK.md](docs/RUNBOOK.md).
 
