@@ -14,23 +14,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Groups: `Added`, `Changed`, `Fixed`, `Security`, `Deprecated`, `Removed`.
 - See [README.md](README.md) when upgrading between tagged versions.
 
-**Releases:** [GitHub Releases](https://github.com/Everlite/Spectora-Website-Monitoring-Suite/releases) — latest tag: **v0.2.0**.
+**Releases:** [GitHub Releases](https://github.com/Everlite/Spectora-Website-Monitoring-Suite/releases) — latest tag: **v0.2.1**.
 
 ---
 
 ## [Unreleased]
+
+### Planned
+
+- Further dashboard sub-partials (overview stat cards, etc.) after weekend QA
+
+---
+
+## [0.2.1] - 2026-05-30
 
 ### Security
 
 - Dependabot: `laravel/framework` → **12.62.0** (signed URL path confusion, GHSA #5)
 - Dependabot: `web-token/jwt-library` → **4.1.7** (PBES2 DoS, algorithm confusion, RSA1_5 oracle, ChaCha20Poly1305 — alerts #7–#10)
 - Dependabot: `vite` → **7.3.5** (dev-server `fs.deny` bypass + `launch-editor` UNC/NTLM — alerts #4, #6)
-
-### Changed
-
-### Removed
-
-- Maintainer-only files from the public tree (`.github/GH_COMMANDS.md`, `.github/REPO_DESCRIPTION.txt`, `.github/RELEASE_v0.2.0.md`, `dashboard/partials/README.md`, `_ide_stubs.php`, obsolete `docker/laravel.cron`)
 
 ### Added
 
@@ -41,13 +43,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- README / package description: honest positioning (GDPR-oriented, no Google Analytics, cookie-free analytics — not "no tracking" / "no third parties")
 - `SecurityService` instance singleton with per-job `clearHostIpCache()` (queue-safe DNS cache)
 - Docker: Apache on **8080** as `www-data`, `schedule:work` instead of root cron
 - RUNBOOK: scheduler/health port 8080
 
-### Planned
+### Removed
 
-- Further dashboard sub-partials (overview stat cards, etc.) after weekend QA
+- Maintainer-only files from the public tree (`.github/GH_COMMANDS.md`, `.github/REPO_DESCRIPTION.txt`, `.github/RELEASE_v0.2.0.md`, `dashboard/partials/README.md`, `_ide_stubs.php`, obsolete `docker/laravel.cron`)
 
 ---
 
