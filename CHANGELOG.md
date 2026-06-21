@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Security
+
+- Dependabot: `form-data` → **4.0.6** (CRLF injection in multipart field names — alert #11)
+
 ### Planned
 
 - Further dashboard sub-partials (overview stat cards, etc.) after weekend QA
