@@ -20,9 +20,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Changed
+### Security
 
-- README / package description: honest positioning (GDPR-oriented, no Google Analytics, cookie-free analytics — not “no tracking” / “no third parties”)
+- Dependabot: `laravel/framework` → **12.62.0** (signed URL path confusion, GHSA #5)
+- Dependabot: `web-token/jwt-library` → **4.1.7** (PBES2 DoS, algorithm confusion, RSA1_5 oracle, ChaCha20Poly1305 — alerts #7–#10)
+- Dependabot: `vite` → **7.3.5** (dev-server `fs.deny` bypass + `launch-editor` UNC/NTLM — alerts #4, #6)
+
+### Changed
 
 ### Removed
 
