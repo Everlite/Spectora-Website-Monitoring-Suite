@@ -24,6 +24,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Dependabot: `form-data` → **4.0.6** (CRLF injection in multipart field names — alert #11)
 
+### Changed
+
+- CI: GitHub Actions v5 (`checkout`, `cache`, `setup-node`), Node **24**, `key:generate --force` (no production prompt)
+
 ### Planned
 
 - Further dashboard sub-partials (overview stat cards, etc.) after weekend QA
