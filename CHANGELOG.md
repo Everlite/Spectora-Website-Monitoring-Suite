@@ -14,11 +14,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Groups: `Added`, `Changed`, `Fixed`, `Security`, `Deprecated`, `Removed`.
 - See [README.md](README.md) when upgrading between tagged versions.
 
-**Releases:** [GitHub Releases](https://github.com/Everlite/Spectora-Website-Monitoring-Suite/releases) — latest tag: **v0.2.1**.
+**Releases:** [GitHub Releases](https://github.com/Everlite/Spectora-Website-Monitoring-Suite/releases) — latest tag: **v0.2.2**.
 
 ---
 
 ## [Unreleased]
+
+### Planned
+
+- Further dashboard sub-partials (overview stat cards, etc.) after weekend QA
+
+---
+
+## [0.2.2] - 2026-06-21
 
 ### Security
 
@@ -27,10 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - CI: GitHub Actions v5 (`checkout`, `cache`, `setup-node`), Node **24**, `key:generate --force` (no production prompt)
-
-### Planned
-
-- Further dashboard sub-partials (overview stat cards, etc.) after weekend QA
+- npm: pin `form-data` override, approve `esbuild` install scripts, `.npmrc` (`fund=false`)
 
 ---
 
