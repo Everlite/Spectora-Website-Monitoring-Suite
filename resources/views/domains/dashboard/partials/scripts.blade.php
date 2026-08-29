@@ -65,9 +65,9 @@
                                 labels: @json($psHistoryLabels),
                                 datasets: [{
                                     data: @json($psHistoryScores),
-                                    borderColor: '{{ $score >= 90 ? "#10b981" : ($score >= 50 ? "#f59e0b" : "#ef4444") }}',
-                                    backgroundColor: '{{ $score >= 90 ? "rgba(16,185,129,0.1)" : ($score >= 50 ? "rgba(245,158,11,0.1)" : "rgba(239,68,68,0.1)") }}',
-                                    borderWidth: 2,
+                                    borderColor: '{{ $score >= 90 ? "#01B574" : ($score >= 50 ? "#FFB547" : "#EE5D50") }}',
+                                    backgroundColor: '{{ $score >= 90 ? "rgba(1,181,116,0.15)" : ($score >= 50 ? "rgba(255,181,71,0.15)" : "rgba(238,93,80,0.15)") }}',
+                                    borderWidth: 2.5,
                                     tension: 0.4,
                                     fill: true,
                                     pointRadius: 0
@@ -93,9 +93,9 @@
                                 labels: ['', '', '', '', '', '', ''],
                                 datasets: [{
                                     data: @json($uptimeHistory),
-                                    borderColor: '#10b981',
-                                    backgroundColor: 'rgba(16,185,129,0.1)',
-                                    borderWidth: 2,
+                                    borderColor: '#01B574',
+                                    backgroundColor: 'rgba(1, 181, 116, 0.15)',
+                                    borderWidth: 2.5,
                                     tension: 0.4,
                                     fill: true,
                                     pointRadius: 0
@@ -121,9 +121,9 @@
                                 labels: @json($historyLabels),
                                 datasets: [{
                                     data: @json($historyResponseTimes),
-                                    borderColor: '{{ $avgResponseTime < 300 ? "#8b5cf6" : "#f59e0b" }}',
-                                    backgroundColor: '{{ $avgResponseTime < 300 ? "rgba(139,92,246,0.1)" : "rgba(245,158,11,0.1)" }}',
-                                    borderWidth: 2,
+                                    borderColor: '{{ $avgResponseTime < 300 ? "#7551FF" : "#FFB547" }}',
+                                    backgroundColor: '{{ $avgResponseTime < 300 ? "rgba(117,81,255,0.15)" : "rgba(255,181,71,0.15)" }}',
+                                    borderWidth: 2.5,
                                     tension: 0.4,
                                     fill: true,
                                     pointRadius: 0
@@ -149,26 +149,26 @@
                         data: {
                             labels: @json($chartLabels),
                             datasets: [{
-                                    label: 'Visitors',
+                                    label: 'Besucher',
                                     data: @json($chartVisitors),
-                                    borderColor: '#8b5cf6',
-                                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                                    borderWidth: 2,
+                                    borderColor: '#7551FF',
+                                    backgroundColor: 'rgba(117, 81, 255, 0.12)',
+                                    borderWidth: 2.5,
                                     tension: 0.4,
                                     fill: true,
                                     pointRadius: 0,
-                                    pointHoverRadius: 4
+                                    pointHoverRadius: 5
                                 },
                                 {
                                     label: 'Pageviews',
                                     data: @json($chartPageviews),
-                                    borderColor: '#06b6d4',
-                                    backgroundColor: 'rgba(6, 182, 212, 0.05)',
-                                    borderWidth: 2,
+                                    borderColor: '#01B574',
+                                    backgroundColor: 'rgba(1, 181, 116, 0.12)',
+                                    borderWidth: 2.5,
                                     tension: 0.4,
                                     fill: true,
                                     pointRadius: 0,
-                                    pointHoverRadius: 4
+                                    pointHoverRadius: 5
                                 }
                             ]
                         },
@@ -176,40 +176,42 @@
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
-                                legend: { display: false }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                                    ticks: { color: '#94a3b8', font: { size: 11 } }
-                                },
-                                x: {
-                                    grid: { display: false },
-                                    ticks: { color: '#94a3b8', font: { size: 11 } }
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: '#111C44',
+                                    borderColor: '#1B254B',
+                                    borderWidth: 1,
+                                    titleColor: '#FFFFFF',
+                                    bodyColor: '#A3AED0'
                                 }
                             },
-                            interaction: {
-                                mode: 'index',
-                                intersect: false
+                            scales: {
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { color: '#A3AED0', font: { family: 'Plus Jakarta Sans', size: 10 } }
+                                },
+                                y: {
+                                    grid: { color: '#1B254B' },
+                                    ticks: { color: '#A3AED0', font: { family: 'Plus Jakarta Sans', size: 10 } }
+                                }
                             }
                         }
                     });
                 },
-                initDeviceChart(chartId = 'overviewDeviceChart') {
-                    const ctx = document.getElementById(chartId);
+                initDeviceChart(canvasId) {
+                    const ctx = document.getElementById(canvasId);
                     if (!ctx) return;
                     new Chart(ctx.getContext('2d'), {
                         type: 'doughnut',
                         data: {
                             labels: ['Desktop', 'Mobile', 'Tablet'],
                             datasets: [{
-                                data: @json($deviceData),
-                                backgroundColor: [
-                                    '#8b5cf6', // Violet (Desktop)
-                                    '#06b6d4', // Cyan (Mobile)
-                                    '#f59e0b'  // Amber (Tablet)
+                                data: [
+                                    {{ $deviceStats['desktop'] ?? 0 }},
+                                    {{ $deviceStats['mobile'] ?? 0 }},
+                                    {{ $deviceStats['tablet'] ?? 0 }}
                                 ],
+                                backgroundColor: ['#7551FF', '#01B574', '#FFB547'],
                                 borderWidth: 0,
                                 hoverOffset: 4
                             }]
@@ -217,10 +219,8 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false }
-                            },
-                            cutout: '65%'
+                            cutout: '75%',
+                            plugins: { legend: { display: false } }
                         }
                     });
                 }

@@ -13,64 +13,51 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', 'Geist', ...defaultTheme.fontFamily.sans],
-                mono: ['JetBrains Mono', 'Geist Mono', ...defaultTheme.fontFamily.mono],
+                sans: ['Plus Jakarta Sans', 'DM Sans', 'Inter', ...defaultTheme.fontFamily.sans],
+                mono: ['JetBrains Mono', 'Fira Code', ...defaultTheme.fontFamily.mono],
             },
             colors: {
-                border: 'hsl(var(--border))',
-                input: 'hsl(var(--input))',
-                ring: 'hsl(var(--ring))',
-                background: 'hsl(var(--background))',
-                foreground: 'hsl(var(--foreground))',
-                primary: {
-                    DEFAULT: 'hsl(var(--primary))',
-                    foreground: 'hsl(var(--primary-foreground))',
+                // Horizon UI Official Palette
+                navy: {
+                    50: '#E9EBF8',
+                    100: '#C7CEEF',
+                    200: '#A3AED0', // Subtitle text
+                    300: '#707EAE', // Secondary text
+                    400: '#434E7B',
+                    500: '#2B3674', // Borders & separators
+                    600: '#1B254B', // Secondary card / elevated
+                    700: '#111C44', // Main Card background
+                    800: '#0B1437', // Main Body background
+                    900: '#080F27',
                 },
-                secondary: {
-                    DEFAULT: 'hsl(var(--secondary))',
-                    foreground: 'hsl(var(--secondary-foreground))',
+                brand: {
+                    100: '#E9E3FF',
+                    200: '#C0B3FF',
+                    300: '#9C86FF',
+                    400: '#868CFF',
+                    500: '#7551FF', // Primary Horizon Purple / Indigo
+                    600: '#4318FF', // Deep Indigo
+                    700: '#3311CC',
+                    800: '#250B99',
+                    900: '#180566',
                 },
-                destructive: {
-                    DEFAULT: 'hsl(var(--destructive))',
-                    foreground: 'hsl(var(--destructive-foreground))',
-                },
-                muted: {
-                    DEFAULT: 'hsl(var(--muted))',
-                    foreground: 'hsl(var(--muted-foreground))',
-                },
-                accent: {
-                    DEFAULT: 'hsl(var(--accent))',
-                    foreground: 'hsl(var(--accent-foreground))',
-                },
-                popover: {
-                    DEFAULT: 'hsl(var(--popover))',
-                    foreground: 'hsl(var(--popover-foreground))',
-                },
-                card: {
-                    DEFAULT: 'hsl(var(--card))',
-                    foreground: 'hsl(var(--card-foreground))',
-                },
-                sidebar: {
-                    DEFAULT: 'hsl(var(--sidebar-background))',
-                    foreground: 'hsl(var(--sidebar-foreground))',
-                    primary: 'hsl(var(--sidebar-primary))',
-                    'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-                    accent: 'hsl(var(--sidebar-accent))',
-                    'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-                    border: 'hsl(var(--sidebar-border))',
-                    ring: 'hsl(var(--sidebar-ring))',
-                },
+                horizon: {
+                    green: '#01B574', // Horizon Success Emerald
+                    'green-light': '#05CD99',
+                    red: '#EE5D50',   // Horizon Danger Coral
+                    amber: '#FFB547', // Horizon Warning Golden
+                    blue: '#3965FF',
+                }
             },
             borderRadius: {
-                lg: 'var(--radius)',
-                md: 'calc(var(--radius) - 2px)',
-                sm: 'calc(var(--radius) - 4px)',
+                'horizon': '20px',
+                'horizon-lg': '24px',
+                'horizon-sm': '14px',
             },
             boxShadow: {
-                'shadcn-sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-                'shadcn': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-                'shadcn-md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                'shadcn-lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+                'horizon': '0px 18px 40px rgba(112, 144, 176, 0.08)',
+                'horizon-card': '0px 18px 40px rgba(0, 0, 0, 0.25)',
+                'horizon-btn': '0px 4px 10px rgba(117, 81, 255, 0.3)',
             }
         },
     },

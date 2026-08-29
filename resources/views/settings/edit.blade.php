@@ -1,79 +1,61 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Settings') }}
-        </h2>
-    </x-slot>
+    <div class="space-y-6">
+        <div>
+            <h2 class="text-xl font-extrabold text-white tracking-tight">Einstellungen & Agentur-Profil</h2>
+            <p class="text-xs text-[#A3AED0] mt-0.5">Verwalte dein Konto, Sicherheits-Passwörter und White-Label-Agentur-Branding.</p>
+        </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('settings.partials.update-profile-information-form')
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Profile Info -->
+            <div class="horizon-card p-6">
+                @include('settings.partials.update-profile-information-form')
             </div>
 
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('settings.partials.update-password-form')
-                </div>
+            <!-- Password -->
+            <div class="horizon-card p-6">
+                @include('settings.partials.update-password-form')
             </div>
 
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    <section>
-                        <header>
-                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                {{ __('Agency Settings') }}
-                            </h2>
-                    
-                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                {{ __("Upload your agency logo to be used in PDF reports.") }}
-                            </p>
-                        </header>
-                    
-                        <form method="post" action="{{ route('agency.logo.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
-                            @csrf
-                    
-                            <div>
-                                <x-input-label for="agency_logo" :value="__('Agency Logo')" />
-                                <input id="agency_logo" name="agency_logo" type="file" class="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" accept="image/*" />
-                                <x-input-error class="mt-2" :messages="$errors->get('agency_logo')" />
+            <!-- Agency Branding -->
+            <div class="horizon-card p-6 lg:col-span-2">
+                <section>
+                    <header class="mb-4">
+                        <h3 class="text-sm font-bold text-white">
+                            {{ __('White-Label Agentur Branding') }}
+                        </h3>
+                        <p class="mt-0.5 text-xs text-[#A3AED0]">
+                            {{ __("Lade dein Agentur-Logo hoch, das automatisch auf PDF-Reports und Kunden-Exporten platziert wird.") }}
+                        </p>
+                    </header>
+                
+                    <form method="post" action="{{ route('agency.logo.update') }}" class="space-y-4" enctype="multipart/form-data">
+                        @csrf
+                
+                        <div>
+                            <input id="agency_logo" name="agency_logo" type="file" 
+                                   class="block w-full text-xs text-[#A3AED0] border border-[#1B254B] rounded-horizon-sm cursor-pointer bg-[#0B1437] focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#7551FF] file:text-white hover:file:bg-[#603BFF]" accept="image/*" />
+                            <x-input-error class="mt-2" :messages="$errors->get('agency_logo')" />
+                        </div>
+                
+                        @if (Auth::user()->agency_logo_path)
+                            <div class="mt-4 p-3 bg-[#0B1437] border border-[#1B254B] rounded-horizon-sm inline-block">
+                                <p class="text-[11px] font-bold text-[#A3AED0] mb-2">Aktuelles Logo:</p>
+                                <img src="{{ asset('storage/' . Auth::user()->agency_logo_path) }}" alt="Agency Logo" class="h-12 object-contain">
                             </div>
-                    
-                            @if (Auth::user()->agency_logo_path)
-                                <div class="mt-4">
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Current Logo:</p>
-                                    <img src="{{ asset('storage/' . Auth::user()->agency_logo_path) }}" alt="Agency Logo" class="h-16 object-contain bg-gray-100 p-2 rounded">
-                                </div>
+                        @endif
+                
+                        <div class="flex items-center gap-3 pt-2">
+                            <button type="submit" class="btn-horizon-primary">Logo speichern</button>
+                
+                            @if (session('status') === 'agency-logo-updated')
+                                <span x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2500)" class="text-xs text-[#01B574] font-bold">
+                                    ✓ Gespeichert!
+                                </span>
                             @endif
-                    
-                            <div class="flex items-center gap-4">
-                                <x-primary-button>{{ __('Save') }}</x-primary-button>
-                    
-                                @if (session('status') === 'agency-logo-updated')
-                                    <p
-                                        x-data="{ show: true }"
-                                        x-show="show"
-                                        x-transition
-                                        x-init="setTimeout(() => show = false, 2000)"
-                                        class="text-sm text-gray-600 dark:text-gray-400"
-                                    >{{ __('Saved.') }}</p>
-                                @endif
-                            </div>
-                        </form>
-                    </section>
-                </div>
+                        </div>
+                    </form>
+                </section>
             </div>
-
-            @if (Auth::user()->is_admin)
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                    <div class="max-w-7xl">
-                        @include('settings.partials.manage-users-form')
-                    </div>
-                </div>
-            @endif
-
         </div>
     </div>
 </x-app-layout>

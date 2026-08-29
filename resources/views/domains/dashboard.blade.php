@@ -1,34 +1,32 @@
-{{--
-    Domain dashboard — composed from partials under resources/views/domains/dashboard/partials/
-    and components under resources/views/components/dashboard/
---}}
 <x-app-layout>
-    <x-slot name="header">
-        <x-dashboard.header :domain="$domain" />
-    </x-slot>
-
     @include('domains.dashboard.partials.styles')
 
-    <div class="py-10" x-data="dashboardData()">
-        <div class="w-full px-4 sm:px-6 lg:px-8 space-y-6">
+    <div class="space-y-6" x-data="dashboardData()">
+        
+        <!-- Domain Action Header (Horizon UI) -->
+        <x-dashboard.header :domain="$domain" />
 
-            <x-dashboard.overhaul-banner />
+        <!-- Segmented Tab Navigation -->
+        @include('domains.dashboard.partials.flash-and-tabs')
 
-            @include('domains.dashboard.partials.flash-and-tabs')
+        <!-- Tab 1: Overview -->
+        @include('domains.dashboard.partials.tab-overview')
 
-            @include('domains.dashboard.partials.tab-overview')
+        <!-- Tab 2: Analytics -->
+        @include('domains.dashboard.partials.tab-analytics')
 
-            @include('domains.dashboard.partials.security-modal')
+        <!-- Tab 3: History & Analysis -->
+        @include('domains.dashboard.partials.tab-history')
 
-            @include('domains.dashboard.partials.tab-monitoring')
+        <!-- Tab 4: Team Notes -->
+        @include('domains.dashboard.partials.tab-notes')
 
-            @include('domains.dashboard.partials.tab-analytics')
+        <!-- Tab 5: Monitoring & Subpages -->
+        @include('domains.dashboard.partials.tab-monitoring')
 
-            @include('domains.dashboard.partials.tab-history')
+        <!-- Security Modal -->
+        @include('domains.dashboard.partials.security-modal')
 
-            @include('domains.dashboard.partials.tab-notes')
-
-        </div>
     </div>
 
     @include('domains.dashboard.partials.scripts')

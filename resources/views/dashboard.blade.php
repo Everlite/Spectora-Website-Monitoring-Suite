@@ -1,20 +1,20 @@
 <x-app-layout>
-    <div class="p-6 lg:p-8 space-y-6" x-data="dashboardManager()">
+    <div class="space-y-6" x-data="dashboardManager()">
         
-        <!-- 1. Page Header (shadcn style) -->
+        <!-- 1. Top Horizon Bar: Action Header -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div class="space-y-1">
-                <h1 class="text-2xl font-bold tracking-tight text-foreground">Fleet Overview</h1>
-                <p class="text-xs text-muted-foreground">
-                    Zentrales Monitoring aller Kunden-Websites, Uptime-Probes, SSL-Zertifikate und Pulse-Telemetrie.
+            <div>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Flotten-Übersicht</h2>
+                <p class="text-xs text-[#A3AED0] mt-0.5">
+                    Live-Zustand aller überwachten Ziel-Websites, SLA Uptime-Probes und DSGVO-Telemetrie.
                 </p>
             </div>
 
-            <div class="flex items-center gap-2.5">
+            <div class="flex items-center gap-3">
                 <button type="button" 
                         @click="$dispatch('open-add-domain')" 
-                        class="btn-default">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        class="btn-horizon-primary">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     <span>Website hinzufügen</span>
                 </button>
             </div>
@@ -22,72 +22,72 @@
 
         <!-- Global Flash Messages -->
         @if (session('status'))
-            <div class="rounded-lg border border-emerald-800/40 bg-emerald-950/30 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
-                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <div class="rounded-horizon bg-[#01B574]/20 border border-[#01B574]/40 p-4 text-xs font-bold text-[#01B574] flex items-center gap-2.5 shadow-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                 <span>{{ session('status') }}</span>
             </div>
         @endif
 
-        <!-- 2. shadcn KPI Metrics Cards -->
+        <!-- 2. Horizon 4-Card Circular Metric Grid -->
         <x-spectora.global-metrics :kpis="$kpis ?? []" />
 
-        <!-- 3. Toolbar: Search + Filter Pills + View Switcher -->
+        <!-- 3. Horizon Search & Filter Controls -->
         <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-2">
             
-            <!-- Left: Search Input -->
+            <!-- Search Pill -->
             <div class="relative flex-1 max-w-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#A3AED0]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <input type="text" 
                        x-model="searchQuery" 
                        placeholder="Domains filtern..." 
-                       class="shadcn-input pl-8">
+                       class="horizon-input pl-10">
             </div>
 
-            <!-- Right: Filter Pills & View Mode Switcher -->
+            <!-- Filter Pills & View Switcher -->
             <div class="flex items-center gap-3">
                 <!-- Status Pills -->
-                <div class="inline-flex rounded-lg border border-border bg-card p-0.5 text-muted-foreground">
+                <div class="inline-flex rounded-full bg-[#111C44] border border-[#1B254B] p-1 text-[#A3AED0]">
                     <button type="button" 
                             @click="filterStatus = 'all'" 
-                            :class="filterStatus === 'all' ? 'bg-secondary text-foreground font-semibold shadow-sm' : 'hover:text-foreground'"
-                            class="px-2.5 py-1 rounded-md text-xs transition-colors">
+                            :class="filterStatus === 'all' ? 'bg-[#7551FF] text-white font-bold shadow-horizon-btn' : 'hover:text-white'"
+                            class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all">
                         Alle ({{ count($domains) }})
                     </button>
                     <button type="button" 
                             @click="filterStatus = 'online'" 
-                            :class="filterStatus === 'online' ? 'bg-secondary text-emerald-400 font-semibold shadow-sm' : 'hover:text-foreground'"
-                            class="px-2.5 py-1 rounded-md text-xs transition-colors">
+                            :class="filterStatus === 'online' ? 'bg-[#01B574] text-white font-bold' : 'hover:text-white'"
+                            class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all">
                         Online ({{ $kpis['online_count'] ?? 0 }})
                     </button>
                     <button type="button" 
                             @click="filterStatus = 'offline'" 
-                            :class="filterStatus === 'offline' ? 'bg-secondary text-rose-400 font-semibold shadow-sm' : 'hover:text-foreground'"
-                            class="px-2.5 py-1 rounded-md text-xs transition-colors">
+                            :class="filterStatus === 'offline' ? 'bg-[#EE5D50] text-white font-bold' : 'hover:text-white'"
+                            class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all">
                         Störungen ({{ $kpis['active_incidents'] ?? 0 }})
                     </button>
                 </div>
 
-                <!-- View Switcher (Table / Grid) -->
-                <div class="inline-flex rounded-lg border border-border bg-card p-0.5 text-muted-foreground">
+                <!-- View Mode Switcher -->
+                <div class="inline-flex rounded-full bg-[#111C44] border border-[#1B254B] p-1 text-[#A3AED0]">
                     <button type="button" 
                             @click="viewMode = 'table'" 
-                            :class="viewMode === 'table' ? 'bg-secondary text-foreground' : 'hover:text-foreground'"
-                            class="p-1.5 rounded-md transition-colors" title="Tabellenansicht">
+                            :class="viewMode === 'table' ? 'bg-[#1B254B] text-white' : 'hover:text-white'"
+                            class="p-2 rounded-full transition-all" title="Tabellenansicht">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
                     </button>
                     <button type="button" 
                             @click="viewMode = 'grid'" 
-                            :class="viewMode === 'grid' ? 'bg-secondary text-foreground' : 'hover:text-foreground'"
-                            class="p-1.5 rounded-md transition-colors" title="Kartenansicht">
+                            :class="viewMode === 'grid' ? 'bg-[#1B254B] text-white' : 'hover:text-white'"
+                            class="p-2 rounded-full transition-all" title="Kartenansicht">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- 4. Main Domain List (Table or Grid) -->
+        <!-- 4. Main Domain List (Horizon Table or Grid) -->
         @if(count($domains) > 0)
             <!-- Table View -->
             <div x-show="viewMode === 'table'">
@@ -95,7 +95,7 @@
             </div>
 
             <!-- Grid Cards View -->
-            <div x-show="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div x-show="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 @foreach ($domains as $domain)
                     <div x-show="matchesFilter({{ json_encode(strtolower($domain->url)) }}, {{ json_encode($domain->status_code >= 200 && $domain->status_code < 400 ? 'online' : 'offline') }})">
                         <x-spectora.domain-card :domain="$domain" />
@@ -104,19 +104,19 @@
             </div>
         @else
             <!-- Zero State -->
-            <div class="shadcn-card p-12 text-center my-8 max-w-md mx-auto border-dashed">
-                <div class="w-10 h-10 rounded-lg bg-secondary text-foreground flex items-center justify-center mx-auto mb-3 border border-border">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+            <div class="horizon-card p-12 text-center my-8 max-w-md mx-auto border-dashed">
+                <div class="w-14 h-14 rounded-full bg-[#1B254B] text-[#7551FF] flex items-center justify-center mx-auto mb-3 shadow-inner">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
                 </div>
-                <h3 class="text-sm font-semibold text-foreground">Keine Ziel-Websites hinterlegt</h3>
-                <p class="text-xs text-muted-foreground mt-1 mb-4">Füge deine erste Website hinzu, um 24/7 Monitoring und Telemetrie zu starten.</p>
-                <button type="button" @click="$dispatch('open-add-domain')" class="btn-default">
+                <h3 class="text-base font-bold text-white">Noch keine Ziel-Websites hinterlegt</h3>
+                <p class="text-xs text-[#A3AED0] mt-1 mb-5">Füge deine erste Website hinzu, um Uptime-Probes und Telemetrie zu starten.</p>
+                <button type="button" @click="$dispatch('open-add-domain')" class="btn-horizon-primary">
                     + Website hinzufügen
                 </button>
             </div>
         @endif
 
-        <!-- Modals (Dialogs) -->
+        <!-- Horizon Modals -->
         <x-spectora.add-domain-modal />
         <x-spectora.watchdog-modal />
         <x-spectora.notes-modal />
@@ -131,7 +131,7 @@
             return {
                 searchQuery: '',
                 filterStatus: 'all',
-                viewMode: 'table', // default to clean shadcn data-table
+                viewMode: 'table',
 
                 matchesFilter(url, status) {
                     const matchesSearch = !this.searchQuery || url.includes(this.searchQuery.toLowerCase());
