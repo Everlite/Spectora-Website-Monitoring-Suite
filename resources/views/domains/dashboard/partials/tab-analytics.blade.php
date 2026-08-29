@@ -54,10 +54,10 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[#1B254B]/60">
-                        @forelse ($topPages as $page)
+                        @forelse ($topPages ?? [] as $page)
                             <tr class="hover:bg-[#121E4A] transition-colors">
-                                <td class="py-3 text-white font-mono truncate max-w-xs">{{ $page->url }}</td>
-                                <td class="py-3 text-right text-white font-mono font-bold">{{ number_format($page->total) }}</td>
+                                <td class="py-3 text-white font-mono truncate max-w-xs">{{ $page->url ?? '/' }}</td>
+                                <td class="py-3 text-right text-white font-mono font-bold">{{ number_format($page->total ?? 0) }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        <!-- Referrers -->
+        <!-- Referrers / Sources -->
         <div class="horizon-card p-6">
             <h3 class="text-xs font-bold uppercase tracking-wider text-[#A3AED0] mb-4">Top Traffic-Quellen (Referrer)</h3>
             <div class="overflow-x-auto">
@@ -81,10 +81,13 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[#1B254B]/60">
-                        @forelse ($topReferrers as $referrer)
+                        @php
+                            $sources = $topSources ?? $topReferrers ?? [];
+                        @endphp
+                        @forelse ($sources as $source)
                             <tr class="hover:bg-[#121E4A] transition-colors">
-                                <td class="py-3 text-white font-mono truncate max-w-xs">{{ $referrer->referrer ?: 'Direkt / Bookmark' }}</td>
-                                <td class="py-3 text-right text-white font-mono font-bold">{{ number_format($referrer->total) }}</td>
+                                <td class="py-3 text-white font-mono truncate max-w-xs">{{ $source->referrer_domain ?? $source->referrer ?? 'Direkt / Bookmark' }}</td>
+                                <td class="py-3 text-right text-white font-mono font-bold">{{ number_format($source->total ?? 0) }}</td>
                             </tr>
                         @empty
                             <tr>

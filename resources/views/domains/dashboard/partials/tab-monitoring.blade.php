@@ -87,7 +87,7 @@
                             <div class="p-3 bg-[#0B1437] border border-[#1B254B] rounded-horizon-sm">
                                 <div class="text-[10px] uppercase font-bold text-[#A3AED0]">Aktive Subpages</div>
                                 <div class="text-xl font-bold font-mono text-white mt-1">
-                                    {{ $domain->subpages ? $domain->subpages->count() : 0 }}
+                                    {{ isset($monitoredUrls) ? $monitoredUrls->count() : ($domain->monitoredUrls ? $domain->monitoredUrls->count() : 0) }}
                                 </div>
                             </div>
                         </div>

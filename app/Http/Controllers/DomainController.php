@@ -122,10 +122,12 @@ class DomainController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // --- 5. Security & Audit Summary (Restored Fix) ---
+        // --- 5. Security & Audit Summary ---
         $auditDetails = $domain->last_pagespeed_details ?? [];
         $criticalCount = collect($auditDetails)->where('status', 'error')->count();
         $warningCount = collect($auditDetails)->where('status', 'warning')->count();
+        $securityIssues = $auditDetails;
+        $topReferrers = $analytics['topSources'] ?? [];
 
         return view('domains.dashboard', array_merge(
             compact(
@@ -143,6 +145,8 @@ class DomainController extends Controller
                 'criticalCount',
                 'warningCount',
                 'auditDetails',
+                'securityIssues',
+                'topReferrers',
                 'score',
                 'scoreColor',
                 'watchdogData',
