@@ -7,16 +7,13 @@
 
         <title>Spectora</title>
 
-        <!-- Fonts: System Stack (Privacy First) -->
-    <style>
-        .font-sans {
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
-        }
-    </style>
+        <!-- Fonts: Inter & Outfit -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800,900|outfit:600,700,800&display=swap" rel="stylesheet" />
 
         <!-- PWA -->
         <link rel="manifest" href="/manifest.json">
-        <meta name="theme-color" content="#0f172a">
+        <meta name="theme-color" content="#070b12">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="Spectora">
@@ -24,13 +21,13 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-slate-100 dark:bg-gray-900 text-slate-800 dark:text-gray-100 transition-colors duration-300">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <body class="font-sans antialiased bg-[#0B0F17] text-slate-100 min-h-screen selection:bg-cyan-500 selection:text-[#070B12]">
+        <div class="min-h-screen bg-[#0B0F17]">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white dark:bg-gray-800/95 border-b border-slate-200/60 dark:border-gray-700/50">
+                <header class="bg-[#0D1424]/60 backdrop-blur-md border-b border-slate-800/80">
                     <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>

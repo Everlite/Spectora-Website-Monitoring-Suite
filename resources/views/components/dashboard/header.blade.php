@@ -15,6 +15,11 @@
                         @else
                             <span class="badge-error text-[10px]">● Offline</span>
                         @endif
+                        @if(isset($domain->pagespeed_score_desktop) && $domain->pagespeed_score_desktop > 0)
+                            <span class="px-2 py-0.5 rounded text-[11px] font-black uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                                Grade {{ $domain->grade }} ({{ $domain->pagespeed_score_desktop }}/100)
+                            </span>
+                        @endif
                     </h2>
                     <p class="text-muted text-sm mt-0.5">Last Check: {{ $domain->updated_at->diffForHumans() }}</p>
                 </div>

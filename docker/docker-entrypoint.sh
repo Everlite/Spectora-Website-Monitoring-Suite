@@ -6,10 +6,14 @@
 
 set -e
 
-# 1. Fix permissions on mounted volumes (MUST run before anything else)
-echo "Setting permissions on storage and database volumes..."
+# 1. Fix permissions on mounted volumes & Apache directories
+echo "Setting permissions on storage, database and apache logs..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+
+mkdir -p /var/log/apache2 /var/run/apache2 /var/lock/apache2
+chown -R www-data:www-data /var/log/apache2 /var/run/apache2 /var/lock/apache2
+chmod -R 775 /var/log/apache2 /var/run/apache2 /var/lock/apache2
 
 # Ensure required storage subdirectories exist
 mkdir -p /var/www/html/storage/logs \
@@ -76,6 +80,9 @@ DB_DATABASE="$NEW_DB" php artisan migrate --force
 # 7. Create storage link (forces overwriting existing links/files if present)
 echo "Ensuring storage link..."
 php artisan storage:link --force
+
+# Clean up any stale PID files from unclean container shutdowns
+rm -f /var/run/apache2/apache2.pid /var/run/apache2.pid /var/run/supervisord.pid /run/apache2/apache2.pid /run/httpd.pid 2>/dev/null || true
 
 # 8. Start Supervisor (Apache + Cron + Queue Worker)
 echo "Starting services via Supervisor..."

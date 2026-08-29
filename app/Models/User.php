@@ -27,6 +27,7 @@ class User extends Authenticatable
         'password',
         'timezone',
         'agency_logo_path',
+        'webhook_url',
         'title',
         'phone',
         'mobile_phone',

@@ -22,6 +22,8 @@ class AnalyticsVisit extends Model
         'browser',
         'os',
         'device',
+        'event_type',
+        'event_name',
         'country',
         'region',
         'city',

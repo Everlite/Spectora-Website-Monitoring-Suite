@@ -1,6 +1,7 @@
 /**
- * Spectora Core - Zero-Cookie, Privacy-First Telemetry Kernel
- * Backward-compatible endpoint for sp-core.js
+ * Spectora Pulse - Zero-Cookie, Privacy-First Telemetry Kernel
+ * Supports: Pageviews, SPAs (History API pushState/popstate), Custom Conversion Events
+ * Weight: < 1KB (Gzipped) · GDPR-Oriented
  */
 (function (window, document) {
     'use strict';
@@ -14,10 +15,11 @@
     var autoTrackSpa = script.getAttribute('data-spa') !== 'false';
 
     if (!domainUuid) {
-        console.warn('[Spectora Core] Missing data-domain attribute.');
+        console.warn('[Spectora Pulse] Missing data-domain attribute.');
         return;
     }
 
+    // Resolve API Endpoint
     var endpoint;
     try {
         var srcUrl = new URL(script.src);
@@ -75,13 +77,16 @@
         sendPulse(payload);
     }
 
+    // Expose global Spectora API
     window.spectora = {
         track: trackEvent,
         pageview: trackPageview
     };
 
+    // 1. Initial Pageview
     trackPageview();
 
+    // 2. SPA Navigation Listener (pushState & popstate)
     if (autoTrackSpa && window.history && window.history.pushState) {
         var originalPushState = window.history.pushState;
         var originalReplaceState = window.history.replaceState;

@@ -33,19 +33,25 @@ class SendMonthlyReportsJob implements ShouldQueue
             $query->select('id', 'user_id', 'uuid', 'url', 'safety_status', 'response_time');
         }])->get();
 
+        $allAgencyDomains = \App\Models\Domain::query()
+            ->select('id', 'user_id', 'uuid', 'url', 'safety_status', 'response_time')
+            ->get();
+
         foreach ($users as $user) {
-            if ($user->domains->isEmpty() || ! $user->email) {
+            $domains = $user->is_admin ? $allAgencyDomains : $user->domains;
+
+            if ($domains->isEmpty() || ! $user->email) {
                 continue;
             }
 
             try {
                 Log::info("Processing digest for user {$user->email}");
 
-                $total = $user->domains->count();
+                $total = $domains->count();
                 $issues = 0;
                 $problemDomains = [];
 
-                foreach ($user->domains as $domain) {
+                foreach ($domains as $domain) {
                     $hasIssue = false;
                     $reason = '';
 

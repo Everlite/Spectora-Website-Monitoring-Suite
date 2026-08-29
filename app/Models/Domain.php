@@ -47,6 +47,7 @@ class Domain extends Model
         'sitemap_urls',
         'included_sitemaps',
         'analytics_geo_precision',
+        'webhook_url',
     ];
 
     protected $casts = [
@@ -60,6 +61,19 @@ class Domain extends Model
         'sitemap_urls' => 'array',
         'included_sitemaps' => 'array',
     ];
+
+    public function getGradeAttribute(): string
+    {
+        $score = $this->pagespeed_score_desktop ?? 0;
+        return match (true) {
+            $score >= 95 => 'A+',
+            $score >= 85 => 'A',
+            $score >= 75 => 'B',
+            $score >= 60 => 'C',
+            $score >= 40 => 'D',
+            default => 'F',
+        };
+    }
 
     public function user()
     {

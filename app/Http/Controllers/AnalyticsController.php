@@ -15,11 +15,12 @@ class AnalyticsController extends Controller
 {
     public function __construct(
         private readonly AnalyticsQueryService $analyticsQuery,
-        private readonly GeoResolutionService $geoResolution
+        private readonly GeoResolutionService $geoResolution,
+        private readonly \App\SpectoraEngine\Pulse\PulseIngestEngine $pulseIngest
     ) {}
 
     /**
-     * Store a new analytics event.
+     * Store a new pulse / analytics event.
      */
     public function store(Request $request)
     {
@@ -28,70 +29,13 @@ class AnalyticsController extends Controller
             'url' => 'required|url',
             'referrer' => 'nullable|string',
             'width' => 'nullable|integer',
+            'event_type' => 'nullable|string|max:32',
+            'event_name' => 'nullable|string|max:64',
+            'event_data' => 'nullable|array',
         ]);
 
-        $domain = Domain::where('uuid', $validated['domain'])->firstOrFail();
-
-        $origin = $request->header('Origin');
-        $referer = $request->header('Referer');
-        $expectedHost = HostHelper::fromUrl($domain->url);
-
-        $isLocal = ($origin && (str_contains($origin, 'localhost') || str_contains($origin, '127.0.0.1')))
-            || ($referer && (str_contains($referer, 'localhost') || str_contains($referer, '127.0.0.1')));
-
-        if (! $isLocal) {
-            $originHost = $origin ? parse_url($origin, PHP_URL_HOST) : null;
-            $refererHost = $referer ? parse_url($referer, PHP_URL_HOST) : null;
-
-            $isAuthorized = HostHelper::matches($originHost, $expectedHost)
-                || (! $originHost && HostHelper::matches($refererHost, $expectedHost));
-
-            if (! $isAuthorized) {
-                abort(403, 'Unauthorized tracking origin (Expected: '.$expectedHost.')');
-            }
-        }
-
-        $ip = $request->ip();
-        $userAgent = $request->userAgent() ?? 'Unknown';
-        $date = now()->format('Y-m-d');
-        $dailyKey = hash_hmac('sha256', $date, (string) config('app.key'));
-        $ipForHash = $ip ? AnalyticsIpService::anonymizeForHash($ip) : '';
-        $visitorHash = hash_hmac('sha256', $ipForHash.'|'.$userAgent, $dailyKey);
-
-        $urlPath = parse_url($validated['url'], PHP_URL_PATH) ?? '/';
-
-        $referrerDomain = null;
-        if (! empty($validated['referrer'])) {
-            $referrerDomain = parse_url($validated['referrer'], PHP_URL_HOST);
-        }
-
-        $width = $request->input('width');
-        $device = 'desktop';
-        if ($width && $width < 768) {
-            $device = 'mobile';
-        } elseif ($width && $width < 1024) {
-            $device = 'tablet';
-        }
-
-        $browser = AnalyticsUserAgent::browser($userAgent);
-        $os = AnalyticsUserAgent::os($userAgent);
-        $precision = $domain->analytics_geo_precision ?? Domain::GEO_CITY;
-        $geo = $this->geoResolution->resolve($ip, $request, $precision);
-
-        AnalyticsVisit::create([
-            'domain_id' => $domain->id,
-            'visitor_hash' => $visitorHash,
-            'url' => $validated['url'],
-            'path' => $urlPath,
-            'referrer' => $validated['referrer'] ?? null,
-            'referrer_domain' => $referrerDomain,
-            'browser' => $browser,
-            'os' => $os,
-            'device' => $device,
-            'country' => $geo['country'],
-            'region' => $geo['region'],
-            'city' => $geo['city'],
-        ]);
+        $event = \App\SpectoraEngine\Pulse\PulseEvent::fromRequest($validated);
+        $this->pulseIngest->ingest($request, $event);
 
         return response()->noContent();
     }

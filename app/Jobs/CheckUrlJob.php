@@ -116,20 +116,20 @@ class CheckUrlJob implements ShouldQueue
                 }
             }
 
-            // 5. Watchdog Service (reuse response body — no second HTTP request)
+            // 5. Watchdog Engine (reuse response body — no second HTTP request)
             try {
-                $watchdog = new WatchdogService;
+                $watchdog = new \App\SpectoraEngine\Watchdog\SpectoraWatchdogEngine;
                 $scanResult = $watchdog->scan($this->domain, $url, $rawBody, $statusCode);
 
-                $safetyDetails['watchdog'] = $scanResult;
-                if ($scanResult['status'] === 'danger') {
+                $safetyDetails['watchdog'] = $scanResult->toArray();
+                if ($scanResult->isDangerous()) {
                     $safetyStatus = 'danger';
-                    foreach ($scanResult['issues'] as $issue) {
-                        if ($issue['severity'] === 'critical') {
+                    foreach ($scanResult->issues as $issue) {
+                        if (($issue['severity'] ?? '') === 'critical') {
                             $issues[] = "🚨 {$issue['title']}: {$issue['description']}";
                         }
                     }
-                } elseif ($scanResult['status'] === 'warning' && $safetyStatus === 'safe') {
+                } elseif ($scanResult->hasWarnings() && $safetyStatus === 'safe') {
                     $safetyStatus = 'warning';
                 }
             } catch (\Exception $e) {
@@ -189,28 +189,9 @@ class CheckUrlJob implements ShouldQueue
             'created_at' => now(),
         ]);
 
-        // --- Handle Notifications (main URL and each monitored sub-URL) ---
-        if ($this->monitoredUrl) {
-            if (! empty($issues)) {
-                if (! $this->monitoredUrl->notify_sent) {
-                    DomainAlertService::sendDowntimeAlerts($this->domain, $issues, $this->url);
-                    $this->monitoredUrl->update(['notify_sent' => true]);
-                }
-            } elseif ($this->monitoredUrl->notify_sent) {
-                $this->monitoredUrl->update(['notify_sent' => false]);
-                Log::info("Resetting notify_sent for monitored URL {$this->url} (Healthy again)");
-            }
-        } else {
-            if (! empty($issues)) {
-                if (! $this->domain->notify_sent) {
-                    DomainAlertService::sendDowntimeAlerts($this->domain, $issues);
-                    $this->domain->update(['notify_sent' => true]);
-                }
-            } elseif ($this->domain->notify_sent) {
-                $this->domain->update(['notify_sent' => false]);
-                Log::info("Resetting notify_sent for {$this->domain->url} (Healthy again)");
-            }
-        }
+        // --- Handle Notifications via Incident State Machine (Downtime + Recovery + Webhooks) ---
+        $stateMachine = app(\App\SpectoraEngine\Incidents\IncidentStateMachine::class);
+        $stateMachine->transition($this->domain, $this->monitoredUrl, $issues, $this->url);
 
         SecurityService::clearHostIpCache();
     }

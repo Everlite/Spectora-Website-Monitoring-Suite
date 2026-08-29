@@ -29,6 +29,7 @@ class SettingsUpdateRequest extends FormRequest
             ],
             'company_name' => ['required', 'string', 'max:255'],
             'timezone' => ['required', 'string', 'max:255', Rule::in(timezone_identifiers_list())],
+            'webhook_url' => ['nullable', 'url', 'max:1024'],
         ];
     }
 }

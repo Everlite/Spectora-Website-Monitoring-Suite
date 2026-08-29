@@ -41,7 +41,7 @@
 
         <div>
             <x-input-label for="timezone" :value="__('Timezone')" />
-            <select id="timezone" name="timezone" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+            <select id="timezone" name="timezone" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-cyan-500 dark:focus:border-cyan-500 focus:ring-cyan-500 rounded-md shadow-sm">
                 @foreach(timezone_identifiers_list() as $timezone)
                     <option value="{{ $timezone }}" {{ old('timezone', $user->timezone) == $timezone ? 'selected' : '' }}>
                         {{ $timezone }}
@@ -49,6 +49,13 @@
                 @endforeach
             </select>
             <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
+        </div>
+
+        <div>
+            <x-input-label for="webhook_url" :value="__('Discord / Slack Webhook URL (Optional)')" />
+            <x-text-input id="webhook_url" name="webhook_url" type="url" placeholder="https://discord.com/api/webhooks/... or https://hooks.slack.com/..." class="mt-1 block w-full" :value="old('webhook_url', $user->webhook_url)" />
+            <p class="mt-1 text-xs text-gray-500">Receive instant outage and recovery alerts directly in your team's Discord or Slack channel.</p>
+            <x-input-error class="mt-2" :messages="$errors->get('webhook_url')" />
         </div>
 
         <div class="flex items-center gap-4">

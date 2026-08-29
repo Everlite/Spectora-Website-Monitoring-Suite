@@ -20,9 +20,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Planned
+### Added
 
-- Further dashboard sub-partials (overview stat cards, etc.) after weekend QA
+- **Proprietary Spectora Engine Core (`App\SpectoraEngine`)**:
+  - `SpectoraAuditEngine`: Multi-factor scoring matrix (0–100, Grade A+ to F) evaluating TTFB, size, H1 structure, SEO snippets, alt tags, and security headers.
+  - `SpectoraWatchdogEngine`: Heuristic malware scanner detecting eval-obfuscated JS (`eval`, `String.fromCharCode`), CJK SEO title spam, cloaking, and malicious hidden iframes.
+  - `PulseIngestEngine`: Zero-cookie telemetry with rotating HMAC-SHA256 visitor subkeys, origin validation, and custom event tracking.
+  - `IncidentStateMachine`: Intelligent outage & recovery lifecycle manager with automated healing detection.
+  - `AlertDispatcher`: Multi-channel notification dispatcher supporting **Discord Webhooks**, **Slack Webhooks**, Email, and Web Push.
+- **Client Tracking Kernels**:
+  - `public/js/sp-pulse.js`: < 1KB tracking script supporting SPA History API route tracking (`pushState`/`popstate`) and `window.spectora.track()` custom events.
+- **Cyber-Glassmorphic UI/UX Redesign ("WOW Factor")**:
+  - Dark obsidian and neon cyber design tokens (`#0B0F17`, `#00F2FE`, `#10B981`, `#F43F5E`, `#8B5CF6`).
+  - Modular Blade components: `<x-spectora.global-metrics>`, `<x-spectora.domain-card>`, `<x-spectora.add-domain-modal>`, `<x-spectora.watchdog-modal>`, `<x-spectora.notes-modal>`, and `<x-spectora.delete-modal>`.
+  - Upgraded top navigation with live glowing `ENGINE ACTIVE` radar pill.
+  - Webhook URL configuration in User Settings.
+- **Database & Performance**:
+  - Migration `2026_06_15_000000_upgrade_spectora_engine_schema.php` with `webhook_url` support and composite indexes on `checks_history` and `analytics_visits`.
+  - Batch aggregation in `DashboardController` eliminating all N+1 query overhead.
+- **Unit Tests**:
+  - `SpectoraAuditEngineTest`, `SpectoraWatchdogEngineTest`, `PulseIngestEngineTest`, and `IncidentStateMachineTest`.
 
 ---
 
