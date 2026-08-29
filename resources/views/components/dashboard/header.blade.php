@@ -1,38 +1,72 @@
-@props(['domain'])
+@props(['domain', 'allDomains' => []])
 
-<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 py-2" x-data="headerActions()">
-    <!-- Domain Info -->
-    <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-studio-sm bg-[#171E2E] border border-[#202A3E] flex items-center justify-center text-[#3B57E8] shrink-0">
+<div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 py-2" x-data="headerActions()">
+    
+    <!-- Left: Target Info & Quick Switcher -->
+    <div class="flex items-center gap-3.5 min-w-0">
+        <div class="w-10 h-10 rounded-studio-sm bg-[#171E2E] border border-[#202A3E] flex items-center justify-center text-[#3B57E8] shrink-0 shadow-studio-sm">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
         </div>
-        <div>
+        
+        <div class="min-w-0">
             <div class="flex items-center gap-2.5 flex-wrap">
-                <h2 class="font-bold text-lg text-white tracking-tight">
-                    {{ $domain->url }}
-                </h2>
+                <!-- Target Dropdown Switcher -->
+                <div class="relative" x-data="{ open: false }">
+                    <button type="button" @click="open = !open" @click.outside="open = false" 
+                            class="flex items-center gap-1.5 font-bold text-base sm:text-lg text-white hover:text-[#3B57E8] transition-colors group">
+                        <span class="truncate">{{ $domain->url }}</span>
+                        <svg class="w-4 h-4 text-[#8A95A8] group-hover:text-white transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+
+                    <!-- Dropdown List -->
+                    <div x-show="open" x-cloak 
+                         class="absolute left-0 mt-2 w-64 bg-[#111622] border border-[#202A3E] rounded-studio shadow-studio-card p-1.5 z-50 space-y-1">
+                        <div class="px-2 py-1 text-[10px] font-bold text-[#8A95A8] uppercase tracking-wider">
+                            Ziel wechseln
+                        </div>
+                        @foreach($allDomains as $d)
+                            <a href="{{ route('domains.show', $d) }}" 
+                               class="flex items-center justify-between px-2.5 py-1.5 rounded-studio-sm text-xs font-semibold {{ $d->id === $domain->id ? 'bg-[#171E2E] text-white border border-[#202A3E]' : 'text-[#8A95A8] hover:text-white hover:bg-[#171E2E]/60' }}">
+                                <span class="truncate">{{ $d->url }}</span>
+                                <span class="w-2 h-2 rounded-full {{ $d->status_code >= 200 && $d->status_code < 400 ? 'bg-[#10B981]' : 'bg-[#F43F5E]' }}"></span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Status Badge -->
                 @if($domain->status_code >= 200 && $domain->status_code < 400)
                     <span class="badge-status-online">
                         ● Online ({{ $domain->status_code }})
                     </span>
                 @else
                     <span class="badge-status-offline">
-                        ● Offline
+                        ● {{ $domain->status_code ? 'HTTP '.$domain->status_code : 'Offline' }}
                     </span>
                 @endif
+
+                <!-- Grade Badge -->
                 @if(isset($domain->pagespeed_score_desktop) && $domain->pagespeed_score_desktop > 0)
                     <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-[#171E2E] text-[#4F6BFF] border border-[#202A3E]">
                         Grade {{ $domain->grade }} ({{ $domain->pagespeed_score_desktop }}/100)
                     </span>
                 @endif
             </div>
-            <p class="text-xs text-[#8A95A8] mt-0.5">Letzter Check: {{ $domain->last_checked ? $domain->last_checked->diffForHumans() : 'nie' }}</p>
+
+            <p class="text-xs text-[#8A95A8] mt-0.5 flex items-center gap-2">
+                <span>Letzter Check: {{ $domain->last_checked ? $domain->last_checked->diffForHumans() : 'nie' }}</span>
+                <span class="text-[#5A667A]">·</span>
+                <a href="{{ $domain->url }}" target="_blank" rel="noopener noreferrer" class="text-[#3B57E8] hover:underline inline-flex items-center gap-1 font-medium">
+                    Website öffnen
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+            </p>
         </div>
     </div>
     
-    <!-- Action Buttons -->
+    <!-- Right: Operational Action Buttons -->
     <div class="flex flex-wrap items-center gap-2">
-        <!-- Analyse Button -->
+        <!-- 1-Click Live Deep Probe -->
         <button 
             type="button"
             @click="runAnalysis()"
@@ -50,24 +84,22 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
             </template>
-            <span x-text="isAnalyzing ? 'Prüfung läuft...' : 'Jetzt prüfen'"></span>
+            <span x-text="isAnalyzing ? 'Prüfung läuft...' : 'Deep Probe starten'"></span>
         </button>
-        
-        <!-- Open Site -->
-        <a href="{{ $domain->url }}" target="_blank" rel="noopener noreferrer"
-           class="btn-spectora-secondary">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-            </svg>
-            <span>Öffnen</span>
-        </a>
 
-        <!-- Tracking Code -->
+        <!-- Tracking Code Modal Trigger -->
         <button type="button" @click="showTrackingModal = true"
                 class="btn-spectora-secondary">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
             <span>Tracking Code</span>
         </button>
+
+        <!-- PDF Client Report Download -->
+        <a href="{{ route('domains.report', $domain) }}" target="_blank"
+           class="btn-spectora-secondary" title="PDF Report generieren">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>PDF Export</span>
+        </a>
     </div>
 
     <!-- Tracking Modal -->
@@ -84,7 +116,7 @@
                  class="inline-block align-bottom bg-[#111622] border border-[#202A3E] rounded-studio text-left overflow-hidden shadow-studio-card transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full p-6 space-y-4">
                 <div class="flex items-start justify-between pb-3 border-b border-[#202A3E]">
                     <div>
-                        <h3 class="text-sm font-bold text-white">Pulse Tracking Code</h3>
+                        <h3 class="text-sm font-bold text-white">Pulse Telemetrie Snippet</h3>
                         <p class="text-xs text-[#8A95A8] font-mono mt-0.5">{{ $domain->url }}</p>
                     </div>
                     <button type="button" @click="showTrackingModal = false" class="text-[#8A95A8] hover:text-white">
@@ -92,7 +124,7 @@
                     </button>
                 </div>
                 <div class="space-y-2">
-                    <p class="text-xs text-[#8A95A8]">Füge diesen Code in den <code class="bg-[#090B10] px-1.5 py-0.5 rounded text-white font-mono border border-[#202A3E]">&lt;head&gt;</code> ein:</p>
+                    <p class="text-xs text-[#8A95A8]">Füge diesen Tag vor dem schließenden <code class="bg-[#090B10] px-1.5 py-0.5 rounded text-white font-mono border border-[#202A3E]">&lt;/head&gt;</code> Tag ein:</p>
                     <pre class="bg-[#090B10] border border-[#202A3E] rounded-studio-sm p-3 text-xs font-mono text-[#10B981] select-all overflow-x-auto whitespace-pre-wrap leading-relaxed">&lt;script defer src="{{ rtrim(config('app.url'), '/') }}/js/sp-pulse.js" data-domain="{{ $domain->uuid }}"&gt;&lt;/script&gt;</pre>
                 </div>
                 <div class="flex justify-end pt-3 border-t border-[#202A3E]">

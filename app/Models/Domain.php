@@ -105,12 +105,33 @@ class Domain extends Model
         return $this->hasMany(MonitoredUrl::class);
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function ($domain) {
+            if (empty($domain->uuid)) {
+                $domain->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
     /**
      * Get the route key for the model.
      */
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    public function getRouteKey()
+    {
+        return $this->uuid ?: (string)$this->id;
+    }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where('uuid', $value)
+            ->orWhere('id', $value)
+            ->firstOrFail();
     }
 
     /**
