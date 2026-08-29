@@ -1,141 +1,102 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Spectora</title>
+        <title>{{ config('app.name', 'Spectora') }} - Fleet Monitoring</title>
 
-        <!-- Fonts: Inter & Outfit -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800,900|outfit:600,700,800&display=swap" rel="stylesheet" />
+        <!-- Fonts (Inter + JetBrains Mono) -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        <!-- PWA -->
+        <!-- PWA / Favicon -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
         <link rel="manifest" href="/manifest.json">
-        <meta name="theme-color" content="#070b12">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Spectora">
+        <meta name="theme-color" content="#09090b">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-[#090D16] text-slate-100 min-h-screen selection:bg-blue-600 selection:text-white">
-        <div class="min-h-screen bg-[#090D16]">
+    <body class="font-sans antialiased bg-background text-foreground min-h-screen selection:bg-primary selection:text-primary-foreground" x-data="{ mobileSidebarOpen: false }">
+        
+        <div class="flex min-h-screen bg-background">
+            
+            <!-- 1. Left Sidebar Navigation (Desktop) -->
             @include('layouts.navigation')
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-[#0B1120] border-b border-[#1E293B]">
-                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+            <!-- Mobile Sidebar Drawer -->
+            <div x-show="mobileSidebarOpen" 
+                 x-cloak
+                 class="fixed inset-0 z-50 lg:hidden flex" 
+                 role="dialog" aria-modal="true">
+                <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" @click="mobileSidebarOpen = false"></div>
+                <div class="relative flex flex-col w-72 bg-sidebar border-r border-border p-4 z-50">
+                    <div class="flex items-center justify-between pb-4 border-b border-border mb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black text-xs">S</div>
+                            <span class="text-sm font-bold text-foreground">Spectora</span>
+                        </div>
+                        <button @click="mobileSidebarOpen = false" class="text-muted-foreground hover:text-foreground">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <nav class="space-y-1">
+                        <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium bg-secondary text-foreground">
+                            Dashboard
+                        </a>
+                        <a href="{{ route('settings.edit') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground">
+                            Einstellungen
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- 2. Main Content Area -->
+            <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+                
+                <!-- Top Header Bar -->
+                <header class="h-14 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6">
+                    <div class="flex items-center gap-3">
+                        <button type="button" @click="mobileSidebarOpen = true" class="lg:hidden text-muted-foreground hover:text-foreground p-1.5 rounded-md border border-border">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </button>
+
+                        <!-- Breadcrumbs -->
+                        <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <a href="{{ route('dashboard') }}" class="hover:text-foreground transition-colors">Monitoring</a>
+                            <span>/</span>
+                            <span class="text-foreground font-medium">Fleet Overview</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Controls -->
+                    <div class="flex items-center gap-3">
+                        <x-spectora.push-alerts-badge />
+
+                        <div class="w-7 h-7 rounded-md bg-secondary flex items-center justify-center font-bold text-xs text-foreground border border-border">
+                            {{ substr(Auth::user()->first_name ?? 'A', 0, 1) }}
+                        </div>
                     </div>
                 </header>
-            @endisset
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+                <!-- Page Content -->
+                <main class="flex-1 overflow-y-auto">
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
 
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js');
+                    navigator.serviceWorker.register('/sw.js').catch(err => {
+                        console.log('SW registration failed: ', err);
+                    });
                 });
             }
-
-            // PWA Install Logic (Global)
-            let deferredPrompt;
-            const installBtnMobile = document.getElementById('installAppBtnMobile');
-            const installBtnDesktop = document.getElementById('installAppBtnDesktop');
-
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                console.log('PWA: Native prompt ready');
-            });
-
-            const handleInstallClick = () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then((choiceResult) => {
-                        deferredPrompt = null;
-                    });
-                } else {
-                    // Fallback: Show manual instructions modal
-                    window.dispatchEvent(new CustomEvent('open-install-modal'));
-                }
-            };
-
-            // Attach listeners when DOM is ready
-            document.addEventListener('DOMContentLoaded', () => {
-                const btnMobile = document.getElementById('installAppBtnMobile');
-                const btnDesktop = document.getElementById('installAppBtnDesktop');
-                if(btnMobile) btnMobile.addEventListener('click', handleInstallClick);
-                if(btnDesktop) btnDesktop.addEventListener('click', handleInstallClick);
-            });
         </script>
-
-        <!-- Theme Initialization (must be before Alpine) -->
-        <script>
-            (function() {
-                const theme = localStorage.getItem('spectora-theme');
-                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            })();
-        </script>
-
-
-        <!-- Install Instructions Modal (Global) -->
-        <div x-data="{ showInstallModal: false }" 
-             @open-install-modal.window="showInstallModal = true"
-             x-show="showInstallModal" 
-             x-cloak 
-             class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true"
-             style="display: none;" x-show.important="showInstallModal">
-            
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" @click="showInstallModal = false"></div>
-
-                <div class="inline-block align-bottom bg-gray-800 border border-gray-700 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full">
-                    <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-900/50 sm:mx-0 sm:h-10 sm:w-10">
-                                <svg class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                <h3 class="text-lg leading-6 font-medium text-white" id="modal-title">Install App</h3>
-                                <div class="mt-2 text-sm text-gray-300 space-y-4">
-                                    <p>To install Spectora on your home screen:</p>
-                                    
-                                    <!-- iOS Instructions -->
-                                    <div class="bg-gray-700/50 p-3 rounded-lg">
-                                        <p class="font-bold text-white mb-1">iPhone / iPad (Safari)</p>
-                                        <p>Tap <span class="inline-flex"><svg class="w-4 h-4 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg> Share</span> and select <br><strong>"Add to Home Screen"</strong>.</p>
-                                    </div>
-
-                                    <!-- Android Instructions -->
-                                    <div class="bg-gray-700/50 p-3 rounded-lg">
-                                        <p class="font-bold text-white mb-1">Android (Chrome)</p>
-                                        <p>Tap the menu icon (⋮) and select <br><strong>"Install App"</strong> or <strong>"Add to Home Screen"</strong>.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-800 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-700">
-                        <button type="button" @click="showInstallModal = false" class="w-full inline-flex justify-center rounded-md border border-gray-600 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-white hover:bg-gray-600 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Got it</button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </body>
 </html>

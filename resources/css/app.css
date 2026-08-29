@@ -3,85 +3,135 @@
 @tailwind utilities;
 
 @layer base {
-    html {
-        scroll-behavior: smooth;
+    :root {
+        --background: 240 10% 3.9%;
+        --foreground: 0 0% 98%;
+
+        --card: 240 10% 3.9%;
+        --card-foreground: 0 0% 98%;
+
+        --popover: 240 10% 3.9%;
+        --popover-foreground: 0 0% 98%;
+
+        --primary: 0 0% 98%;
+        --primary-foreground: 240 5.9% 10%;
+
+        --secondary: 240 3.7% 15.9%;
+        --secondary-foreground: 0 0% 98%;
+
+        --muted: 240 3.7% 15.9%;
+        --muted-foreground: 240 5% 64.9%;
+
+        --accent: 240 3.7% 15.9%;
+        --accent-foreground: 0 0% 98%;
+
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+
+        --border: 240 3.7% 15.9%;
+        --input: 240 3.7% 15.9%;
+        --ring: 240 4.9% 83.9%;
+
+        --radius: 0.5rem;
+
+        --sidebar-background: 240 10% 3.9%;
+        --sidebar-foreground: 240 4.8% 95.9%;
+        --sidebar-primary: 224.3 76.3% 48%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 240 3.7% 15.9%;
+        --sidebar-accent-foreground: 240 4.8% 95.9%;
+        --sidebar-border: 240 3.7% 15.9%;
+        --sidebar-ring: 217.2 91.2% 59.8%;
+    }
+
+    * {
+        @apply border-border;
     }
 
     body {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        background-color: #090D16;
-        color: #E2E8F0;
-        font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+        @apply bg-background text-foreground antialiased;
+        font-feature-settings: 'rlig' 1, 'calt' 1;
     }
 
-    /* Crisp Minimal Dark Scrollbars */
+    /* Minimal shadcn Scrollbars */
     ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 5px;
+        height: 5px;
     }
     ::-webkit-scrollbar-track {
-        background: #090D16;
+        background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-        background: #1E293B;
-        border-radius: 3px;
+        background: hsl(var(--border));
+        border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
-        background: #334155;
+        background: hsl(var(--muted-foreground));
     }
 }
 
 @layer components {
-    /* Premium Matte Cards */
-    .premium-card {
-        @apply bg-[#0F1626] border border-[#1E293B] rounded-xl transition-all duration-200;
+    /* shadcn Card */
+    .shadcn-card {
+        @apply rounded-xl border border-border bg-card text-card-foreground shadow-shadcn-sm transition-colors;
     }
 
-    .premium-card:hover {
-        @apply border-[#334155];
+    .shadcn-card-hover:hover {
+        @apply border-zinc-700 bg-zinc-900/40;
     }
 
-    .premium-card-elevated {
-        @apply bg-[#151F33] border border-[#27354E] rounded-xl;
+    /* shadcn Button Variants */
+    .btn-default {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2;
     }
 
-    /* Refined Status Pills */
-    .badge-status-online {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-950/40 text-emerald-400 border border-emerald-800/40;
+    .btn-secondary {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-9 px-4 py-2 border border-border;
     }
 
-    .badge-status-offline {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-950/40 text-rose-400 border border-rose-800/40;
+    .btn-outline {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2;
     }
 
-    .badge-status-neutral {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800/60 text-slate-300 border border-slate-700/60;
+    .btn-ghost {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 px-3;
     }
 
-    .badge-status-warning {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-950/40 text-amber-400 border border-amber-800/40;
+    .btn-destructive {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 h-9 px-4 py-2;
     }
 
-    /* Action Buttons (High-End SaaS Style) */
-    .btn-premium-primary {
-        @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg font-medium text-xs text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 transition-colors shadow-sm;
+    /* shadcn Inputs */
+    .shadcn-input {
+        @apply flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
     }
 
-    .btn-premium-secondary {
-        @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg font-medium text-xs text-slate-200 bg-[#151F33] hover:bg-[#1C2A45] hover:text-white border border-[#27354E] transition-colors shadow-sm;
+    /* shadcn Badge */
+    .badge-shadcn {
+        @apply inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
     }
 
-    .btn-premium-ghost {
-        @apply inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors;
+    .badge-shadcn-default {
+        @apply border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80;
     }
 
-    .btn-premium-danger {
-        @apply inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 border border-rose-900/30 transition-colors;
+    .badge-shadcn-secondary {
+        @apply border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80;
     }
 
-    /* Code Snippet Box */
-    .code-box {
-        @apply font-mono text-xs bg-[#070B13] border border-[#1E293B] rounded-lg p-3 text-slate-300;
+    .badge-shadcn-outline {
+        @apply text-foreground;
+    }
+
+    .badge-shadcn-success {
+        @apply border-emerald-800/40 bg-emerald-950/40 text-emerald-400;
+    }
+
+    .badge-shadcn-destructive {
+        @apply border-rose-800/40 bg-rose-950/40 text-rose-400;
+    }
+
+    .badge-shadcn-warning {
+        @apply border-amber-800/40 bg-amber-950/40 text-amber-400;
     }
 }

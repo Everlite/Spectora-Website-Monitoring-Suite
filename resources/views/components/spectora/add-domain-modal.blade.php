@@ -8,68 +8,66 @@
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <!-- Backdrop -->
         <div x-show="isOpen" 
-             x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
-             x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" 
-             class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" 
+             x-transition:enter="ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
+             x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" 
+             class="fixed inset-0 bg-black/80 backdrop-blur-sm" 
              @click="closeModal()"></div>
 
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-        <!-- Modal Panel -->
+        <!-- shadcn Dialog Panel -->
         <div x-show="isOpen" 
-             x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
-             x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-             class="inline-block align-bottom bg-[#0F1626] border border-[#1E293B] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+             x-transition:enter="ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" 
+             x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" 
+             class="inline-block align-bottom bg-card border border-border rounded-xl text-left overflow-hidden shadow-shadcn-lg transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
             
-            <form method="POST" action="{{ route('domains.store') }}" class="p-6">
+            <form method="POST" action="{{ route('domains.store') }}" class="p-6 space-y-4">
                 @csrf
-                <div class="flex items-center justify-between mb-5">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-blue-950/60 border border-blue-800/40 flex items-center justify-center text-blue-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-bold text-white">Neue Website überwachen</h3>
-                            <p class="text-xs text-slate-400">Automatisierte Uptime-Probes & Pulse-Telemetrie</p>
-                        </div>
+                
+                <!-- Dialog Header -->
+                <div class="flex items-start justify-between pb-3 border-b border-border">
+                    <div class="space-y-0.5">
+                        <h3 class="text-base font-semibold text-foreground">Website zum Monitoring hinzufügen</h3>
+                        <p class="text-xs text-muted-foreground">Automatisierte Uptime-Probes, SSL-Überwachung & Pulse-Telemetrie.</p>
                     </div>
-                    <button type="button" @click="closeModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <button type="button" @click="closeModal()" class="text-muted-foreground hover:text-foreground p-1 rounded-md">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
                 <!-- URL -->
-                <div class="mb-4">
-                    <label for="url" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                <div class="space-y-1.5">
+                    <label for="url" class="text-xs font-medium text-foreground">
                         Website URL <span class="text-rose-400">*</span>
                     </label>
-                    <input type="text" name="url" id="url" required placeholder="https://kunden-website.de"
-                           class="w-full bg-[#070B13] border border-[#1E293B] rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+                    <input type="text" name="url" id="url" required placeholder="https://kunden-domain.de"
+                           class="shadcn-input">
                 </div>
 
                 <!-- Keyword Must Contain -->
-                <div class="mb-4">
-                    <label for="keyword_must_contain" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-                        Muss Keyword enthalten <span class="text-slate-500 text-[10px] font-normal">(optional)</span>
+                <div class="space-y-1.5">
+                    <label for="keyword_must_contain" class="text-xs font-medium text-foreground">
+                        Muss Keyword enthalten <span class="text-muted-foreground text-[10px]">(optional)</span>
                     </label>
-                    <input type="text" name="keyword_must_contain" id="keyword_must_contain" placeholder="z. B. Willkommen, Copyright 2026"
-                           class="w-full bg-[#070B13] border border-[#1E293B] rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+                    <input type="text" name="keyword_must_contain" id="keyword_must_contain" placeholder="z. B. Willkommen, Copyright"
+                           class="shadcn-input">
                 </div>
 
                 <!-- Keyword Must Not Contain -->
-                <div class="mb-5">
-                    <label for="keyword_must_not_contain" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-                        Darf Keyword NICHT enthalten <span class="text-slate-500 text-[10px] font-normal">(optional)</span>
+                <div class="space-y-1.5">
+                    <label for="keyword_must_not_contain" class="text-xs font-medium text-foreground">
+                        Darf Keyword NICHT enthalten <span class="text-muted-foreground text-[10px]">(optional)</span>
                     </label>
-                    <input type="text" name="keyword_must_not_contain" id="keyword_must_not_contain" placeholder="z. B. Error 500, Database connection failed"
-                           class="w-full bg-[#070B13] border border-[#1E293B] rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+                    <input type="text" name="keyword_must_not_contain" id="keyword_must_not_contain" placeholder="z. B. Database connection failed, Error 500"
+                           class="shadcn-input">
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#1E293B]">
-                    <button type="button" @click="closeModal()" class="btn-premium-secondary">
+                <!-- Dialog Footer -->
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-border mt-4">
+                    <button type="button" @click="closeModal()" class="btn-outline">
                         Abbrechen
                     </button>
-                    <button type="submit" class="btn-premium-primary">
+                    <button type="submit" class="btn-default">
                         Überwachung starten
                     </button>
                 </div>

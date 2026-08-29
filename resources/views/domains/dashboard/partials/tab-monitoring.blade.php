@@ -1,7 +1,7 @@
             <!-- Tab Content: Monitoring -->
             <div x-show="tab === 'monitoring'"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-1"
                  x-transition:enter-end="opacity-100 translate-y-0"
                  class="space-y-6"
                  x-data="monitoringManager()">
@@ -10,9 +10,9 @@
                     <!-- Column 1 & 2: Main Settings -->
                     <div class="lg:col-span-2 space-y-6">
                         <!-- Smart Filters Card -->
-                        <div class="bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-xl shadow-sm p-6">
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                        <div class="shadcn-card p-6">
+                            <h3 class="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
                                 Smart Monitoring Filters
                             </h3>
                             

@@ -13,33 +13,64 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
-                mono: ['JetBrains Mono', 'Fira Code', ...defaultTheme.fontFamily.mono],
+                sans: ['Inter', 'Geist', ...defaultTheme.fontFamily.sans],
+                mono: ['JetBrains Mono', 'Geist Mono', ...defaultTheme.fontFamily.mono],
             },
             colors: {
-                // Ultra-Premium Matte Slate & Carbon Palette (Linear/Stripe inspired)
-                slate: {
-                    850: '#141D2E',
-                    925: '#0B1120',
-                    950: '#070C18',
+                border: 'hsl(var(--border))',
+                input: 'hsl(var(--input))',
+                ring: 'hsl(var(--ring))',
+                background: 'hsl(var(--background))',
+                foreground: 'hsl(var(--foreground))',
+                primary: {
+                    DEFAULT: 'hsl(var(--primary))',
+                    foreground: 'hsl(var(--primary-foreground))',
                 },
-                spectora: {
-                    bg: '#090D16',          // Deep matte carbon background
-                    surface: '#0F1626',     // Card surface
-                    elevated: '#151F33',    // Elevated elements & modals
-                    border: '#1E293B',      // Subtle clean border
-                    'border-hover': '#334155', // Border on hover
-                    primary: '#2563EB',     // Sophisticated Blue
-                    'primary-hover': '#1D4ED8',
-                    emerald: '#059669',     // Clean muted emerald
-                    rose: '#E11D48',        // Clean muted rose
-                    amber: '#D97706',       // Clean muted amber
-                }
+                secondary: {
+                    DEFAULT: 'hsl(var(--secondary))',
+                    foreground: 'hsl(var(--secondary-foreground))',
+                },
+                destructive: {
+                    DEFAULT: 'hsl(var(--destructive))',
+                    foreground: 'hsl(var(--destructive-foreground))',
+                },
+                muted: {
+                    DEFAULT: 'hsl(var(--muted))',
+                    foreground: 'hsl(var(--muted-foreground))',
+                },
+                accent: {
+                    DEFAULT: 'hsl(var(--accent))',
+                    foreground: 'hsl(var(--accent-foreground))',
+                },
+                popover: {
+                    DEFAULT: 'hsl(var(--popover))',
+                    foreground: 'hsl(var(--popover-foreground))',
+                },
+                card: {
+                    DEFAULT: 'hsl(var(--card))',
+                    foreground: 'hsl(var(--card-foreground))',
+                },
+                sidebar: {
+                    DEFAULT: 'hsl(var(--sidebar-background))',
+                    foreground: 'hsl(var(--sidebar-foreground))',
+                    primary: 'hsl(var(--sidebar-primary))',
+                    'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+                    accent: 'hsl(var(--sidebar-accent))',
+                    'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+                    border: 'hsl(var(--sidebar-border))',
+                    ring: 'hsl(var(--sidebar-ring))',
+                },
+            },
+            borderRadius: {
+                lg: 'var(--radius)',
+                md: 'calc(var(--radius) - 2px)',
+                sm: 'calc(var(--radius) - 4px)',
             },
             boxShadow: {
-                'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3)',
-                'card': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3)',
-                'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
+                'shadcn-sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+                'shadcn': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+                'shadcn-md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                'shadcn-lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
             }
         },
     },
