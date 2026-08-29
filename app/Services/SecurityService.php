@@ -24,7 +24,12 @@ class SecurityService
 
     public function httpClient(): PendingRequest
     {
-        return Http::withMiddleware($this->buildConnectTimeMiddleware())
+        return Http::withOptions([
+            'curl' => [
+                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            ],
+        ])
+            ->withMiddleware($this->buildConnectTimeMiddleware())
             ->withMiddleware($this->buildRedirectMiddleware());
     }
 
@@ -61,11 +66,11 @@ class SecurityService
 
     public function isSafeIp(string $ip): bool
     {
-        if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+        if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
             return false;
         }
 
-        if ($ip === '127.0.0.1' || $ip === '::1' || str_starts_with($ip, '127.')) {
+        if ($ip === '127.0.0.1' || str_starts_with($ip, '127.') || str_starts_with($ip, '0.')) {
             return false;
         }
 
@@ -168,17 +173,22 @@ class SecurityService
 
         try {
             $aRecords = dns_get_record($host, DNS_A) ?: [];
-            $aaaaRecords = dns_get_record($host, DNS_AAAA) ?: [];
 
-            foreach (array_merge($aRecords, $aaaaRecords) as $record) {
-                $ip = $record['ip'] ?? ($record['ipv6'] ?? null);
-                if ($ip) {
-                    $ips[] = $ip;
+            foreach ($aRecords as $record) {
+                if (! empty($record['ip']) && filter_var($record['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                    $ips[] = $record['ip'];
                 }
             }
         } catch (\Exception $e) {
             $ip = gethostbyname($host);
-            if ($ip !== $host) {
+            if ($ip !== $host && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                $ips[] = $ip;
+            }
+        }
+
+        if (empty($ips)) {
+            $ip = gethostbyname($host);
+            if ($ip !== $host && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                 $ips[] = $ip;
             }
         }
