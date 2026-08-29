@@ -13,38 +13,33 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', 'Outfit', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
                 mono: ['JetBrains Mono', 'Fira Code', ...defaultTheme.fontFamily.mono],
             },
             colors: {
+                // Ultra-Premium Matte Slate & Carbon Palette (Linear/Stripe inspired)
+                slate: {
+                    850: '#141D2E',
+                    925: '#0B1120',
+                    950: '#070C18',
+                },
                 spectora: {
-                    obsidian: '#070B12',
-                    bg: '#0B0F17',
-                    surface: '#111827',
-                    card: '#131B2E',
-                    'card-elevated': '#182238',
-                    border: '#1E293B',
-                    'border-highlight': '#334155',
-                    cyan: '#00F2FE',
-                    'cyan-glow': 'rgba(0, 242, 254, 0.4)',
-                    emerald: '#10B981',
-                    'emerald-glow': 'rgba(16, 185, 129, 0.4)',
-                    violet: '#8B5CF6',
-                    'violet-glow': 'rgba(139, 92, 246, 0.4)',
-                    rose: '#F43F5E',
-                    'rose-glow': 'rgba(244, 63, 94, 0.4)',
-                    amber: '#F59E0B',
+                    bg: '#090D16',          // Deep matte carbon background
+                    surface: '#0F1626',     // Card surface
+                    elevated: '#151F33',    // Elevated elements & modals
+                    border: '#1E293B',      // Subtle clean border
+                    'border-hover': '#334155', // Border on hover
+                    primary: '#2563EB',     // Sophisticated Blue
+                    'primary-hover': '#1D4ED8',
+                    emerald: '#059669',     // Clean muted emerald
+                    rose: '#E11D48',        // Clean muted rose
+                    amber: '#D97706',       // Clean muted amber
                 }
             },
             boxShadow: {
-                'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-                'neon-cyan': '0 0 20px -3px rgba(0, 242, 254, 0.35)',
-                'neon-emerald': '0 0 20px -3px rgba(16, 185, 129, 0.35)',
-                'neon-violet': '0 0 20px -3px rgba(139, 92, 246, 0.35)',
-                'neon-rose': '0 0 20px -3px rgba(244, 63, 94, 0.35)',
-            },
-            backdropBlur: {
-                'xs': '2px',
+                'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3)',
+                'card': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3)',
+                'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
             }
         },
     },

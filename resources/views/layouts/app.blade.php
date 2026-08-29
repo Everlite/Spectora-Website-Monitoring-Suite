@@ -21,14 +21,14 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-[#0B0F17] text-slate-100 min-h-screen selection:bg-cyan-500 selection:text-[#070B12]">
-        <div class="min-h-screen bg-[#0B0F17]">
+    <body class="font-sans antialiased bg-[#090D16] text-slate-100 min-h-screen selection:bg-blue-600 selection:text-white">
+        <div class="min-h-screen bg-[#090D16]">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-[#0D1424]/60 backdrop-blur-md border-b border-slate-800/80">
-                    <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
+                <header class="bg-[#0B1120] border-b border-[#1E293B]">
+                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
                 </header>

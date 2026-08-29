@@ -19,106 +19,106 @@
                 <div class="custom-grid-4">
                     
                     <!-- Performance Card -->
-                    <div class="bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-xl shadow-sm p-4">
+                    <div class="premium-card p-4">
                         <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xs lg:text-sm font-medium text-slate-500 dark:text-gray-400">Performance</h3>
-                            <span class="text-[10px] lg:text-xs px-2 py-1 rounded-full {{ $score >= 90 ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : ($score >= 50 ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400') }}">
-                                {{ $score >= 90 ? 'Excellent' : ($score >= 50 ? 'Average' : 'Critical') }}
+                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Performance Score</h3>
+                            <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold {{ $score >= 90 ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40' : ($score >= 50 ? 'bg-amber-950/60 text-amber-400 border border-amber-800/40' : 'bg-rose-950/60 text-rose-400 border border-rose-800/40') }}">
+                                {{ $score >= 90 ? 'Ausgezeichnet' : ($score >= 50 ? 'Durchschnitt' : 'Kritisch') }}
                             </span>
                         </div>
                         <div class="flex items-baseline gap-1 mb-3">
-                            <span class="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white">{{ $score }}</span>
-                            <span class="text-base lg:text-lg text-slate-400 dark:text-gray-500">/100</span>
+                            <span class="text-3xl font-extrabold text-white font-mono">{{ $score }}</span>
+                            <span class="text-sm text-slate-500 font-mono">/100</span>
                         </div>
-                        <div class="border-t border-slate-100 dark:border-gray-700 pt-2">
-                            <div class="h-12 lg:h-16">
+                        <div class="border-t border-[#1E293B] pt-2">
+                            <div class="h-12 lg:h-14">
                                 <canvas id="performanceSparkline" class="w-full h-full"></canvas>
                             </div>
-                            <div class="flex justify-between text-[9px] lg:text-[10px] text-slate-400 dark:text-gray-500 mt-1">
-                                <span>7 Days</span>
-                                <span>Today</span>
+                            <div class="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+                                <span>7 Tage</span>
+                                <span>Heute</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Uptime Card -->
-                    <div class="bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-xl shadow-sm p-4">
+                    <div class="premium-card p-4">
                         <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xs lg:text-sm font-medium text-slate-500 dark:text-gray-400">Uptime</h3>
-                            <span class="text-[10px] lg:text-xs px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">30 Days</span>
+                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Uptime (30d)</h3>
+                            <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">30 Tage</span>
                         </div>
                         <div class="flex items-baseline gap-1 mb-3">
-                            <span class="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white">{{ number_format($uptime, 1) }}</span>
-                            <span class="text-base lg:text-lg text-slate-400 dark:text-gray-500">%</span>
+                            <span class="text-3xl font-extrabold text-white font-mono">{{ number_format($uptime, 1) }}</span>
+                            <span class="text-sm text-slate-500 font-mono">%</span>
                         </div>
-                        <div class="border-t border-slate-100 dark:border-gray-700 pt-2">
-                            <div class="h-12 lg:h-16">
+                        <div class="border-t border-[#1E293B] pt-2">
+                            <div class="h-12 lg:h-14">
                                 <canvas id="uptimeSparkline" class="w-full h-full"></canvas>
                             </div>
-                            <div class="flex justify-between text-[9px] lg:text-[10px] text-slate-400 dark:text-gray-500 mt-1">
-                                <span>30 Days</span>
-                                <span>Today</span>
+                            <div class="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+                                <span>30 Tage</span>
+                                <span>Heute</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Response Time Card -->
-                    <div class="bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-xl shadow-sm p-4">
+                    <div class="premium-card p-4">
                         <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xs lg:text-sm font-medium text-slate-500 dark:text-gray-400">Response Time</h3>
-                            <span class="text-[10px] lg:text-xs px-2 py-1 rounded-full {{ $avgResponseTime < 300 ? 'bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400' : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' }}">
-                                {{ $avgResponseTime < 300 ? 'Fast' : 'Acceptable' }}
+                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Antwortzeit</h3>
+                            <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold {{ $avgResponseTime < 300 ? 'bg-blue-950/60 text-blue-400 border border-blue-800/40' : 'bg-amber-950/60 text-amber-400 border border-amber-800/40' }}">
+                                {{ $avgResponseTime < 300 ? 'Schnell' : 'Akzeptabel' }}
                             </span>
                         </div>
                         <div class="flex items-baseline gap-1 mb-3">
-                            <span class="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white">
+                            <span class="text-3xl font-extrabold text-white font-mono">
                                 @if(isset($avgResponseTime))
                                     @if($avgResponseTime < 1000)
-                                        {{ $avgResponseTime }}<span class="text-lg lg:text-xl text-slate-500 font-medium">ms</span>
+                                        {{ $avgResponseTime }}<span class="text-sm text-slate-500 font-mono">ms</span>
                                     @else
-                                        {{ number_format($avgResponseTime / 1000, 2) }}<span class="text-lg lg:text-xl text-slate-500 font-medium">s</span>
+                                        {{ number_format($avgResponseTime / 1000, 2) }}<span class="text-sm text-slate-500 font-mono">s</span>
                                     @endif
                                 @else
                                     -
                                 @endif
                             </span>
                         </div>
-                        <div class="border-t border-slate-100 dark:border-gray-700 pt-2">
-                            <div class="h-12 lg:h-16">
+                        <div class="border-t border-[#1E293B] pt-2">
+                            <div class="h-12 lg:h-14">
                                 <canvas id="responseSparkline" class="w-full h-full"></canvas>
                             </div>
-                            <div class="flex justify-between text-[9px] lg:text-[10px] text-slate-400 dark:text-gray-500 mt-1">
-                                <span>7 Days</span>
-                                <span>Today</span>
+                            <div class="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+                                <span>7 Tage</span>
+                                <span>Heute</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- SSL Certificate Card -->
-                    <div class="bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-xl shadow-sm p-4">
+                    <div class="premium-card p-4">
                         <div>
                             <div class="flex items-center justify-between mb-3">
-                                <h3 class="text-xs lg:text-sm font-medium text-slate-500 dark:text-gray-400">SSL Certificate</h3>
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 {{ $sslDaysRemaining > 30 ? 'text-emerald-500' : ($sslDaysRemaining > 7 ? 'text-amber-500' : 'text-rose-500') }}" fill="currentColor" viewBox="0 0 20 20">
+                                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">SSL Zertifikat</h3>
+                                <svg class="w-4 h-4 {{ $sslDaysRemaining > 30 ? 'text-emerald-400' : ($sslDaysRemaining > 7 ? 'text-amber-400' : 'text-rose-400') }}" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
                                 </svg>
                             </div>
                             <div class="flex items-baseline gap-1 mb-3">
-                                <span class="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white">{{ $sslDaysRemaining }}</span>
-                                <span class="text-base lg:text-lg text-slate-400 dark:text-gray-500">Days</span>
+                                <span class="text-3xl font-extrabold text-white font-mono">{{ $sslDaysRemaining }}</span>
+                                <span class="text-sm text-slate-500 font-mono">Tage</span>
                             </div>
                         </div>
-                        <div class="border-t border-slate-100 dark:border-gray-700 pt-2">
+                        <div class="border-t border-[#1E293B] pt-2">
                             <div class="relative pt-1">
-                                <div class="overflow-hidden h-3 text-xs flex rounded bg-slate-100 dark:bg-gray-700">
+                                <div class="overflow-hidden h-2 text-xs flex rounded bg-[#070B13]">
                                     <div style="width:{{ min(100, ($sslDaysRemaining / 90) * 100) }}%" 
                                          class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center {{ $sslDaysRemaining > 60 ? 'bg-emerald-500' : ($sslDaysRemaining > 30 ? 'bg-emerald-400' : ($sslDaysRemaining > 7 ? 'bg-amber-500' : 'bg-rose-500')) }}">
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex justify-between text-[9px] lg:text-[10px] text-slate-400 dark:text-gray-500 mt-2">
-                                <span>0 Days</span>
-                                <span>90 Days</span>
+                            <div class="flex justify-between text-[10px] text-slate-500 font-mono mt-2">
+                                <span>0 Tage</span>
+                                <span>90 Tage</span>
                             </div>
                         </div>
                     </div>
@@ -128,61 +128,61 @@
                 <div class="custom-grid-2">
                     
                     <!-- Device Pie Chart (Left) -->
-                    <div class="min-w-0 bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-xl shadow-sm p-4 lg:p-5">
+                    <div class="min-w-0 premium-card p-5">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-base font-semibold text-slate-800 dark:text-gray-100">Devices</h3>
-                            <span class="text-xs text-slate-400 dark:text-gray-500">Last 30 Days</span>
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Geräteverteilung</h3>
+                            <span class="text-[10px] text-slate-500 font-mono">Letzte 30 Tage</span>
                         </div>
                         <div class="flex items-center justify-center">
-                            <div class="relative w-48 h-48 max-w-full">
+                            <div class="relative w-40 h-40 max-w-full">
                                 <canvas id="overviewDeviceChart"></canvas>
                             </div>
                         </div>
                         <!-- Legend -->
                         <div class="mt-4 space-y-2">
-                            <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center justify-between text-xs">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-full bg-violet-500"></div>
-                                    <span class="text-slate-600 dark:text-gray-400">Desktop</span>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+                                    <span class="text-slate-400">Desktop</span>
                                 </div>
-                                <span class="font-medium text-slate-800 dark:text-gray-200">{{ $deviceStats['desktop'] ?? 0 }}%</span>
+                                <span class="font-mono font-semibold text-white">{{ $deviceStats['desktop'] ?? 0 }}%</span>
                             </div>
-                            <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center justify-between text-xs">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-full bg-cyan-500"></div>
-                                    <span class="text-slate-600 dark:text-gray-400">Mobile</span>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                                    <span class="text-slate-400">Mobile</span>
                                 </div>
-                                <span class="font-medium text-slate-800 dark:text-gray-200">{{ $deviceStats['mobile'] ?? 0 }}%</span>
+                                <span class="font-mono font-semibold text-white">{{ $deviceStats['mobile'] ?? 0 }}%</span>
                             </div>
-                            <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center justify-between text-xs">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-full bg-amber-500"></div>
-                                    <span class="text-slate-600 dark:text-gray-400">Tablet</span>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+                                    <span class="text-slate-400">Tablet</span>
                                 </div>
-                                <span class="font-medium text-slate-800 dark:text-gray-200">{{ $deviceStats['tablet'] ?? 0 }}%</span>
+                                <span class="font-mono font-semibold text-white">{{ $deviceStats['tablet'] ?? 0 }}%</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Traffic Line Chart (Right) — click opens Analytics tab -->
-                    <div class="min-w-0 bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-xl shadow-sm p-4 lg:p-5 cursor-pointer hover:border-violet-200 dark:hover:border-cyan-500/30 transition-colors"
+                    <div class="min-w-0 premium-card p-5 cursor-pointer hover:border-slate-600 transition-colors"
                          @click="tab = 'analytics'" role="button" tabindex="0" @keydown.enter="tab = 'analytics'">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-base font-semibold text-slate-800 dark:text-gray-100">Traffic Overview</h3>
-                            <div class="flex items-center gap-4 text-sm">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-full bg-violet-500"></div>
-                                    <span class="text-slate-500 dark:text-gray-400">Visitors</span>
-                                    <span class="font-semibold text-slate-800 dark:text-gray-200">{{ number_format(array_sum($chartVisitors)) }}</span>
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Traffic Übersicht</h3>
+                            <div class="flex items-center gap-4 text-xs font-mono">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                    <span class="text-slate-400">Besucher:</span>
+                                    <span class="font-bold text-white">{{ number_format(array_sum($chartVisitors)) }}</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-full bg-cyan-500"></div>
-                                    <span class="text-slate-500 dark:text-gray-400">Pageviews</span>
-                                    <span class="font-semibold text-slate-800 dark:text-gray-200">{{ number_format(array_sum($chartPageviews)) }}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                    <span class="text-slate-400">Views:</span>
+                                    <span class="font-bold text-white">{{ number_format(array_sum($chartPageviews)) }}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="relative h-64 w-full">
+                        <div class="relative h-60 w-full">
                             <canvas id="overviewChart"></canvas>
                         </div>
                     </div>
