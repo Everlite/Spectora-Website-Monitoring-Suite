@@ -17,6 +17,9 @@ services:
     environment:
       - DB_CONNECTION=sqlite
       - DB_DATABASE=/var/www/html/storage/database.sqlite
+    networks:
+      - default
+      - proxy_default
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/health/ops"]
       interval: 30s
@@ -25,3 +28,8 @@ services:
 
 volumes:
   spectora-storage:
+
+networks:
+  default:
+  proxy_default:
+    external: true
