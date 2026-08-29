@@ -1,510 +1,282 @@
-    <script src="/js/chart.min.js"></script>
+    <!-- Chart.js & Alpine Initialization (Spectora Studio) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <script>
-        function headerActions() {
-            return {
-                showTrackingModal: false,
-                isAnalyzing: false,
-                analysisResult: null,
-                analysisError: '',
-                
-                async runAnalysis() {
-                    this.isAnalyzing = true;
-                    this.analysisResult = null;
-                    this.analysisError = '';
-                    
-                    try {
-                        const response = await fetch('{{ route('domains.analyze', $domain) }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            }
-                        });
-                        
-                        if (response.ok) {
-                            this.analysisResult = 'success';
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-                        } else {
-                            this.analysisResult = 'error';
-                            const data = await response.json().catch(() => ({}));
-                            this.analysisError = data.message || 'An error occurred.';
-                            setTimeout(() => { this.analysisResult = null; }, 5000);
-                        }
-                    } catch (e) {
-                        this.analysisResult = 'error';
-                        this.analysisError = e.message;
-                        setTimeout(() => { this.analysisResult = null; }, 5000);
-                    } finally {
-                        this.isAnalyzing = false;
-                    }
-                }
-            }
+        // Spectora Studio Chart Theme Defaults
+        if (window.Chart) {
+            Chart.defaults.color = '#8A95A8';
+            Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+            Chart.defaults.font.size = 11;
+            Chart.defaults.plugins.legend.display = false;
         }
 
-        function dashboardData() {
-            return {
-                tab: 'overview', // Default to overview
-                showSecurityModal: false,
-                showTrafficModal: false,
-                init() {
-                    this.initOverviewChart();
-                    this.initDeviceChart('overviewDeviceChart');
-                    this.initDeviceChart('analyticsDeviceChart');
-                    this.initSparklines();
-                },
-                initSparklines() {
-                    // Performance Sparkline
-                    const perfCtx = document.getElementById('performanceSparkline');
-                    if (perfCtx) {
-                        new Chart(perfCtx, {
-                            type: 'line',
-                            data: {
-                                labels: @json($psHistoryLabels),
-                                datasets: [{
-                                    data: @json($psHistoryScores),
-                                    borderColor: '{{ $score >= 90 ? "#01B574" : ($score >= 50 ? "#FFB547" : "#EE5D50") }}',
-                                    backgroundColor: '{{ $score >= 90 ? "rgba(1,181,116,0.15)" : ($score >= 50 ? "rgba(255,181,71,0.15)" : "rgba(238,93,80,0.15)") }}',
-                                    borderWidth: 2.5,
-                                    tension: 0.4,
-                                    fill: true,
-                                    pointRadius: 0
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                                scales: {
-                                    x: { display: false },
-                                    y: { display: false, min: 0, max: 100 }
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Performance Sparkline
+            const perfCtx = document.getElementById('performanceSparkline');
+            if (perfCtx) {
+                new Chart(perfCtx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($psHistoryLabels ?? ['7d', '6d', '5d', '4d', '3d', '2d', 'Heute']),
+                        datasets: [{
+                            data: @json($psHistoryScores ?? [$score ?? 0]),
+                            borderColor: '#3B57E8',
+                            backgroundColor: 'rgba(59, 87, 232, 0.12)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false, min: 0, max: 100 }
+                        }
+                    }
+                });
+            }
+
+            // 2. Uptime Sparkline
+            const uptimeCtx = document.getElementById('uptimeSparkline');
+            if (uptimeCtx) {
+                new Chart(uptimeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['30d', '25d', '20d', '15d', '10d', '5d', 'Heute'],
+                        datasets: [{
+                            data: @json($uptimeHistory ?? [100, 100, 100, 100, 100, 100, $uptime ?? 100]),
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false, min: 90, max: 100 }
+                        }
+                    }
+                });
+            }
+
+            // 3. Response Sparkline
+            const respCtx = document.getElementById('responseSparkline');
+            if (respCtx) {
+                new Chart(respCtx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($historyLabels ?? []),
+                        datasets: [{
+                            data: @json($historyResponseTimes ?? []),
+                            borderColor: '#3B57E8',
+                            backgroundColor: 'rgba(59, 87, 232, 0.12)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // 4. Device Pie Chart
+            const deviceCtx = document.getElementById('overviewDeviceChart');
+            if (deviceCtx) {
+                new Chart(deviceCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Desktop', 'Mobile', 'Tablet'],
+                        datasets: [{
+                            data: [
+                                {{ $deviceStats['desktop'] ?? 70 }},
+                                {{ $deviceStats['mobile'] ?? 25 }},
+                                {{ $deviceStats['tablet'] ?? 5 }}
+                            ],
+                            backgroundColor: ['#3B57E8', '#10B981', '#F59E0B'],
+                            borderWidth: 2,
+                            borderColor: '#111622',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '72%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.label + ': ' + context.raw + '%';
+                                    }
                                 }
                             }
-                        });
+                        }
                     }
-                    // Uptime Sparkline
-                    const uptimeCtx = document.getElementById('uptimeSparkline');
-                    if (uptimeCtx) {
-                        new Chart(uptimeCtx, {
-                            type: 'line',
-                            data: {
-                                labels: ['', '', '', '', '', '', ''],
-                                datasets: [{
-                                    data: @json($uptimeHistory),
-                                    borderColor: '#01B574',
-                                    backgroundColor: 'rgba(1, 181, 116, 0.15)',
-                                    borderWidth: 2.5,
-                                    tension: 0.4,
-                                    fill: true,
-                                    pointRadius: 0
-                                }]
+                });
+            }
+
+            // 5. Traffic Line Chart
+            const overviewCtx = document.getElementById('overviewChart');
+            if (overviewCtx) {
+                new Chart(overviewCtx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($chartLabels ?? []),
+                        datasets: [
+                            {
+                                label: 'Besucher',
+                                data: @json($chartVisitors ?? []),
+                                borderColor: '#3B57E8',
+                                backgroundColor: 'rgba(59, 87, 232, 0.12)',
+                                fill: true,
+                                tension: 0.35,
+                                borderWidth: 2,
+                                pointRadius: 2,
+                                pointHoverRadius: 5,
                             },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
-                                scales: {
-                                    x: { display: false },
-                                    y: { display: false, min: 95, max: 100.5 }
-                                }
+                            {
+                                label: 'Pageviews',
+                                data: @json($chartPageviews ?? []),
+                                borderColor: '#10B981',
+                                backgroundColor: 'transparent',
+                                borderDash: [4, 4],
+                                tension: 0.35,
+                                borderWidth: 1.5,
+                                pointRadius: 1,
+                                pointHoverRadius: 4,
                             }
-                        });
-                    }
-                    // Response Time Sparkline
-                    const respCtx = document.getElementById('responseSparkline');
-                    if (respCtx) {
-                        new Chart(respCtx, {
-                            type: 'line',
-                            data: {
-                                labels: @json($historyLabels),
-                                datasets: [{
-                                    data: @json($historyResponseTimes),
-                                    borderColor: '{{ $avgResponseTime < 300 ? "#7551FF" : "#FFB547" }}',
-                                    backgroundColor: '{{ $avgResponseTime < 300 ? "rgba(117,81,255,0.15)" : "rgba(255,181,71,0.15)" }}',
-                                    borderWidth: 2.5,
-                                    tension: 0.4,
-                                    fill: true,
-                                    pointRadius: 0
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                                scales: {
-                                    x: { display: false },
-                                    y: { display: false }
-                                }
-                            }
-                        });
-                    }
-                },
-                initOverviewChart() {
-                    const ctx = document.getElementById('overviewChart');
-                    if (!ctx) return;
-                    new Chart(ctx.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: @json($chartLabels),
-                            datasets: [{
-                                    label: 'Besucher',
-                                    data: @json($chartVisitors),
-                                    borderColor: '#7551FF',
-                                    backgroundColor: 'rgba(117, 81, 255, 0.12)',
-                                    borderWidth: 2.5,
-                                    tension: 0.4,
-                                    fill: true,
-                                    pointRadius: 0,
-                                    pointHoverRadius: 5
-                                },
-                                {
-                                    label: 'Pageviews',
-                                    data: @json($chartPageviews),
-                                    borderColor: '#01B574',
-                                    backgroundColor: 'rgba(1, 181, 116, 0.12)',
-                                    borderWidth: 2.5,
-                                    tension: 0.4,
-                                    fill: true,
-                                    pointRadius: 0,
-                                    pointHoverRadius: 5
-                                }
-                            ]
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index',
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    backgroundColor: '#111C44',
-                                    borderColor: '#1B254B',
-                                    borderWidth: 1,
-                                    titleColor: '#FFFFFF',
-                                    bodyColor: '#A3AED0'
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    grid: { display: false },
-                                    ticks: { color: '#A3AED0', font: { family: 'Plus Jakarta Sans', size: 10 } }
-                                },
-                                y: {
-                                    grid: { color: '#1B254B' },
-                                    ticks: { color: '#A3AED0', font: { family: 'Plus Jakarta Sans', size: 10 } }
-                                }
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#111622',
+                                borderColor: '#202A3E',
+                                borderWidth: 1,
+                                padding: 10,
+                                titleColor: '#F1F3F9',
+                                bodyColor: '#8A95A8',
                             }
-                        }
-                    });
-                },
-                initDeviceChart(canvasId) {
-                    const ctx = document.getElementById(canvasId);
-                    if (!ctx) return;
-                    new Chart(ctx.getContext('2d'), {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Desktop', 'Mobile', 'Tablet'],
-                            datasets: [{
-                                data: [
-                                    {{ $deviceStats['desktop'] ?? 0 }},
-                                    {{ $deviceStats['mobile'] ?? 0 }},
-                                    {{ $deviceStats['tablet'] ?? 0 }}
-                                ],
-                                backgroundColor: ['#7551FF', '#01B574', '#FFB547'],
-                                borderWidth: 0,
-                                hoverOffset: 4
-                            }]
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            cutout: '75%',
-                            plugins: { legend: { display: false } }
-                        }
-                    });
-                }
-            }
-        }
-
-        function historyManager() {
-            return {
-                isAnalyzing: false,
-                analysisResult: null, // 'success' | 'error' | null
-                analysisError: '',
-                showAllLogs: false,
-                
-                async runAnalysis() {
-                    this.isAnalyzing = true;
-                    this.analysisResult = null;
-                    this.analysisError = '';
-                    
-                    try {
-                        const response = await fetch('{{ route('domains.analyze', $domain) }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            }
-                        });
-                        
-                        if (response.ok) {
-                            this.analysisResult = 'success';
-                            // Reload after 2 seconds to show updated data
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 2000);
-                        } else {
-                            this.analysisResult = 'error';
-                            const data = await response.json().catch(() => ({}));
-                            this.analysisError = data.message || 'An unknown error occurred.';
-                        }
-                    } catch (e) {
-                        this.analysisResult = 'error';
-                        this.analysisError = 'Network error: ' + e.message;
-                    } finally {
-                        this.isAnalyzing = false;
-                    }
-                }
-            }
-        }
-
-        function notesManager(domainUuid) {
-            return {
-                notes: @json($notes),
-                newNote: '',
-                isDeleteModalOpen: false,
-                deleteNoteId: null,
-                isEditModalOpen: false,
-                editingNoteId: null,
-                editingContent: '',
-
-                async addNote() {
-                    if (!this.newNote.trim()) return;
-
-                    try {
-                        const response = await fetch(`/domains/${domainUuid}/notes`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content'),
-                                'Accept': 'application/json'
+                        scales: {
+                            x: {
+                                grid: { display: false, color: '#202A3E' },
+                                ticks: { maxTicksLimit: 8, color: '#8A95A8' }
                             },
-                            body: JSON.stringify({
-                                content: this.newNote
-                            })
-                        });
-
-                        if (response.ok) {
-                            const note = await response.json();
-                            this.notes.unshift(note);
-                            this.newNote = '';
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
-                },
-
-                confirmDelete(noteId) {
-                    this.deleteNoteId = noteId;
-                    this.isDeleteModalOpen = true;
-                },
-
-                closeDeleteModal() {
-                    this.isDeleteModalOpen = false;
-                    this.deleteNoteId = null;
-                },
-
-                async submitDelete() {
-                    if (!this.deleteNoteId) return;
-
-                    try {
-                        const response = await fetch(`/notes/${this.deleteNoteId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content'),
-                                'Accept': 'application/json'
+                            y: {
+                                grid: { color: 'rgba(32, 42, 62, 0.6)' },
+                                ticks: { precision: 0, color: '#8A95A8' }
                             }
-                        });
-                        if (response.ok) {
-                            this.notes = this.notes.filter(n => n.id !== this.deleteNoteId);
-                            this.closeDeleteModal();
                         }
-                    } catch (e) {
-                        console.error(e);
                     }
-                },
-
-                editNote(note) {
-                    this.editingNoteId = note.id;
-                    this.editingContent = note.content;
-                    this.isEditModalOpen = true;
-                },
-
-                closeEditModal() {
-                    this.isEditModalOpen = false;
-                    this.editingNoteId = null;
-                    this.editingContent = '';
-                },
-
-                async submitEdit() {
-                    if (!this.editingNoteId || !this.editingContent.trim()) return;
-
-                    try {
-                        const response = await fetch(`/notes/${this.editingNoteId}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content'),
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                content: this.editingContent
-                            })
-                        });
-
-                        if (response.ok) {
-                            const updatedNote = await response.json();
-                            const index = this.notes.findIndex(n => n.id === this.editingNoteId);
-                            if (index !== -1) {
-                                this.notes[index] = updatedNote;
-                            }
-                            this.closeEditModal();
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
+                });
             }
-        }
 
+            // 6. History Full Chart
+            const historyCtx = document.getElementById('historyChart');
+            if (historyCtx) {
+                new Chart(historyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($historyLabels ?? []),
+                        datasets: [{
+                            label: 'Latenz (ms)',
+                            data: @json($historyResponseTimes ?? []),
+                            borderColor: '#3B57E8',
+                            backgroundColor: 'rgba(59, 87, 232, 0.12)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointRadius: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => ' ' + ctx.raw + ' ms'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { maxTicksLimit: 10, color: '#8A95A8' }
+                            },
+                            y: {
+                                grid: { color: 'rgba(32, 42, 62, 0.6)' },
+                                ticks: { color: '#8A95A8' }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        // Alpine Monitoring Manager
         function monitoringManager() {
             return {
-                isSaving: false,
-                isDetecting: false,
-                showUrlModal: false,
-                isScanningUrls: false,
-                isSyncingUrls: false,
-                sitemap_urls: @json($domain->sitemap_urls ?? []),
-                monitoredUrls: @json($domain->monitoredUrls),
-                discoveredUrls: [],
-                allSelected: false,
                 settings: {
                     only_check_public_pages: {{ $domain->only_check_public_pages ? 'true' : 'false' }},
                     respect_robots_txt: {{ $domain->respect_robots_txt ? 'true' : 'false' }},
-                    respect_noindex: {{ $domain->respect_noindex ? 'true' : 'false' }},
-                    exclude_patterns: @json($domain->exclude_patterns ?? ''),
-                    included_sitemaps: @json($domain->included_sitemaps ?? []),
+                    respect_noindex: {{ $domain->respect_noindex ? 'true' : 'false' }}
                 },
+                sitemapUrl: '',
+                isCrawling: false,
 
-                async saveSettings() {
-                    this.isSaving = true;
-                    try {
-                        const response = await fetch('{{ route('domains.settings.update', $domain) }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify(this.settings)
-                        });
-                        if (response.ok) {
-                            // Show success state briefly then reload
-                            const btn = event.target.closest('button');
-                            const originalText = btn.innerText;
-                            btn.innerText = 'Saved!';
-                            btn.classList.add('bg-emerald-600');
-                            
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1000);
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    } finally {
-                        this.isSaving = false;
-                    }
-                },
-
-                async detectSitemaps() {
-                    this.isDetecting = true;
+                async crawlSitemap() {
+                    if (!this.sitemapUrl) return;
+                    this.isCrawling = true;
                     try {
                         const response = await fetch('{{ route('domains.sitemaps.detect', $domain) }}', {
                             method: 'POST',
                             headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            }
-                        });
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.sitemap_urls = data.sitemaps;
-                            this.settings.included_sitemaps = data.sitemaps; // Auto-include new ones?
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    } finally {
-                        this.isDetecting = false;
-                    }
-                },
-
-                async openUrlSelector() {
-                    this.showUrlModal = true;
-                    this.isScanningUrls = true;
-                    try {
-                        const response = await fetch('{{ route('domains.urls.scan', $domain) }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            }
-                        });
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.discoveredUrls = data.urls;
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    } finally {
-                        this.isScanningUrls = false;
-                    }
-                },
-
-                toggleAllUrls() {
-                    this.allSelected = !this.allSelected;
-                    this.discoveredUrls.forEach(u => u.is_monitored = this.allSelected);
-                },
-
-                selectPublicOnly() {
-                    this.discoveredUrls.forEach(u => u.is_monitored = u.is_public);
-                },
-
-                async saveUrlSelection() {
-                    this.isSyncingUrls = true;
-                    try {
-                        const response = await fetch('{{ route('domains.urls.sync', $domain) }}', {
-                            method: 'POST',
-                            headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                 'Accept': 'application/json'
                             },
-                            body: JSON.stringify({ urls: this.discoveredUrls })
+                            body: JSON.stringify({ sitemap_url: this.sitemapUrl })
                         });
-                        if (response.ok) {
-                            window.location.reload();
-                        }
+                        const data = await response.json();
+                        alert(data.message || 'Sitemap erfolgreich eingelesen.');
                     } catch (e) {
-                        console.error(e);
+                        alert('Fehler beim Crawlen der Sitemap.');
                     } finally {
-                        this.isSyncingUrls = false;
+                        this.isCrawling = false;
                     }
                 }
-            }
+            };
         }
     </script>

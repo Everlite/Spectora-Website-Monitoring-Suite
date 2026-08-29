@@ -1,33 +1,32 @@
 <x-app-layout>
-    @include('domains.dashboard.partials.styles')
-
-    <div class="space-y-6" x-data="dashboardData()">
+    <div x-data="{ tab: 'overview', showSecurityModal: false }" class="space-y-6">
         
-        <!-- Domain Action Header (Horizon UI) -->
+        <!-- Back Navigation Link -->
+        <div>
+            <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 text-xs text-[#8A95A8] hover:text-white transition-colors font-medium">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span>Zurück zur Flotten-Übersicht</span>
+            </a>
+        </div>
+
+        <!-- 1. Domain Action Header -->
         <x-dashboard.header :domain="$domain" />
 
-        <!-- Segmented Tab Navigation -->
+        <!-- 2. Flash Messages & Tabs Controller -->
         @include('domains.dashboard.partials.flash-and-tabs')
 
-        <!-- Tab 1: Overview -->
+        <!-- 3. Tab Contents -->
         @include('domains.dashboard.partials.tab-overview')
-
-        <!-- Tab 2: Analytics -->
         @include('domains.dashboard.partials.tab-analytics')
-
-        <!-- Tab 3: History & Analysis -->
         @include('domains.dashboard.partials.tab-history')
-
-        <!-- Tab 4: Team Notes -->
         @include('domains.dashboard.partials.tab-notes')
-
-        <!-- Tab 5: Monitoring & Subpages -->
         @include('domains.dashboard.partials.tab-monitoring')
 
-        <!-- Security Modal -->
+        <!-- 4. Security Modal -->
         @include('domains.dashboard.partials.security-modal')
 
     </div>
 
+    <!-- 5. Dynamic Charts & Scripts -->
     @include('domains.dashboard.partials.scripts')
 </x-app-layout>

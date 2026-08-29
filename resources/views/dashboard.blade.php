@@ -1,20 +1,20 @@
 <x-app-layout>
     <div class="space-y-6" x-data="dashboardManager()">
         
-        <!-- 1. Top Horizon Bar: Action Header -->
+        <!-- 1. Top Action Header -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Flotten-Übersicht</h2>
-                <p class="text-xs text-[#A3AED0] mt-0.5">
-                    Live-Zustand aller überwachten Ziel-Websites, SLA Uptime-Probes und DSGVO-Telemetrie.
+                <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Flotten-Übersicht</h1>
+                <p class="text-xs text-[#8A95A8] mt-0.5">
+                    Zentrales Monitoring aller Ziel-Websites, 24/7 Uptime-Probes, SSL-Wächter und Pulse-Telemetrie.
                 </p>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5">
                 <button type="button" 
                         @click="$dispatch('open-add-domain')" 
-                        class="btn-horizon-primary">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                        class="btn-spectora-primary">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     <span>Website hinzufügen</span>
                 </button>
             </div>
@@ -22,80 +22,80 @@
 
         <!-- Global Flash Messages -->
         @if (session('status'))
-            <div class="rounded-horizon bg-[#01B574]/20 border border-[#01B574]/40 p-4 text-xs font-bold text-[#01B574] flex items-center gap-2.5 shadow-sm">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            <div class="rounded-studio-sm bg-[#10B981]/15 border border-[#10B981]/30 p-3.5 text-xs font-bold text-[#10B981] flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 <span>{{ session('status') }}</span>
             </div>
         @endif
 
-        <!-- 2. Horizon 4-Card Circular Metric Grid -->
+        <!-- 2. Fleet KPI Deck -->
         <x-spectora.global-metrics :kpis="$kpis ?? []" />
 
-        <!-- 3. Horizon Search & Filter Controls -->
-        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-2">
+        <!-- 3. Studio Toolbar: Search & Segmented Filters -->
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-1">
             
-            <!-- Search Pill -->
+            <!-- Search Input -->
             <div class="relative flex-1 max-w-sm">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#A3AED0]">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#5A667A]">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <input type="text" 
                        x-model="searchQuery" 
                        placeholder="Domains filtern..." 
-                       class="horizon-input pl-10">
+                       class="spectora-input pl-8">
             </div>
 
-            <!-- Filter Pills & View Switcher -->
-            <div class="flex items-center gap-3">
+            <!-- Filters & View Mode Switcher -->
+            <div class="flex items-center gap-2.5">
                 <!-- Status Pills -->
-                <div class="inline-flex rounded-full bg-[#111C44] border border-[#1B254B] p-1 text-[#A3AED0]">
+                <div class="inline-flex rounded-studio-sm bg-[#111622] border border-[#202A3E] p-0.5 text-[#8A95A8]">
                     <button type="button" 
                             @click="filterStatus = 'all'" 
-                            :class="filterStatus === 'all' ? 'bg-[#7551FF] text-white font-bold shadow-horizon-btn' : 'hover:text-white'"
-                            class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all">
+                            :class="filterStatus === 'all' ? 'bg-[#171E2E] text-white font-bold' : 'hover:text-white'"
+                            class="px-3 py-1 rounded-studio-sm text-xs font-semibold transition-all">
                         Alle ({{ count($domains) }})
                     </button>
                     <button type="button" 
                             @click="filterStatus = 'online'" 
-                            :class="filterStatus === 'online' ? 'bg-[#01B574] text-white font-bold' : 'hover:text-white'"
-                            class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all">
+                            :class="filterStatus === 'online' ? 'bg-[#10B981]/20 text-[#10B981] font-bold border border-[#10B981]/30' : 'hover:text-white'"
+                            class="px-3 py-1 rounded-studio-sm text-xs font-semibold transition-all">
                         Online ({{ $kpis['online_count'] ?? 0 }})
                     </button>
                     <button type="button" 
                             @click="filterStatus = 'offline'" 
-                            :class="filterStatus === 'offline' ? 'bg-[#EE5D50] text-white font-bold' : 'hover:text-white'"
-                            class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all">
+                            :class="filterStatus === 'offline' ? 'bg-[#F43F5E]/20 text-[#F43F5E] font-bold border border-[#F43F5E]/30' : 'hover:text-white'"
+                            class="px-3 py-1 rounded-studio-sm text-xs font-semibold transition-all">
                         Störungen ({{ $kpis['active_incidents'] ?? 0 }})
                     </button>
                 </div>
 
                 <!-- View Mode Switcher -->
-                <div class="inline-flex rounded-full bg-[#111C44] border border-[#1B254B] p-1 text-[#A3AED0]">
+                <div class="inline-flex rounded-studio-sm bg-[#111622] border border-[#202A3E] p-0.5 text-[#8A95A8]">
                     <button type="button" 
                             @click="viewMode = 'table'" 
-                            :class="viewMode === 'table' ? 'bg-[#1B254B] text-white' : 'hover:text-white'"
-                            class="p-2 rounded-full transition-all" title="Tabellenansicht">
+                            :class="viewMode === 'table' ? 'bg-[#171E2E] text-white' : 'hover:text-white'"
+                            class="p-1.5 rounded-studio-sm transition-all" title="Tabellenansicht">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
                     </button>
                     <button type="button" 
                             @click="viewMode = 'grid'" 
-                            :class="viewMode === 'grid' ? 'bg-[#1B254B] text-white' : 'hover:text-white'"
-                            class="p-2 rounded-full transition-all" title="Kartenansicht">
+                            :class="viewMode === 'grid' ? 'bg-[#171E2E] text-white' : 'hover:text-white'"
+                            class="p-1.5 rounded-studio-sm transition-all" title="Kartenansicht">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- 4. Main Domain List (Horizon Table or Grid) -->
+        <!-- 4. Fleet Data (Table or Grid) -->
         @if(count($domains) > 0)
             <!-- Table View -->
             <div x-show="viewMode === 'table'">
                 <x-spectora.domain-table :domains="$domains" />
             </div>
 
-            <!-- Grid Cards View -->
-            <div x-show="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <!-- Grid View -->
+            <div x-show="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 @foreach ($domains as $domain)
                     <div x-show="matchesFilter({{ json_encode(strtolower($domain->url)) }}, {{ json_encode($domain->status_code >= 200 && $domain->status_code < 400 ? 'online' : 'offline') }})">
                         <x-spectora.domain-card :domain="$domain" />
@@ -104,19 +104,19 @@
             </div>
         @else
             <!-- Zero State -->
-            <div class="horizon-card p-12 text-center my-8 max-w-md mx-auto border-dashed">
-                <div class="w-14 h-14 rounded-full bg-[#1B254B] text-[#7551FF] flex items-center justify-center mx-auto mb-3 shadow-inner">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+            <div class="spectora-card p-12 text-center my-8 max-w-md mx-auto border-dashed">
+                <div class="w-10 h-10 rounded-studio-sm bg-[#171E2E] text-[#3B57E8] flex items-center justify-center mx-auto mb-3 border border-[#202A3E]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
                 </div>
-                <h3 class="text-base font-bold text-white">Noch keine Ziel-Websites hinterlegt</h3>
-                <p class="text-xs text-[#A3AED0] mt-1 mb-5">Füge deine erste Website hinzu, um Uptime-Probes und Telemetrie zu starten.</p>
-                <button type="button" @click="$dispatch('open-add-domain')" class="btn-horizon-primary">
+                <h3 class="text-sm font-bold text-white">Noch keine Websites hinterlegt</h3>
+                <p class="text-xs text-[#8A95A8] mt-1 mb-4">Füge dein erstes Ziel hinzu, um Uptime-Überwachung und Telemetrie zu starten.</p>
+                <button type="button" @click="$dispatch('open-add-domain')" class="btn-spectora-primary">
                     + Website hinzufügen
                 </button>
             </div>
         @endif
 
-        <!-- Horizon Modals -->
+        <!-- Modals -->
         <x-spectora.add-domain-modal />
         <x-spectora.watchdog-modal />
         <x-spectora.notes-modal />

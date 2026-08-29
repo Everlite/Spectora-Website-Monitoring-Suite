@@ -1,3 +1,3 @@
-<button {{ $attributes->merge(['type' => 'submit', 'class' => 'btn-horizon-primary']) }}>
+<button {{ $attributes->merge(['type' => 'submit', 'class' => 'btn-spectora-primary']) }}>
     {{ $slot }}
 </button>

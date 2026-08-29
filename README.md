@@ -5,11 +5,11 @@
   [![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
   [![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=for-the-badge&logo=php)](https://php.net)
   [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com)
-  [![UI](https://img.shields.io/badge/Design-Horizon_UI_Dark-7551FF?style=for-the-badge)](https://horizon-ui.com)
+  [![UI](https://img.shields.io/badge/Design-Spectora_Studio_Dark-3B57E8?style=for-the-badge)](https://spectora.taikon.de)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
   <p align="center">
-    <strong>Powered by the proprietary Spectora Engine™ · Horizon UI Dark Design System · Self-Hosted &amp; Private by Design</strong><br>
+    <strong>Powered by the proprietary Spectora Engine™ · Bespoke Studio Dark UI · Self-Hosted &amp; Private by Design</strong><br>
     Laravel 12 · Docker · Heuristic Watchdog · Multi-Factor Audits · Zero-Cookie Pulse Telemetry · Discord &amp; Slack Webhooks · Multi-Channel Recovery Alerts
   </p>
 </div>
@@ -17,9 +17,9 @@
 ---
 
 > [!IMPORTANT]
-> **Spectora v2.0: Horizon UI Dark Overhaul & Spectora Engine Architecture (2026)**
-> Spectora features a complete visual redesign built on the signature **Horizon UI Dark Design System** paired with the autonomous **Spectora Engine** ecosystem:
-> 1. **Horizon UI Dark Theme:** Deep Midnight Navy (`#0B1437` / `#111C44`), Electric Purple (`#7551FF`), Emerald Teal (`#01B574`), Plus Jakarta Sans typography, floating glassmorphic navbar, circular KPI metric cards, and responsive data tables.
+> **Spectora v2.4: Custom Studio Dark Architecture & Spectora Engine Ecosystem (2026)**
+> Spectora features a 100% custom-crafted, bespoke **Spectora Studio Dark UI** paired with the autonomous **Spectora Engine** ecosystem:
+> 1. **Bespoke Studio Dark Theme:** Deep Charcoal canvas (`#090B10`), Matte Obsidian cards (`#111622`), Studio Cobalt (`#3B57E8`), Emerald Mint (`#10B981`), Plus Jakarta Sans and JetBrains Mono typography, high-utility sidebar, and streamlined data tables.
 > 2. **Spectora Audit Engine:** Multi-factor scoring matrix (0–100, Grade A+ to F) evaluating TTFB, payload size, H1 hierarchy, SEO snippets, image alt tags, and security headers.
 > 3. **Spectora Watchdog Engine:** Heuristic malware scanner detecting obfuscated JS (`eval`, `String.fromCharCode`), CJK SEO title spam, cloaking, and hidden iframes.
 > 4. **Spectora Pulse Telemetry:** Privacy-first, zero-cookie telemetry kernel with SPA History API auto-tracking and custom conversion tracking (`window.spectora.track`).
@@ -61,20 +61,19 @@ flowchart TD
 
 ---
 
-## 🎨 Horizon UI Dark Design System
+## 🎨 Bespoke Studio Dark UI
 
-The application interface is built strictly around the **Horizon UI Chakra / Tailwind Dark Mode** design system:
+The application interface is a 100% bespoke design system crafted exclusively for Spectora:
 
-* **Midnight Navy Backgrounds:** Deep `#0B1437` background with elevated `#111C44` and `#1B254B` glassmorphic cards.
-* **Signature Horizon Accents:**
-  * Primary Brand: **Electric Purple / Indigo (`#7551FF` / `#4318FF`)**
-  * Health / Success: **Emerald Teal (`#01B574`)**
-  * Warning: **Warm Golden Amber (`#FFB547`)**
-  * Danger / Outage: **Coral Red (`#EE5D50`)**
-* **Floating Glassmorphic Navbar:** Backdrop-blur top bar with breadcrumb trail (`Pages / Dashboard`), global search pill, and push alert status.
-* **Horizon Sidebar:** Dedicated agency navigation with brand logo, active indicators, and floating engine status widget.
-* **Circular Metric Cards:** 4-column KPI grid featuring circular icon badges on the left and bold monospace metrics on the right.
-* **SaaS Data Tables & Card Switcher:** Switch between comprehensive Data Table view and responsive Card Grid view with one click.
+* **Matte Studio Foundations:** Deep `#090B10` canvas with elevated `#111622` cards and razor-sharp `#202A3E` borders.
+* **Purposeful Accent Palette:**
+  * Primary Brand: **Studio Cobalt (`#3B57E8` / `#4F6BFF`)**
+  * Health / Online: **Clean Emerald (`#10B981`)**
+  * Degraded / Warning: **Polished Amber (`#F59E0B`)**
+  * Outage / Threat: **Coral Crimson (`#F43F5E`)**
+* **Left Studio Navigation:** Brand header, system node telemetry pill, and user profile.
+* **Fleet KPI Deck & Unified Tables:** Real-time latency (in ms), SSL expiration countdowns, and quick actions (`Code </>`, `Details`, `Notes`, `Delete`).
+* **Interactive Command Center:** Segmented controllers for Overview, Pulse Telemetry, Watchdog & Audits, Probe Logs, and Subpage Monitors.
 
 ---
 
@@ -86,7 +85,6 @@ The application interface is built strictly around the **Horizon UI Chakra / Tai
   * **Structure & SEO:** Single H1 hierarchy enforcement, `<title>` snippet validation, and `<meta name="description">` audits.
   * **Accessibility:** Automatic verification of image `alt` attributes.
   * **Security:** HTTPS enforcement, Strict-Transport-Security (HSTS), X-Frame-Options framing defenses, and X-Content-Type-Options.
-* Replaces heavy external dependencies with instant, lightweight local audits.
 
 ### 2. Spectora Watchdog Engine (`App\SpectoraEngine\Watchdog`)
 * Deep heuristic malware, cloaking, and defacement detection running with zero latency overhead during uptime checks:

@@ -1,3 +1,3 @@
 @props(['disabled' => false])
 
-<input @disabled($disabled) {{ $attributes->merge(['class' => 'horizon-input']) }}>
+<input @disabled($disabled) {{ $attributes->merge(['class' => 'spectora-input']) }}>

@@ -13,51 +13,37 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Plus Jakarta Sans', 'DM Sans', 'Inter', ...defaultTheme.fontFamily.sans],
+                sans: ['Plus Jakarta Sans', 'Inter', ...defaultTheme.fontFamily.sans],
                 mono: ['JetBrains Mono', 'Fira Code', ...defaultTheme.fontFamily.mono],
             },
             colors: {
-                // Horizon UI Official Palette
-                navy: {
-                    50: '#E9EBF8',
-                    100: '#C7CEEF',
-                    200: '#A3AED0', // Subtitle text
-                    300: '#707EAE', // Secondary text
-                    400: '#434E7B',
-                    500: '#2B3674', // Borders & separators
-                    600: '#1B254B', // Secondary card / elevated
-                    700: '#111C44', // Main Card background
-                    800: '#0B1437', // Main Body background
-                    900: '#080F27',
-                },
-                brand: {
-                    100: '#E9E3FF',
-                    200: '#C0B3FF',
-                    300: '#9C86FF',
-                    400: '#868CFF',
-                    500: '#7551FF', // Primary Horizon Purple / Indigo
-                    600: '#4318FF', // Deep Indigo
-                    700: '#3311CC',
-                    800: '#250B99',
-                    900: '#180566',
-                },
-                horizon: {
-                    green: '#01B574', // Horizon Success Emerald
-                    'green-light': '#05CD99',
-                    red: '#EE5D50',   // Horizon Danger Coral
-                    amber: '#FFB547', // Horizon Warning Golden
-                    blue: '#3965FF',
+                studio: {
+                    bg: '#090B10',          // Deep Canvas
+                    surface: '#111622',     // Primary Card
+                    elevated: '#171E2E',    // Secondary Card / Inset
+                    hover: '#1D2538',       // Active Hover
+                    border: '#202A3E',      // Primary Border
+                    'border-subtle': '#182030',
+                    brand: '#3B57E8',       // Studio Cobalt Primary
+                    'brand-hover': '#4F6BFF',
+                    emerald: '#10B981',     // Healthy / Online
+                    rose: '#F43F5E',        // Down / Outage
+                    amber: '#F59E0B',       // Degraded / Expiring
+                    sky: '#0EA5E9',         // Telemetry / Pulse
+                    text: '#F1F3F9',        // Primary Heading
+                    muted: '#8A95A8',       // Subtitles / Labels
+                    subtle: '#5A667A',      // Meta / Timestamps
                 }
             },
             borderRadius: {
-                'horizon': '20px',
-                'horizon-lg': '24px',
-                'horizon-sm': '14px',
+                'studio': '16px',
+                'studio-lg': '20px',
+                'studio-sm': '10px',
             },
             boxShadow: {
-                'horizon': '0px 18px 40px rgba(112, 144, 176, 0.08)',
-                'horizon-card': '0px 18px 40px rgba(0, 0, 0, 0.25)',
-                'horizon-btn': '0px 4px 10px rgba(117, 81, 255, 0.3)',
+                'studio-sm': '0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4)',
+                'studio-card': '0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 0, 0, 0.4)',
+                'studio-btn': '0 2px 10px rgba(59, 87, 232, 0.35)',
             }
         },
     },

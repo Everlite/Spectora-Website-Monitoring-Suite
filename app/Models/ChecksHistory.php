@@ -12,8 +12,6 @@ class ChecksHistory extends Model
 
     protected $table = 'checks_history';
 
-    // WICHTIG: Wir haben timestamps (created_at, updated_at) jetzt in der DB,
-    // also aktivieren wir sie hier, damit Laravel sie automatisch füllt.
     public $timestamps = true;
 
     protected $fillable = [
@@ -25,6 +23,7 @@ class ChecksHistory extends Model
         'ssl_days_left',
         'pagespeed_score',
         'pagespeed_score_desktop',
+        'checked_at',
         'created_at',
     ];
 
@@ -44,11 +43,11 @@ class ChecksHistory extends Model
         });
     }
 
-    // Hier sagen wir Laravel: "Behandle diese Spalten als echtes Datum"
     protected $casts = [
+        'checked_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'response_time' => 'float', // Optional: Damit Zahlen auch Zahlen sind
+        'response_time' => 'float',
     ];
 
     public function monitoredUrl()
