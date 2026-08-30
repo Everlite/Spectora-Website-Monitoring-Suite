@@ -4,8 +4,8 @@
     <script>
         // Spectora Studio Chart Theme Defaults
         if (window.Chart) {
-            Chart.defaults.color = '#8A95A8';
-            Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+            Chart.defaults.color = '#9C9488';
+            Chart.defaults.font.family = "'IBM Plex Mono', monospace";
             Chart.defaults.font.size = 11;
             Chart.defaults.plugins.legend.display = false;
         }
@@ -20,7 +20,7 @@
                         labels: {!! json_encode(!empty($psHistoryLabels) && count($psHistoryLabels) > 0 ? $psHistoryLabels : ['7d', '6d', '5d', '4d', '3d', '2d', 'Heute']) !!},
                         datasets: [{
                             data: {!! json_encode(!empty($psHistoryScores) && count($psHistoryScores) > 0 ? $psHistoryScores : [$score ?? 0]) !!},
-                            borderColor: '#3B57E8',
+                            borderColor: '#E4F54A',
                             backgroundColor: 'rgba(59, 87, 232, 0.12)',
                             fill: true,
                             tension: 0.4,
@@ -80,7 +80,7 @@
                         labels: {!! json_encode($historyLabels ?? []) !!},
                         datasets: [{
                             data: {!! json_encode($historyResponseTimes ?? []) !!},
-                            borderColor: '#3B57E8',
+                            borderColor: '#E4F54A',
                             backgroundColor: 'rgba(59, 87, 232, 0.12)',
                             fill: true,
                             tension: 0.4,
@@ -114,9 +114,9 @@
                                 {{ $deviceStats['mobile'] ?? 25 }},
                                 {{ $deviceStats['tablet'] ?? 5 }}
                             ],
-                            backgroundColor: ['#3B57E8', '#10B981', '#F59E0B'],
+                            backgroundColor: ['#E4F54A', '#7DDB8A', '#E8A14A'],
                             borderWidth: 2,
-                            borderColor: '#111622',
+                            borderColor: '#0C0A08',
                         }]
                     },
                     options: {
@@ -148,8 +148,8 @@
                             {
                                 label: 'Besucher',
                                 data: {!! json_encode($chartVisitors ?? []) !!},
-                                borderColor: '#3B57E8',
-                                backgroundColor: 'rgba(59, 87, 232, 0.12)',
+                                borderColor: '#E4F54A',
+                                backgroundColor: 'rgba(228, 245, 74, 0.10)',
                                 fill: true,
                                 tension: 0.35,
                                 borderWidth: 2,
@@ -179,22 +179,22 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: '#111622',
+                                backgroundColor: '#14110E',
                                 borderColor: '#202A3E',
                                 borderWidth: 1,
                                 padding: 10,
                                 titleColor: '#F1F3F9',
-                                bodyColor: '#8A95A8',
+                                bodyColor: '#9C9488',
                             }
                         },
                         scales: {
                             x: {
                                 grid: { display: false, color: '#202A3E' },
-                                ticks: { maxTicksLimit: 8, color: '#8A95A8' }
+                                ticks: { maxTicksLimit: 8, color: '#9C9488' }
                             },
                             y: {
                                 grid: { color: 'rgba(32, 42, 62, 0.6)' },
-                                ticks: { precision: 0, color: '#8A95A8' }
+                                ticks: { precision: 0, color: '#9C9488' }
                             }
                         }
                     }
@@ -211,7 +211,7 @@
                         datasets: [{
                             label: 'Latenz (ms)',
                             data: {!! json_encode($historyResponseTimes ?? []) !!},
-                            borderColor: '#3B57E8',
+                            borderColor: '#E4F54A',
                             backgroundColor: 'rgba(59, 87, 232, 0.12)',
                             fill: true,
                             tension: 0.3,
@@ -233,11 +233,11 @@
                         scales: {
                             x: {
                                 grid: { display: false },
-                                ticks: { maxTicksLimit: 10, color: '#8A95A8' }
+                                ticks: { maxTicksLimit: 10, color: '#9C9488' }
                             },
                             y: {
                                 grid: { color: 'rgba(32, 42, 62, 0.6)' },
-                                ticks: { color: '#8A95A8' }
+                                ticks: { color: '#9C9488' }
                             }
                         }
                     }

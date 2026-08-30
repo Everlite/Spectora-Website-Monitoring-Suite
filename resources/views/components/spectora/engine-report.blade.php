@@ -54,18 +54,22 @@
     $oks = collect($rows)->where('status', 'success')->count();
 @endphp
 
-<section class="spectora-card overflow-hidden">
-    <div class="px-5 py-4 border-b border-studio-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+<section class="border-t border-studio-border pt-12">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-8">
         <div>
-            <h2 class="text-sm font-extrabold text-white tracking-tight">Engine-Bericht</h2>
-            <p class="text-[11px] text-studio-muted mt-0.5">Prüfpunkte der letzten Analyse — mit gemessenem Wert und nächstem Schritt.</p>
+            <p class="sp-kicker">Spectora Engine</p>
+            <h2 class="sp-display text-4xl text-studio-text mt-2">Engine-Bericht</h2>
+            <p class="text-sm text-studio-muted mt-3 max-w-xl">
+                Dokument-Score aus dem HTML, das Spectora geholt hat. Kein Chrome, kein Lighthouse.
+                Watchdog kommt vom letzten Probe. Deep Probe startet den Audit-Job.
+            </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             @if($score !== null)
-                <span class="font-mono text-xs font-bold px-2 py-1 rounded-studio-sm border border-studio-border bg-studio-bg text-white">
-                    {{ (int) $score }}/100
+                <span class="font-mono text-xs px-2 py-1 border border-studio-border text-studio-text">
+                    Dokument {{ (int) $score }}/100
                     @if($grade)
-                        <span class="text-studio-muted font-semibold">· {{ $grade }}</span>
+                        <span class="text-studio-muted">· {{ $grade }}</span>
                     @endif
                 </span>
             @endif
@@ -76,7 +80,7 @@
     </div>
 
     @if($rows === [])
-        <p class="px-5 py-8 text-xs text-studio-muted">Noch kein Audit. „Deep Probe starten“ ausführen.</p>
+        <p class="py-8 text-sm text-studio-muted">Noch kein Audit. „Deep Probe starten“ holt das HTML und bewertet es.</p>
     @else
         <div class="divide-y divide-studio-border">
             @foreach($groups as $category => $items)

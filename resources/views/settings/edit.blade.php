@@ -1,8 +1,9 @@
 <x-app-layout>
     <div class="space-y-6">
         <div>
-            <h2 class="text-xl font-extrabold text-white tracking-tight">Einstellungen & Agentur-Profil</h2>
-            <p class="text-xs text-studio-muted mt-0.5">Verwalte dein Konto, Sicherheits-Passwörter und White-Label-Agentur-Branding.</p>
+            <p class="sp-kicker">Konto</p>
+            <h2 class="sp-display text-4xl text-studio-text mt-2">Einstellungen</h2>
+            <p class="text-sm text-studio-muted mt-2">Profil, Passwort, Agentur-Logo für PDF-Reports.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">

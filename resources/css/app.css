@@ -1,30 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-    --studio-bg: #090B10;
-    --studio-surface: #111622;
-    --studio-surface-elevated: #171E2E;
-    --studio-surface-hover: #1D2538;
-    --studio-border: #202A3E;
-    --studio-border-subtle: #182030;
-    --studio-border-focus: #3B57E8;
-    --studio-brand: #3B57E8;
-    --studio-brand-hover: #4F6BFF;
-    --studio-brand-subtle: rgba(59, 87, 232, 0.12);
-    --studio-emerald: #10B981;
-    --studio-emerald-subtle: rgba(16, 185, 129, 0.12);
-    --studio-rose: #F43F5E;
-    --studio-rose-subtle: rgba(244, 63, 94, 0.12);
-    --studio-amber: #F59E0B;
-    --studio-amber-subtle: rgba(245, 158, 11, 0.12);
-    --studio-cyan: #06B6D4;
-    --studio-text-primary: #F1F3F9;
-    --studio-text-secondary: #8A95A8;
-    --studio-text-tertiary: #5A667A;
+    --studio-bg: #0C0A08;
+    --studio-surface: #14110E;
+    --studio-surface-elevated: #1C1814;
+    --studio-surface-hover: #241F19;
+    --studio-border: #2A241C;
+    --studio-border-subtle: #1A1612;
+    --studio-border-focus: #E4F54A;
+    --studio-brand: #E4F54A;
+    --studio-brand-hover: #F2FF7A;
+    --studio-brand-subtle: rgba(228, 245, 74, 0.12);
+    --studio-emerald: #7DDB8A;
+    --studio-emerald-subtle: rgba(125, 219, 138, 0.12);
+    --studio-rose: #E85D4C;
+    --studio-rose-subtle: rgba(232, 93, 76, 0.12);
+    --studio-amber: #E8A14A;
+    --studio-amber-subtle: rgba(232, 161, 74, 0.12);
+    --studio-cyan: #6EC8E8;
+    --studio-text-primary: #F3EDE3;
+    --studio-text-secondary: #9C9488;
+    --studio-text-tertiary: #6B645A;
 }
 
 @layer base {
@@ -41,67 +41,80 @@
         -moz-osx-font-smoothing: grayscale;
         background-color: var(--studio-bg);
         color: var(--studio-text-primary);
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: 'Source Sans 3', sans-serif;
     }
 
     ::-webkit-scrollbar {
-        width: 5px;
-        height: 5px;
+        width: 6px;
+        height: 6px;
     }
     ::-webkit-scrollbar-track {
         background: var(--studio-bg);
     }
     ::-webkit-scrollbar-thumb {
         background: var(--studio-border);
-        border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: var(--studio-surface-hover);
     }
 }
 
 @layer components {
+    .sp-spectrum {
+        height: 3px;
+        width: 100%;
+        background: linear-gradient(90deg, #E85D4C 0%, #E8A14A 28%, #E4F54A 52%, #7DDB8A 76%, #6EC8E8 100%);
+    }
+
+    .sp-display {
+        font-family: 'Instrument Serif', Georgia, serif;
+        font-weight: 400;
+        letter-spacing: -0.03em;
+        line-height: 0.9;
+    }
+
+    .sp-kicker {
+        @apply text-[11px] font-medium uppercase tracking-[0.22em] text-studio-muted;
+    }
+
     .spectora-card {
-        @apply bg-studio-surface rounded-studio border border-studio-border shadow-studio-card transition-all duration-200;
+        @apply bg-transparent border border-studio-border;
     }
 
     .spectora-card-hover:hover {
-        @apply border-studio-brand/60 bg-studio-hover;
+        @apply border-studio-brand/40;
     }
 
     .btn-spectora-primary {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-studio-sm font-bold text-xs text-white bg-studio-brand hover:bg-studio-brand-hover active:scale-95 shadow-studio-btn transition-all duration-150;
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold text-xs text-studio-bg bg-studio-brand hover:bg-studio-brand-hover active:scale-[0.99] transition-colors;
     }
 
     .btn-spectora-secondary {
-        @apply inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-studio-sm font-semibold text-xs text-studio-text bg-studio-elevated hover:bg-studio-border border border-studio-border transition-all duration-150;
+        @apply inline-flex items-center justify-center gap-2 px-3.5 py-1.5 font-medium text-xs text-studio-text border border-studio-border hover:border-studio-brand/50 hover:text-studio-brand transition-colors;
     }
 
     .btn-spectora-ghost {
-        @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-studio-sm text-xs font-semibold text-studio-muted hover:text-white hover:bg-studio-elevated transition-colors;
+        @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-studio-muted hover:text-studio-text transition-colors;
     }
 
     .btn-spectora-danger {
-        @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-studio-sm text-xs font-bold text-studio-rose bg-studio-rose/10 hover:bg-studio-rose/20 border border-studio-rose/30 transition-colors;
+        @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-studio-rose border border-studio-rose/40 hover:bg-studio-rose/10 transition-colors;
     }
 
     .spectora-input {
-        @apply flex h-9 w-full rounded-studio-sm border border-studio-border bg-studio-bg px-3.5 py-1.5 text-xs text-studio-text placeholder-studio-subtle shadow-sm transition-colors focus:border-studio-brand focus:outline-none focus:ring-1 focus:ring-studio-brand;
+        @apply flex h-10 w-full border border-studio-border bg-studio-bg px-3 py-2 text-sm text-studio-text placeholder-studio-subtle focus:border-studio-brand focus:outline-none;
     }
 
     .badge-status-online {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-studio-emerald/15 text-studio-emerald border border-studio-emerald/30;
+        @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-semibold bg-studio-emerald/10 text-studio-emerald border border-studio-emerald/25;
     }
 
     .badge-status-offline {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-studio-rose/15 text-studio-rose border border-studio-rose/30;
+        @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-semibold bg-studio-rose/10 text-studio-rose border border-studio-rose/25;
     }
 
     .badge-status-warning {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-studio-amber/15 text-studio-amber border border-studio-amber/30;
+        @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-semibold bg-studio-amber/10 text-studio-amber border border-studio-amber/25;
     }
 
     .badge-status-neutral {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-studio-elevated text-studio-muted border border-studio-border;
+        @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium text-studio-muted border border-studio-border;
     }
 }

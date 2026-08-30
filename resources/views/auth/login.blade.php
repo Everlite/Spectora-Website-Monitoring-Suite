@@ -1,8 +1,8 @@
 <x-auth-layout>
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <h1 class="text-lg font-extrabold text-white tracking-tight">Anmelden</h1>
-    <p class="text-xs text-studio-muted mt-1">Zugang zu deiner Spectora-Instanz.</p>
+    <h1 class="sp-display text-4xl text-studio-text">Anmelden</h1>
+    <p class="text-sm text-studio-muted mt-2">Zugang zu deiner Instanz.</p>
 
     <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-4">
         @csrf

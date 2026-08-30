@@ -1,89 +1,37 @@
 <x-app-layout>
     <div class="space-y-6" x-data="dashboardManager()">
         
-        <!-- 1. Top Action Header -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
             <div>
-                <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Websites</h1>
-                <p class="text-xs text-studio-muted mt-0.5">
-                    Pulse-Besucher zuerst. Uptime und SSL daneben, ohne Google Analytics.
-                </p>
+                <h1 class="sp-kicker">Properties</h1>
+                <p class="sp-display text-4xl sm:text-5xl text-studio-text mt-2">Websites</p>
             </div>
-
-            <div class="flex items-center gap-2.5">
-                <button type="button" 
-                        @click="$dispatch('open-add-domain')" 
-                        class="btn-spectora-primary">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                    <span>Website hinzufügen</span>
-                </button>
-            </div>
+            <button type="button" @click="$dispatch('open-add-domain')" class="btn-spectora-primary">
+                Website hinzufügen
+            </button>
         </div>
 
-        <!-- Global Flash Messages -->
         @if (session('status'))
-            <div class="rounded-studio-sm bg-studio-emerald/15 border border-studio-emerald/30 p-3.5 text-xs font-bold text-studio-emerald flex items-center gap-2">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                <span>{{ session('status') }}</span>
+            <div class="border border-studio-emerald/30 bg-studio-emerald/10 p-3 text-xs text-studio-emerald">
+                {{ session('status') }}
             </div>
         @endif
 
-        <!-- 2. Fleet KPI Deck -->
         <x-spectora.global-metrics :kpis="$kpis ?? []" />
 
-        <!-- 3. Studio Toolbar: Search & Segmented Filters -->
-        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-1">
-            
-            <!-- Search Input -->
-            <div class="relative flex-1 max-w-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-studio-subtle">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <input type="text" 
-                       x-model="searchQuery" 
-                       placeholder="Domains filtern..." 
-                       class="spectora-input pl-8">
-            </div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <input type="text"
+                   x-model="searchQuery"
+                   placeholder="Suchen…"
+                   class="spectora-input max-w-sm">
 
-            <!-- Filters & View Mode Switcher -->
-            <div class="flex items-center gap-2.5">
-                <!-- Status Pills -->
-                <div class="inline-flex rounded-studio-sm bg-studio-surface border border-studio-border p-0.5 text-studio-muted">
-                    <button type="button" 
-                            @click="filterStatus = 'all'" 
-                            :class="filterStatus === 'all' ? 'bg-studio-elevated text-white font-bold' : 'hover:text-white'"
-                            class="px-3 py-1 rounded-studio-sm text-xs font-semibold transition-all">
-                        Alle ({{ count($domains) }})
-                    </button>
-                    <button type="button" 
-                            @click="filterStatus = 'online'" 
-                            :class="filterStatus === 'online' ? 'bg-studio-emerald/20 text-studio-emerald font-bold border border-studio-emerald/30' : 'hover:text-white'"
-                            class="px-3 py-1 rounded-studio-sm text-xs font-semibold transition-all">
-                        Online ({{ $kpis['online_count'] ?? 0 }})
-                    </button>
-                    <button type="button" 
-                            @click="filterStatus = 'offline'" 
-                            :class="filterStatus === 'offline' ? 'bg-studio-rose/20 text-studio-rose font-bold border border-studio-rose/30' : 'hover:text-white'"
-                            class="px-3 py-1 rounded-studio-sm text-xs font-semibold transition-all">
-                        Störungen ({{ $kpis['active_incidents'] ?? 0 }})
-                    </button>
-                </div>
-
-                <!-- View Mode Switcher -->
-                <div class="inline-flex rounded-studio-sm bg-studio-surface border border-studio-border p-0.5 text-studio-muted">
-                    <button type="button" 
-                            @click="viewMode = 'table'" 
-                            :class="viewMode === 'table' ? 'bg-studio-elevated text-white' : 'hover:text-white'"
-                            class="p-1.5 rounded-studio-sm transition-all" title="Tabellenansicht">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-                    </button>
-                    <button type="button" 
-                            @click="viewMode = 'grid'" 
-                            :class="viewMode === 'grid' ? 'bg-studio-elevated text-white' : 'hover:text-white'"
-                            class="p-1.5 rounded-studio-sm transition-all" title="Kartenansicht">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    </button>
-                </div>
+            <div class="flex flex-wrap items-center gap-5 text-sm">
+                <button type="button" @click="filterStatus = 'all'" :class="filterStatus === 'all' ? 'text-studio-text' : 'text-studio-muted hover:text-studio-text'">Alle</button>
+                <button type="button" @click="filterStatus = 'online'" :class="filterStatus === 'online' ? 'text-studio-emerald' : 'text-studio-muted hover:text-studio-text'">Erreichbar</button>
+                <button type="button" @click="filterStatus = 'offline'" :class="filterStatus === 'offline' ? 'text-studio-rose' : 'text-studio-muted hover:text-studio-text'">Störungen</button>
+                <span class="text-studio-subtle">·</span>
+                <button type="button" @click="viewMode = 'table'" :class="viewMode === 'table' ? 'text-studio-text' : 'text-studio-muted'">Liste</button>
+                <button type="button" @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'text-studio-text' : 'text-studio-muted'">Kacheln</button>
             </div>
         </div>
 
@@ -104,14 +52,11 @@
             </div>
         @else
             <!-- Zero State -->
-            <div class="spectora-card p-12 text-center my-8 max-w-md mx-auto border-dashed">
-                <div class="w-10 h-10 rounded-studio-sm bg-studio-elevated text-studio-brand flex items-center justify-center mx-auto mb-3 border border-studio-border">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
-                </div>
-                <h3 class="text-sm font-bold text-white">Noch keine Websites hinterlegt</h3>
-                <p class="text-xs text-studio-muted mt-1 mb-4">Erste Website eintragen — Pulse-Snippet einbauen, Uptime läuft automatisch.</p>
+            <div class="py-20 border-t border-studio-border">
+                <p class="sp-display text-4xl text-studio-text">Noch keine Website.</p>
+                <p class="text-sm text-studio-muted mt-3 mb-6 max-w-md">Erste Property eintragen. Pulse-Snippet einbauen — Uptime läuft mit dem nächsten Probe.</p>
                 <button type="button" @click="$dispatch('open-add-domain')" class="btn-spectora-primary">
-                    + Website hinzufügen
+                    Website hinzufügen
                 </button>
             </div>
         @endif

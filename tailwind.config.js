@@ -13,38 +13,39 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Plus Jakarta Sans', 'Inter', ...defaultTheme.fontFamily.sans],
-                mono: ['JetBrains Mono', 'Fira Code', ...defaultTheme.fontFamily.mono],
+                sans: ['Source Sans 3', 'Helvetica Neue', ...defaultTheme.fontFamily.sans],
+                display: ['Instrument Serif', 'Georgia', 'serif'],
+                mono: ['IBM Plex Mono', ...defaultTheme.fontFamily.mono],
             },
             colors: {
                 studio: {
-                    bg: '#090B10',          // Deep Canvas
-                    surface: '#111622',     // Primary Card
-                    elevated: '#171E2E',    // Secondary Card / Inset
-                    hover: '#1D2538',       // Active Hover
-                    border: '#202A3E',      // Primary Border
-                    'border-subtle': '#182030',
-                    brand: '#3B57E8',       // Studio Cobalt Primary
-                    'brand-hover': '#4F6BFF',
-                    emerald: '#10B981',     // Healthy / Online
-                    rose: '#F43F5E',        // Down / Outage
-                    amber: '#F59E0B',       // Degraded / Expiring
-                    sky: '#0EA5E9',         // Telemetry / Pulse
-                    text: '#F1F3F9',        // Primary Heading
-                    muted: '#8A95A8',       // Subtitles / Labels
-                    subtle: '#5A667A',      // Meta / Timestamps
-                }
+                    bg: '#0C0A08',
+                    surface: '#14110E',
+                    elevated: '#1C1814',
+                    hover: '#241F19',
+                    border: '#2A241C',
+                    'border-subtle': '#1A1612',
+                    brand: '#E4F54A',
+                    'brand-hover': '#F2FF7A',
+                    emerald: '#7DDB8A',
+                    rose: '#E85D4C',
+                    amber: '#E8A14A',
+                    sky: '#6EC8E8',
+                    text: '#F3EDE3',
+                    muted: '#9C9488',
+                    subtle: '#6B645A',
+                },
             },
             borderRadius: {
-                'studio': '16px',
-                'studio-lg': '20px',
-                'studio-sm': '10px',
+                studio: '0',
+                'studio-lg': '0',
+                'studio-sm': '0',
             },
             boxShadow: {
-                'studio-sm': '0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4)',
-                'studio-card': '0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 0, 0, 0.4)',
-                'studio-btn': '0 2px 10px rgba(59, 87, 232, 0.35)',
-            }
+                'studio-sm': 'none',
+                'studio-card': 'none',
+                'studio-btn': 'none',
+            },
         },
     },
 

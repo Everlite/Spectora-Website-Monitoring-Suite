@@ -1,17 +1,16 @@
 @props(['domains'])
 
-<div class="spectora-card overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
+<div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
             <thead>
-                <tr class="border-b border-studio-border bg-studio-elevated/50 text-studio-muted font-bold text-[11px] uppercase tracking-wider">
-                    <th class="py-3 px-4">Website</th>
-                    <th class="py-3 px-4">Besucher (heute)</th>
-                    <th class="py-3 px-4">Status</th>
-                    <th class="py-3 px-4">Uptime 30d</th>
-                    <th class="py-3 px-4">SSL</th>
-                    <th class="py-3 px-4">Watchdog</th>
-                    <th class="py-3 px-4 text-right">Aktionen</th>
+                <tr class="border-y border-studio-border text-studio-muted text-[11px] uppercase tracking-[0.16em]">
+                    <th class="py-3 pr-4 font-medium">Website</th>
+                    <th class="py-3 px-4 font-medium">Besucher</th>
+                    <th class="py-3 px-4 font-medium">Status</th>
+                    <th class="py-3 px-4 font-medium">Uptime</th>
+                    <th class="py-3 px-4 font-medium">SSL</th>
+                    <th class="py-3 px-4 font-medium">Watchdog</th>
+                    <th class="py-3 pl-4 text-right font-medium"> </th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-studio-border">
@@ -21,27 +20,19 @@
                         $sslDays = $domain->ssl_days_left ?? 0;
                         $uptime = $domain->calculated_uptime ?? $domain->calculateUptime();
                     @endphp
-                    <tr class="hover:bg-studio-elevated/60 transition-colors"
+                    <tr class="border-b border-studio-border/80 hover:bg-studio-elevated/40"
                         x-show="matchesFilter({{ json_encode(strtolower($domain->url)) }}, {{ json_encode($isOnline ? 'online' : 'offline') }})">
-                        
-                        <!-- Domain Target -->
-                        <td class="py-3.5 px-4">
-                            <div class="flex items-center gap-2.5">
-                                <span class="relative flex h-2 w-2 shrink-0">
-                                    <span class="relative inline-flex rounded-full h-2 w-2 {{ $isOnline ? 'bg-studio-emerald' : 'bg-studio-rose' }}"></span>
-                                </span>
-                                <div class="min-w-0">
-                                    <a href="{{ route('domains.show', $domain) }}" class="font-bold text-white hover:text-studio-brand transition-colors truncate block">
-                                        {{ $domain->url }}
-                                    </a>
-                                    <span class="text-[10px] text-studio-muted">
-                                        Vor {{ $domain->last_checked ? $domain->last_checked->diffForHumans(null, true) : 'nie' }}
-                                    </span>
-                                </div>
-                            </div>
+
+                        <td class="py-5 pr-4">
+                            <a href="{{ route('domains.show', $domain) }}" class="sp-display text-2xl text-studio-text hover:text-studio-brand truncate block">
+                                {{ parse_url($domain->url, PHP_URL_HOST) ?: $domain->url }}
+                            </a>
+                            <span class="text-[11px] text-studio-muted">
+                                {{ $domain->last_checked ? $domain->last_checked->diffForHumans() : 'noch nie geprüft' }}
+                            </span>
                         </td>
 
-                        <td class="py-3.5 px-4 font-mono font-bold text-white text-sm">
+                        <td class="py-5 px-4 sp-display text-3xl text-studio-text tabular-nums">
                             {{ number_format($domain->visitors_count_today ?? $domain->visitors_today ?? 0) }}
                         </td>
 
@@ -130,5 +121,4 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
 </div>
