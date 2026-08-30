@@ -17,9 +17,9 @@
                 new Chart(perfCtx, {
                     type: 'line',
                     data: {
-                        labels: @json($psHistoryLabels ?? ['7d', '6d', '5d', '4d', '3d', '2d', 'Heute']),
+                        labels: {!! json_encode(!empty($psHistoryLabels) && count($psHistoryLabels) > 0 ? $psHistoryLabels : ['7d', '6d', '5d', '4d', '3d', '2d', 'Heute']) !!},
                         datasets: [{
-                            data: @json($psHistoryScores ?? [$score ?? 0]),
+                            data: {!! json_encode(!empty($psHistoryScores) && count($psHistoryScores) > 0 ? $psHistoryScores : [$score ?? 0]) !!},
                             borderColor: '#3B57E8',
                             backgroundColor: 'rgba(59, 87, 232, 0.12)',
                             fill: true,
@@ -49,7 +49,7 @@
                     data: {
                         labels: ['30d', '25d', '20d', '15d', '10d', '5d', 'Heute'],
                         datasets: [{
-                            data: @json($uptimeHistory ?? [100, 100, 100, 100, 100, 100, $uptime ?? 100]),
+                            data: {!! json_encode(!empty($uptimeHistory) && count($uptimeHistory) > 0 ? $uptimeHistory : [100, 100, 100, 100, 100, 100, $uptime ?? 100]) !!},
                             borderColor: '#10B981',
                             backgroundColor: 'rgba(16, 185, 129, 0.12)',
                             fill: true,
@@ -77,9 +77,9 @@
                 new Chart(respCtx, {
                     type: 'line',
                     data: {
-                        labels: @json($historyLabels ?? []),
+                        labels: {!! json_encode($historyLabels ?? []) !!},
                         datasets: [{
-                            data: @json($historyResponseTimes ?? []),
+                            data: {!! json_encode($historyResponseTimes ?? []) !!},
                             borderColor: '#3B57E8',
                             backgroundColor: 'rgba(59, 87, 232, 0.12)',
                             fill: true,
@@ -143,11 +143,11 @@
                 new Chart(overviewCtx, {
                     type: 'line',
                     data: {
-                        labels: @json($chartLabels ?? []),
+                        labels: {!! json_encode($chartLabels ?? []) !!},
                         datasets: [
                             {
                                 label: 'Besucher',
-                                data: @json($chartVisitors ?? []),
+                                data: {!! json_encode($chartVisitors ?? []) !!},
                                 borderColor: '#3B57E8',
                                 backgroundColor: 'rgba(59, 87, 232, 0.12)',
                                 fill: true,
@@ -158,7 +158,7 @@
                             },
                             {
                                 label: 'Pageviews',
-                                data: @json($chartPageviews ?? []),
+                                data: {!! json_encode($chartPageviews ?? []) !!},
                                 borderColor: '#10B981',
                                 backgroundColor: 'transparent',
                                 borderDash: [4, 4],
@@ -207,10 +207,10 @@
                 new Chart(historyCtx, {
                     type: 'line',
                     data: {
-                        labels: @json($historyLabels ?? []),
+                        labels: {!! json_encode($historyLabels ?? []) !!},
                         datasets: [{
                             label: 'Latenz (ms)',
-                            data: @json($historyResponseTimes ?? []),
+                            data: {!! json_encode($historyResponseTimes ?? []) !!},
                             borderColor: '#3B57E8',
                             backgroundColor: 'rgba(59, 87, 232, 0.12)',
                             fill: true,
