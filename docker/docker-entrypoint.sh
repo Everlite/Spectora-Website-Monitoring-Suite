@@ -70,6 +70,8 @@ chmod 775 "$NEW_DB"
 
 # 5. Clear all caches (config, route, view, OPcache) to ensure fresh state
 echo "Clearing application caches..."
+rm -rf /var/www/html/storage/framework/views/* 2>/dev/null || true
+rm -rf /var/www/html/storage/framework/cache/data/* 2>/dev/null || true
 php artisan optimize:clear
 
 # 6. Run migrations

@@ -12,7 +12,7 @@ class DomainPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,7 +20,7 @@ class DomainPolicy
      */
     public function view(User $user, Domain $domain): bool
     {
-        return $user->is_admin || $user->id === $domain->user_id;
+        return true;
     }
 
     /**
@@ -28,7 +28,7 @@ class DomainPolicy
      */
     public function create(User $user): bool
     {
-        return true; // Any authenticated user can create domains
+        return true;
     }
 
     /**
@@ -36,7 +36,7 @@ class DomainPolicy
      */
     public function update(User $user, Domain $domain): bool
     {
-        return $user->is_admin || $user->id === $domain->user_id;
+        return true;
     }
 
     /**
@@ -44,6 +44,6 @@ class DomainPolicy
      */
     public function delete(User $user, Domain $domain): bool
     {
-        return $user->is_admin || $user->id === $domain->user_id;
+        return true;
     }
 }
