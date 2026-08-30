@@ -41,6 +41,11 @@ class SpectoraAuditEngineTest extends TestCase
         $this->assertGreaterThanOrEqual(90, $result->score);
         $this->assertContains($result->grade, ['A+', 'A']);
         $this->assertNotEmpty($result->findings);
+        $ttfb = collect($result->findings)->firstWhere('label', 'Antwortzeit (TTFB)');
+        $this->assertNotNull($ttfb);
+        $this->assertSame('success', $ttfb['status']);
+        $this->assertSame('success', \App\SpectoraEngine\Audit\AuditResult::normalizeStatus('success'));
+        $this->assertSame('success', \App\SpectoraEngine\Audit\AuditResult::normalizeStatus('ok'));
     }
 
     public function test_audit_engine_penalizes_missing_title_and_h1(): void

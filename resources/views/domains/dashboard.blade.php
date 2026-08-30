@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div x-data="{ showSecurityModal: false }" class="space-y-8">
+    <div class="space-y-8">
 
         <div>
             <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 text-xs text-studio-muted hover:text-white transition-colors font-medium">
@@ -21,7 +21,6 @@
             @include('domains.dashboard.partials.tab-monitoring')
         </div>
 
-        @include('domains.dashboard.partials.security-modal')
     </div>
 
     @include('domains.dashboard.partials.scripts')

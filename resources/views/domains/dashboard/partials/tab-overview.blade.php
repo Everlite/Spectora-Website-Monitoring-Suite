@@ -172,19 +172,11 @@
                     </div>
                 </div>
 
-                <!-- Security Alert (nur wenn Issues vorhanden sind) -->
-                @if(($criticalCount ?? 0) + ($warningCount ?? 0) > 0)
-                <div @click="showSecurityModal = true"
-                     class="spectora-card p-4 flex items-center gap-3 cursor-pointer bg-studio-rose/10 border-studio-rose/30 hover:bg-studio-rose/15 transition-all group">
-                    <div class="w-8 h-8 rounded-studio-sm bg-studio-rose/20 text-studio-rose flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    </div>
-                    <div class="flex-1">
-                        <span class="font-bold text-white text-xs">{{ ($criticalCount ?? 0) + ($warningCount ?? 0) }} Sicherheits-Hinweise gefunden</span>
-                        <span class="text-xs ml-2 text-studio-muted group-hover:underline">→ Für Details klicken</span>
-                    </div>
-                    <svg class="w-4 h-4 text-studio-muted group-hover:text-white transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                </div>
-                @endif
+                <x-spectora.engine-report
+                    :findings="$auditDetails ?? []"
+                    :watchdog="$watchdogData ?? []"
+                    :score="$score ?? null"
+                    :grade="$domain->grade ?? null"
+                />
 
             </div>

@@ -43,4 +43,25 @@ class AuditResult
     {
         return array_values(array_filter($this->findings, fn ($f) => ($f['status'] ?? '') === $status));
     }
+
+    public static function normalizeStatus(?string $status): string
+    {
+        return match ($status) {
+            'ok', 'passed', 'success', 'safe', 'info' => 'success',
+            'warning', 'warn' => 'warning',
+            default => 'error',
+        };
+    }
+
+    public static function categoryLabel(string $category): string
+    {
+        return match ($category) {
+            'performance' => 'Leistung',
+            'seo' => 'Struktur',
+            'accessibility' => 'Barrierefreiheit',
+            'security' => 'Sicherheit',
+            'watchdog' => 'Watchdog',
+            default => $category,
+        };
+    }
 }

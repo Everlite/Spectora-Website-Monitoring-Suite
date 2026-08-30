@@ -24,6 +24,7 @@ class DomainAuthorizationTest extends TestCase
             ->get("/domains/{$domain->uuid}")
             ->assertOk()
             ->assertSee('Uptime (30d)', false)
+            ->assertSee('Engine-Bericht', false)
             ->assertSee('Spectora Pulse', false)
             ->assertDontSee('Historie & Probes', false);
     }

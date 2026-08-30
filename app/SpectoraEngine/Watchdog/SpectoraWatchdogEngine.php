@@ -62,8 +62,8 @@ class SpectoraWatchdogEngine
                 issues: [[
                     'type' => 'security_blocked',
                     'severity' => 'critical',
-                    'title' => 'SSRF Prohibited',
-                    'description' => 'Outbound request blocked by Spectora SSRF Protection.',
+                    'title' => 'SSRF-Schutz',
+                    'description' => 'Request von Spectora blockiert (private oder gesperrte IP).',
                 ]],
                 summary: ['critical' => 1, 'warning' => 0, 'info' => 0]
             );
@@ -81,9 +81,9 @@ class SpectoraWatchdogEngine
                         issues: [[
                             'type' => 'unreachable',
                             'severity' => 'critical',
-                            'title' => 'Website Unreachable',
-                            'description' => "Server responded with HTTP {$httpStatus}.",
-                            'recommendation' => 'Verify server uptime and firewall rules.',
+                            'title' => 'Seite nicht erreichbar',
+                            'description' => "HTTP {$httpStatus}.",
+                            'recommendation' => 'Erreichbarkeit und Firewall prüfen.',
                         ]],
                         summary: ['critical' => 1, 'warning' => 0, 'info' => 0]
                     );
@@ -101,8 +101,8 @@ class SpectoraWatchdogEngine
                         issues: [[
                             'type' => 'unreachable',
                             'severity' => 'critical',
-                            'title' => 'Website Unreachable',
-                            'description' => "Server returned status {$response->status()}.",
+                            'title' => 'Seite nicht erreichbar',
+                            'description' => "HTTP {$response->status()}.",
                         ]],
                         summary: ['critical' => 1, 'warning' => 0, 'info' => 0]
                     );
@@ -169,8 +169,8 @@ class SpectoraWatchdogEngine
                 issues: [[
                     'type' => 'scan_interrupted',
                     'severity' => 'warning',
-                    'title' => 'Watchdog Scan Interrupted',
-                    'description' => 'Engine scan error: '.$e->getMessage(),
+                    'title' => 'Watchdog unterbrochen',
+                    'description' => $e->getMessage(),
                 ]],
                 summary: ['critical' => 0, 'warning' => 1, 'info' => 0]
             );
@@ -199,10 +199,9 @@ class SpectoraWatchdogEngine
             $issues[] = [
                 'type' => 'malicious_eval',
                 'severity' => 'critical',
-                'title' => 'Obfuscated JavaScript Payload',
-                'description' => 'Detected dynamically decoded script execution or cryptominer signature.',
-                'explanation' => 'Attackers use obfuscated eval functions to bypass traditional malware filters.',
-                'recommendation' => 'Inspect script tags and recently modified CMS plugins/themes immediately.',
+                'title' => 'Verschleiertes JavaScript',
+                'description' => 'eval/fromCharCode, unescape oder Miner-Signatur im Markup.',
+                'recommendation' => 'Script-Tags und zuletzt geänderte Plugins/Themes prüfen.',
             ];
         }
 
@@ -235,9 +234,9 @@ class SpectoraWatchdogEngine
                         $issues[] = [
                             'type' => 'suspicious_script_host',
                             'severity' => 'critical',
-                            'title' => 'Script from High-Abuse TLD',
-                            'description' => "External script loaded from suspicious origin: {$host}",
-                            'recommendation' => 'Verify if this script was intentionally added.',
+                            'title' => 'Script von verdächtiger TLD',
+                            'description' => "Externes Script von {$host}.",
+                            'recommendation' => 'Prüfen, ob dieses Script bewusst eingebunden ist.',
                         ];
                         break;
                     }
@@ -262,10 +261,9 @@ class SpectoraWatchdogEngine
             return [
                 'type' => 'title_hijacked',
                 'severity' => 'critical',
-                'title' => 'Title Defacement / Japanese SEO Spam',
-                'description' => 'Foreign character injection in title: "'.mb_substr($title, 0, 45).'..."',
-                'explanation' => 'Japanese keyword injection (Spamdexing) is an automated WordPress/Joomla exploit.',
-                'recommendation' => 'Check server database, .htaccess rules, and change admin credentials.',
+                'title' => 'Titel-Hijack (CJK-Spam)',
+                'description' => 'Fremde Schriftzeichen im Title: „'.mb_substr($title, 0, 45).'…“',
+                'recommendation' => 'Datenbank, .htaccess und Admin-Zugang prüfen.',
             ];
         }
 
@@ -284,20 +282,20 @@ class SpectoraWatchdogEngine
                     $snippet = substr($bodyLower, $start, 90);
 
                     $titles = [
-                        'pharma' => 'Pharma Spam Injected',
-                        'gambling' => 'Gambling Keywords Found',
-                        'adult' => 'Adult Content Detected',
-                        'counterfeit' => 'Counterfeit Goods Spam',
-                        'crypto_scam' => 'Crypto Scam Pattern Detected',
+                        'pharma' => 'Pharma-Spam',
+                        'gambling' => 'Glücksspiel-Keywords',
+                        'adult' => 'Adult-Content',
+                        'counterfeit' => 'Fälschungs-Spam',
+                        'crypto_scam' => 'Crypto-Scam-Muster',
                     ];
 
                     $issues[] = [
                         'type' => 'spam_keyword_'.$category,
                         'severity' => 'critical',
-                        'title' => $titles[$category] ?? 'Spam Keyword Detected',
-                        'description' => "Found unauthorized keyword: \"{$keyword}\"",
+                        'title' => $titles[$category] ?? 'Spam-Keyword',
+                        'description' => "Unerwartetes Keyword: „{$keyword}“",
                         'context' => '..."'.trim(preg_replace('/\s+/', ' ', $snippet)).'"...',
-                        'recommendation' => 'Search code repository and database for this string.',
+                        'recommendation' => 'Code und Datenbank nach diesem String durchsuchen.',
                     ];
                     break; // One match per category is enough to alert
                 }
@@ -315,10 +313,9 @@ class SpectoraWatchdogEngine
                 return [
                     'type' => 'hidden_text_cloaking',
                     'severity' => 'critical',
-                    'title' => 'Hidden Black-Hat SEO Content',
-                    'description' => 'Hidden text block: "'.mb_substr($hiddenText, 0, 60).'..."',
-                    'explanation' => 'Hidden text using CSS display:none or off-screen positioning triggers Google penalties.',
-                    'recommendation' => 'Inspect template code and remove hidden keyword stuffing.',
+                    'title' => 'Versteckter SEO-Text',
+                    'description' => 'Versteckter Block: „'.mb_substr($hiddenText, 0, 60).'…“',
+                    'recommendation' => 'Template prüfen und verstecktes Keyword-Stuffing entfernen.',
                 ];
             }
         }
@@ -343,10 +340,9 @@ class SpectoraWatchdogEngine
                 $issues[] = [
                     'type' => 'hidden_iframe',
                     'severity' => 'critical',
-                    'title' => 'Zero-Pixel / Hidden Iframe Detected',
-                    'description' => 'Iframe is hidden or 1px sized (Target: '.mb_substr($src ?? 'unknown', 0, 50).')',
-                    'explanation' => 'Hidden iframes are frequently used for drive-by downloads or stealth redirects.',
-                    'recommendation' => 'Remove unauthorized iframe immediately.',
+                    'title' => 'Verstecktes Iframe',
+                    'description' => 'Iframe unsichtbar oder 1px (Ziel: '.mb_substr($src ?? 'unbekannt', 0, 50).')',
+                    'recommendation' => 'Unbefugtes Iframe entfernen.',
                 ];
                 continue;
             }
@@ -368,9 +364,9 @@ class SpectoraWatchdogEngine
                 $issues[] = [
                     'type' => 'unknown_iframe',
                     'severity' => 'warning',
-                    'title' => 'Third-Party Iframe',
-                    'description' => "Loads external source: {$srcHost}",
-                    'recommendation' => 'Verify if this embed source is legitimate and GDPR-compliant.',
+                    'title' => 'Fremdes Iframe',
+                    'description' => "Lädt {$srcHost}.",
+                    'recommendation' => 'Prüfen, ob die Quelle gewollt und DSGVO-konform ist.',
                 ];
             }
         }
@@ -386,9 +382,9 @@ class SpectoraWatchdogEngine
             return [
                 'type' => 'meta_refresh_redirect',
                 'severity' => 'warning',
-                'title' => 'Client-Side Meta Refresh Redirect',
-                'description' => 'Meta refresh: '.mb_substr($content, 0, 60),
-                'recommendation' => 'Use HTTP 301 server redirects instead of HTML meta refresh.',
+                'title' => 'Meta-Refresh-Weiterleitung',
+                'description' => 'Meta-Refresh: '.mb_substr($content, 0, 60),
+                'recommendation' => 'Stattdessen HTTP 301 auf dem Server nutzen.',
             ];
         }
 
@@ -418,9 +414,9 @@ class SpectoraWatchdogEngine
                     $issues[] = [
                         'type' => 'url_shortener_link',
                         'severity' => 'warning',
-                        'title' => 'Link via URL Shortener',
-                        'description' => "External link hides destination: {$linkHost}",
-                        'recommendation' => 'Use direct canonical URLs instead of shorteners in navigation.',
+                        'title' => 'Shortener-Link',
+                        'description' => "Ziel hinter Shortener: {$linkHost}.",
+                        'recommendation' => 'Direkte URLs statt Shortener in der Navigation.',
                     ];
                     break 2;
                 }
@@ -432,9 +428,9 @@ class SpectoraWatchdogEngine
                     $issues[] = [
                         'type' => 'suspicious_tld_link',
                         'severity' => 'warning',
-                        'title' => 'Link to Suspicious TLD',
-                        'description' => "External destination uses high-abuse TLD ({$linkHost})",
-                        'recommendation' => 'Confirm if this external partner link is intentional.',
+                        'title' => 'Link zu verdächtiger TLD',
+                        'description' => "Externes Ziel {$linkHost}.",
+                        'recommendation' => 'Prüfen, ob der Link gewollt ist.',
                     ];
                     break 2;
                 }
