@@ -4,9 +4,9 @@
         <!-- 1. Top Action Header -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Flotte</h1>
+                <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Websites</h1>
                 <p class="text-xs text-studio-muted mt-0.5">
-                    Uptime, SSL, Watchdog und Pulse für alle überwachten Websites.
+                    Pulse-Besucher zuerst. Uptime und SSL daneben, ohne Google Analytics.
                 </p>
             </div>
 
@@ -109,7 +109,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
                 </div>
                 <h3 class="text-sm font-bold text-white">Noch keine Websites hinterlegt</h3>
-                <p class="text-xs text-studio-muted mt-1 mb-4">Füge dein erstes Ziel hinzu, um Uptime-Überwachung und Telemetrie zu starten.</p>
+                <p class="text-xs text-studio-muted mt-1 mb-4">Erste Website eintragen — Pulse-Snippet einbauen, Uptime läuft automatisch.</p>
                 <button type="button" @click="$dispatch('open-add-domain')" class="btn-spectora-primary">
                     + Website hinzufügen
                 </button>

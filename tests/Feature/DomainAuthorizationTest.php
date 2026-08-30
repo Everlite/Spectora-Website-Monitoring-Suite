@@ -23,7 +23,7 @@ class DomainAuthorizationTest extends TestCase
         $this->actingAs($owner)
             ->get("/domains/{$domain->uuid}")
             ->assertOk()
-            ->assertSee('Uptime (30d)', false)
+            ->assertSee('Besucher', false)
             ->assertSee('Engine-Bericht', false)
             ->assertSee('Spectora Pulse', false)
             ->assertDontSee('Historie & Probes', false);

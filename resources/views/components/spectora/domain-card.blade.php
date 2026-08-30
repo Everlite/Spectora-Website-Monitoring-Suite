@@ -80,38 +80,23 @@
             </button>
         </div>
 
-        <!-- Metrics Inset Grid -->
-        <div class="grid grid-cols-2 gap-2 bg-studio-bg border border-studio-border rounded-studio-sm p-2.5 mb-3">
-            <div>
-                <div class="text-[10px] uppercase font-bold text-studio-muted">30d Uptime</div>
-                <div class="font-mono text-xs font-bold mt-0.5 {{ $uptime >= 99 ? 'text-studio-emerald' : ($uptime >= 95 ? 'text-studio-amber' : 'text-studio-rose') }}">
-                    {{ number_format($uptime, 1) }}%
-                </div>
+        <div class="bg-studio-bg border border-studio-border rounded-studio-sm p-2.5 mb-3">
+            <div class="text-[10px] uppercase font-bold text-studio-muted">Besucher heute</div>
+            <div class="font-mono text-lg font-bold text-white mt-0.5">
+                {{ number_format($domain->visitors_count_today ?? $domain->visitors_today ?? 0) }}
             </div>
-            <div>
-                <div class="text-[10px] uppercase font-bold text-studio-muted">Latenz</div>
-                <div class="font-mono text-xs font-bold text-white mt-0.5">
-                    @if(isset($domain->response_time))
-                        @if($domain->response_time < 1)
-                            {{ round($domain->response_time * 1000) }} ms
-                        @else
-                            {{ number_format($domain->response_time, 2) }} s
-                        @endif
-                    @else
-                        --
-                    @endif
+            <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-studio-border">
+                <div>
+                    <div class="text-[10px] uppercase font-bold text-studio-muted">Uptime 30d</div>
+                    <div class="font-mono text-xs font-bold mt-0.5 {{ $uptime >= 99 ? 'text-studio-emerald' : ($uptime >= 95 ? 'text-studio-amber' : 'text-studio-rose') }}">
+                        {{ number_format($uptime, 1) }}%
+                    </div>
                 </div>
-            </div>
-            <div>
-                <div class="text-[10px] uppercase font-bold text-studio-muted">SSL Zertifikat</div>
-                <div class="font-mono text-[11px] font-medium mt-0.5 {{ $sslDays > 30 ? 'text-white' : ($sslDays > 7 ? 'text-studio-amber' : 'text-studio-rose') }}">
-                    {{ $sslDays > 0 ? $sslDays.' d' : ($sslDays === 0 ? 'Expiring' : 'Kein SSL') }}
-                </div>
-            </div>
-            <div>
-                <div class="text-[10px] uppercase font-bold text-studio-muted">Besucher (24h)</div>
-                <div class="font-mono text-xs font-bold text-white mt-0.5">
-                    {{ $domain->visitors_count_today ?? $domain->visitors_today ?? 0 }}
+                <div>
+                    <div class="text-[10px] uppercase font-bold text-studio-muted">SSL</div>
+                    <div class="font-mono text-[11px] font-medium mt-0.5 {{ $sslDays > 30 ? 'text-white' : ($sslDays > 7 ? 'text-studio-amber' : 'text-studio-rose') }}">
+                        {{ $sslDays > 0 ? $sslDays.' d' : ($sslDays === 0 ? 'Läuft ab' : 'Kein SSL') }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -120,7 +105,7 @@
     <!-- Action Footer -->
     <div class="pt-2.5 border-t border-studio-border flex items-center justify-between gap-2">
         <a href="{{ route('domains.show', $domain) }}" class="btn-spectora-primary flex-1 text-center justify-center py-1.5 text-xs">
-            Dashboard
+            Bericht
         </a>
 
         <button type="button" 

@@ -9,7 +9,7 @@
   [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 </div>
 
-Spectora is a **private-by-design** Laravel app you run yourself. Registration is off by default. There is no SaaS bill and no Google Analytics. Latest tagged release: **v0.2.2**. Current `main` is the Spectora Engine + cockpit line (see [CHANGELOG](CHANGELOG.md)).
+Spectora is a **private-by-design** Laravel app you run yourself. Registration is off by default. There is no SaaS bill and no Google Analytics. Latest tagged release: **v0.2.2**. Current `main` is Pulse-first analytics plus the Engine kernel (see [CHANGELOG](CHANGELOG.md)).
 
 ---
 
@@ -17,8 +17,8 @@ Spectora is a **private-by-design** Laravel app you run yourself. Registration i
 
 | Surface | What you get |
 | --- | --- |
-| **Flotte** | All monitored sites: status, latency, SSL days, incidents, Pulse visitors |
-| **Domain cockpit** | One page per site: availability, score, Pulse, Watchdog, then probe log, notes, subpages |
+| **Websites** | Property list: Pulse visitors first, then status, uptime, SSL, Watchdog |
+| **Domain report** | Pulse first (visitors, pages, sources, devices, geo), health strip, Engine-Bericht, then log / notes / subpages |
 | **Alerts** | Email, Discord/Slack webhooks, Web Push — outage and recovery |
 | **Pulse** | Optional cookie-free first-party hits via `sp-pulse.js` |
 
@@ -50,7 +50,7 @@ flowchart TD
 
 - **Probe** — filter, one fetch (`SpectoraBot/2.0`), must/must-not keywords, SSL days, Watchdog on the same HTML, write history, transition incidents.
 - **Watchdog** — obfuscated `eval` / `fromCharCode`, CJK title spam, hidden text, tiny iframes, meta-refresh, shady outbound links.
-- **Audit** — separate job (too heavy for every probe): TTFB, HTML size, title/H1/meta, image alt, HTTPS/HSTS/frame headers. Score 0–100, grades A+–F.
+- **Audit** — own PHP checklist (Guzzle + DomCrawler), not Lighthouse or PageSpeed Insights. TTFB, HTML size, title/H1/meta, image alt, HTTPS/HSTS/frame headers. Score 0–100, grades A+–F. DB columns are still named `pagespeed_*` from an older schema.
 - **Pulse** — inbound only. Daily rotating HMAC visitor hash, no raw IP stored, no cookies. Origin checked against the monitored host. See [docs/PRIVACY.md](docs/PRIVACY.md).
 - **Incidents** — first failure alerts; recovery alert when the target is healthy again.
 

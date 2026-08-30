@@ -63,9 +63,9 @@ class AnalyticsController extends Controller
         $domain->update($validated);
 
         if ($request->wantsJson()) {
-            return response()->json(['message' => 'Analytics settings saved.']);
+            return response()->json(['message' => 'Standort-Genauigkeit gespeichert.']);
         }
 
-        return back()->with('status', 'Analytics settings saved.');
+        return back()->with('status', 'Standort-Genauigkeit gespeichert.');
     }
 }

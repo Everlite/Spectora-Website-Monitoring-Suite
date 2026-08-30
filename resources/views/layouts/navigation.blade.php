@@ -5,7 +5,7 @@
             <x-application-logo class="w-8 h-8 shrink-0" />
             <div class="min-w-0">
                 <div class="text-sm font-extrabold text-white tracking-wide">Spectora</div>
-                <div class="text-[10px] text-studio-muted font-medium">Website-Monitoring</div>
+                <div class="text-[10px] text-studio-muted font-medium">Analytics &amp; Monitoring</div>
             </div>
         </a>
     </div>
@@ -15,7 +15,7 @@
             <a href="{{ route('dashboard') }}"
                class="flex items-center gap-2.5 px-3 py-2 rounded-studio-sm text-xs font-bold transition-all {{ request()->routeIs('dashboard') ? 'bg-studio-elevated text-white border border-studio-border' : 'text-studio-muted hover:text-white hover:bg-studio-surface' }}">
                 <svg class="w-4 h-4 {{ request()->routeIs('dashboard') ? 'text-studio-brand' : 'text-studio-muted' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                <span>Flotte</span>
+                <span>Websites</span>
             </a>
 
             @if(!empty($navDomain))

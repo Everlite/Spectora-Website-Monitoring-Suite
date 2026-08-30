@@ -44,7 +44,7 @@
                     </div>
                     <nav class="space-y-1">
                         <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-studio-sm text-xs font-bold {{ request()->routeIs('dashboard') ? 'bg-studio-elevated text-white' : 'text-studio-muted hover:text-white' }}">
-                            Flotte
+                            Websites
                         </a>
                         @if($navDomain)
                             <a href="{{ route('domains.show', $navDomain) }}" class="flex items-center gap-2.5 px-3 py-2 rounded-studio-sm text-xs font-bold bg-studio-elevated text-white truncate">
@@ -67,7 +67,7 @@
                         </button>
 
                         <div class="flex items-center gap-2 text-xs">
-                            <a href="{{ route('dashboard') }}" class="text-studio-muted hover:text-white font-medium transition-colors">Flotte</a>
+                            <a href="{{ route('dashboard') }}" class="text-studio-muted hover:text-white font-medium transition-colors">Websites</a>
                             @if($navDomain)
                                 <span class="text-studio-subtle">/</span>
                                 <span class="text-white font-bold truncate max-w-[16rem]">{{ $navDomain->url }}</span>

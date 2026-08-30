@@ -22,7 +22,7 @@
                     <div x-show="open" x-cloak 
                          class="absolute left-0 mt-2 w-64 bg-studio-surface border border-studio-border rounded-studio shadow-studio-card p-1.5 z-50 space-y-1">
                         <div class="px-2 py-1 text-[10px] font-bold text-studio-muted uppercase tracking-wider">
-                            Ziel wechseln
+                            Website wechseln
                         </div>
                         @foreach($allDomains as $d)
                             <a href="{{ route('domains.show', $d) }}" 

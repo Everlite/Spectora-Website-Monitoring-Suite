@@ -5,12 +5,11 @@
         <table class="w-full text-left text-xs">
             <thead>
                 <tr class="border-b border-studio-border bg-studio-elevated/50 text-studio-muted font-bold text-[11px] uppercase tracking-wider">
-                    <th class="py-3 px-4">Ziel-Website</th>
+                    <th class="py-3 px-4">Website</th>
+                    <th class="py-3 px-4">Besucher (heute)</th>
                     <th class="py-3 px-4">Status</th>
-                    <th class="py-3 px-4">30d Uptime</th>
-                    <th class="py-3 px-4">Latenz</th>
-                    <th class="py-3 px-4">SSL Zertifikat</th>
-                    <th class="py-3 px-4">Besucher (24h)</th>
+                    <th class="py-3 px-4">Uptime 30d</th>
+                    <th class="py-3 px-4">SSL</th>
                     <th class="py-3 px-4">Watchdog</th>
                     <th class="py-3 px-4 text-right">Aktionen</th>
                 </tr>
@@ -42,7 +41,10 @@
                             </div>
                         </td>
 
-                        <!-- Status Badge -->
+                        <td class="py-3.5 px-4 font-mono font-bold text-white text-sm">
+                            {{ number_format($domain->visitors_count_today ?? $domain->visitors_today ?? 0) }}
+                        </td>
+
                         <td class="py-3.5 px-4">
                             @if($isOnline)
                                 <span class="badge-status-online">
@@ -55,36 +57,16 @@
                             @endif
                         </td>
 
-                        <!-- 30d Uptime -->
                         <td class="py-3.5 px-4 font-mono">
                             <span class="font-bold {{ $uptime >= 99 ? 'text-studio-emerald' : ($uptime >= 95 ? 'text-studio-amber' : 'text-studio-rose') }}">
                                 {{ number_format($uptime, 1) }}%
                             </span>
                         </td>
 
-                        <!-- Latency -->
-                        <td class="py-3.5 px-4 font-mono text-studio-muted">
-                            @if(isset($domain->response_time))
-                                @if($domain->response_time < 1)
-                                    <span class="text-white font-semibold">{{ round($domain->response_time * 1000) }}</span> ms
-                                @else
-                                    <span class="text-white font-semibold">{{ number_format($domain->response_time, 2) }}</span> s
-                                @endif
-                            @else
-                                --
-                            @endif
-                        </td>
-
-                        <!-- SSL Days -->
                         <td class="py-3.5 px-4 font-mono text-xs">
                             <span class="{{ $sslDays > 30 ? 'text-studio-muted' : ($sslDays > 7 ? 'text-studio-amber' : 'text-studio-rose') }}">
                                 {{ $sslDays > 0 ? $sslDays.' d' : ($sslDays === 0 ? 'Läuft ab' : 'Kein SSL') }}
                             </span>
-                        </td>
-
-                        <!-- Visitors -->
-                        <td class="py-3.5 px-4 font-mono font-bold text-white">
-                            {{ number_format($domain->visitors_count_today ?? $domain->visitors_today ?? 0) }}
                         </td>
 
                         <!-- Watchdog -->
@@ -120,7 +102,7 @@
                                 <!-- Details Link -->
                                 <a href="{{ route('domains.show', $domain) }}" 
                                    class="px-2.5 py-1 rounded-studio-sm bg-studio-elevated hover:bg-studio-brand text-white font-semibold text-xs border border-studio-border transition-colors">
-                                    Details
+                                    Bericht
                                 </a>
 
                                 <!-- Notes Button -->
