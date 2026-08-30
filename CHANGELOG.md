@@ -43,6 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `SpectoraEngine::probe()` is the single outbound check cycle (filter, one HTTP fetch, keywords, watchdog on the same body, persist, incidents). `CheckUrlJob` is a queue wrapper.
 - Domain page is a cockpit: availability, Pulse, Watchdog, then probe log / notes / subpages. No tab bar.
 - Auth, shell, and settings use Studio tokens and the Spectora mark. Pulse snippet is advertised as `sp-pulse.js`.
+- README rewritten to match the Engine kernel, fleet/cockpit UI, and Docker deploy — no v2.4 / proprietary brochure copy.
 
 ### Removed
 

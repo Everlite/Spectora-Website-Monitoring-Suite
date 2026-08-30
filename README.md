@@ -1,196 +1,140 @@
 <div align="center">
-  <img width="256" height="209" alt="spectora_logo" src="https://github.com/user-attachments/assets/2166df18-7009-466d-99b7-de29dae8bb66" />
-  <h1>Spectora: Private Self-Hosted Website Monitoring Suite</h1>
-  
-  [![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
-  [![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=for-the-badge&logo=php)](https://php.net)
-  [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com)
-  [![UI](https://img.shields.io/badge/Design-Spectora_Studio_Dark-3B57E8?style=for-the-badge)](https://spectora.taikon.de)
-  [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+  <img width="256" height="209" alt="Spectora logo" src="https://github.com/user-attachments/assets/2166df18-7009-466d-99b7-de29dae8bb66" />
+  <h1>Spectora</h1>
+  <p>Self-hosted website monitoring for agencies and freelancers.<br>Uptime, SSL, Watchdog, Pulse telemetry — on your server.</p>
 
-  <p align="center">
-    <strong>Powered by the proprietary Spectora Engine™ · Bespoke Studio Dark UI · Self-Hosted &amp; Private by Design</strong><br>
-    Laravel 12 · Docker · Heuristic Watchdog · Multi-Factor Audits · Zero-Cookie Pulse Telemetry · Discord &amp; Slack Webhooks · Multi-Channel Recovery Alerts
-  </p>
+  [![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel)](https://laravel.com)
+  [![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php)](https://php.net)
+  [![Docker](https://img.shields.io/badge/Docker-yes-2496ED?style=flat-square&logo=docker)](https://www.docker.com)
+  [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 </div>
 
----
-
-> [!IMPORTANT]
-> **Spectora v2.4: Custom Studio Dark Architecture & Spectora Engine Ecosystem (2026)**
-> Spectora features a 100% custom-crafted, bespoke **Spectora Studio Dark UI** paired with the autonomous **Spectora Engine** ecosystem:
-> 1. **Bespoke Studio Dark Theme:** Deep Charcoal canvas (`#090B10`), Matte Obsidian cards (`#111622`), Studio Cobalt (`#3B57E8`), Emerald Mint (`#10B981`), Plus Jakarta Sans and JetBrains Mono typography, high-utility sidebar, and streamlined data tables.
-> 2. **Spectora Audit Engine:** Multi-factor scoring matrix (0–100, Grade A+ to F) evaluating TTFB, payload size, H1 hierarchy, SEO snippets, image alt tags, and security headers.
-> 3. **Spectora Watchdog Engine:** Heuristic malware scanner detecting obfuscated JS (`eval`, `String.fromCharCode`), CJK SEO title spam, cloaking, and hidden iframes.
-> 4. **Spectora Pulse Telemetry:** Privacy-first, zero-cookie telemetry kernel with SPA History API auto-tracking and custom conversion tracking (`window.spectora.track`).
-> 5. **Incident State Machine & Multi-Channel Alerting:** Intelligent outage & recovery lifecycle with direct Discord and Slack Webhooks, E-Mail, and Web Push.
-
-**Spectora** is a premium, open-source, **Private by Design Self-Hosted Website Monitoring Suite** custom-tailored for freelancers and modern digital agencies. It allows you to monitor all your client websites (uptime, SSL, security keywords, deep audits, telemetry, and threat detection) from one central command center on your own server—completely free of recurring SaaS subscriptions.
+Spectora is a **private-by-design** Laravel app you run yourself. Registration is off by default. There is no SaaS bill and no Google Analytics. Latest tagged release: **v0.2.2**. Current `main` is the Spectora Engine + cockpit line (see [CHANGELOG](CHANGELOG.md)).
 
 ---
 
-## 🏛️ The Proprietary Spectora Engine Architecture
+## What it does
+
+| Surface | What you get |
+| --- | --- |
+| **Flotte** | All monitored sites: status, latency, SSL days, incidents, Pulse visitors |
+| **Domain cockpit** | One page per site: availability, score, Pulse, Watchdog, then probe log, notes, subpages |
+| **Alerts** | Email, Discord/Slack webhooks, Web Push — outage and recovery |
+| **Pulse** | Optional cookie-free first-party hits via `sp-pulse.js` |
+
+UI language is German. Tokens live in [DESIGN.md](DESIGN.md) (Studio Dark: canvas `#090B10`, brand `#3B57E8`).
+
+---
+
+## Spectora Engine
+
+Outbound checks go through **one** kernel: `App\SpectoraEngine\SpectoraEngine::probe()`. `CheckUrlJob` only queues that call.
 
 ```mermaid
 flowchart TD
-    subgraph ClientSite [Client Website]
-        SP["sp-pulse.js / sp-core.js (< 1KB)"]
-        SPA["SPA History API Tracker"]
-        CE["Custom Event API (window.spectora.track)"]
-    end
+    Job[CheckUrlJob] --> Probe[SpectoraEngine.probe]
+    Probe --> Filter[Filter + SSRF]
+    Filter --> Fetch[one HTTP GET]
+    Fetch --> Rules[Keywords + SSL]
+    Rules --> WD[Watchdog on same body]
+    WD --> Persist[Domain + ChecksHistory]
+    Persist --> Incidents[IncidentStateMachine]
+    Incidents --> Alerts[Email / Discord / Slack / Web Push]
 
-    subgraph SpectoraCore [Spectora Engine Kernel]
-        PULSE["Spectora Pulse Ingest\n(HMAC-SHA256 Daily Subkeys + GDPR)"]
-        AUDIT["Spectora Audit Engine\n(Multi-Factor Index: 0-100, Grade A+ to F)"]
-        WATCHDOG["Spectora Watchdog Engine\n(Obfuscated JS, CJK SEO Spam, Cloaking)"]
-        STATE["Incident State Machine\n(Soft-Fail, Outage, Recovery Lifecycle)"]
-    end
+    AuditJob[PerformSpectoraAudit] --> Audit[AuditEngine]
+    Audit --> Score[Score 0-100 and grade]
 
-    subgraph Channels [Multi-Channel Alerts]
-        MAIL["E-Mail (Downtime & Recovery)"]
-        DISCORD["Discord Webhooks"]
-        SLACK["Slack Webhooks"]
-        WEBPUSH["Web Push Notifications"]
-    end
-
-    ClientSite -->|Telemetry Beacons| PULSE
-    AUDIT -->|Multi-Factor Scores & Grades| Dashboard
-    WATCHDOG -->|Heuristic Threat Assessments| STATE
-    STATE -->|Auto-Dispatch Outages & Recoveries| Channels
+    Client[Client site + sp-pulse.js] --> Pulse[PulseIngestEngine]
+    Pulse --> Visits[analytics_visits]
 ```
 
----
+- **Probe** — filter, one fetch (`SpectoraBot/2.0`), must/must-not keywords, SSL days, Watchdog on the same HTML, write history, transition incidents.
+- **Watchdog** — obfuscated `eval` / `fromCharCode`, CJK title spam, hidden text, tiny iframes, meta-refresh, shady outbound links.
+- **Audit** — separate job (too heavy for every probe): TTFB, HTML size, title/H1/meta, image alt, HTTPS/HSTS/frame headers. Score 0–100, grades A+–F.
+- **Pulse** — inbound only. Daily rotating HMAC visitor hash, no raw IP stored, no cookies. Origin checked against the monitored host. See [docs/PRIVACY.md](docs/PRIVACY.md).
+- **Incidents** — first failure alerts; recovery alert when the target is healthy again.
 
-## 🎨 Bespoke Studio Dark UI
-
-The application interface is a 100% bespoke design system crafted exclusively for Spectora:
-
-* **Matte Studio Foundations:** Deep `#090B10` canvas with elevated `#111622` cards and razor-sharp `#202A3E` borders.
-* **Purposeful Accent Palette:**
-  * Primary Brand: **Studio Cobalt (`#3B57E8` / `#4F6BFF`)**
-  * Health / Online: **Clean Emerald (`#10B981`)**
-  * Degraded / Warning: **Polished Amber (`#F59E0B`)**
-  * Outage / Threat: **Coral Crimson (`#F43F5E`)**
-* **Left Studio Navigation:** Brand header, system node telemetry pill, and user profile.
-* **Fleet KPI Deck & Unified Tables:** Real-time latency (in ms), SSL expiration countdowns, and quick actions (`Code </>`, `Details`, `Notes`, `Delete`).
-* **Interactive Command Center:** Segmented controllers for Overview, Pulse Telemetry, Watchdog & Audits, Probe Logs, and Subpage Monitors.
+`sp-core.js` is a backward-compatible alias. New installs use `sp-pulse.js`.
 
 ---
 
-## ⚡ Core Modules & Features
+## Quick start (Docker)
 
-Outbound checks run through `App\SpectoraEngine\SpectoraEngine::probe()` (one HTTP fetch, then keywords, watchdog, persist, incidents). `CheckUrlJob` is the queue wrapper. Audit stays a separate job; Pulse is inbound.
+Needs Docker Compose and about 1 GB RAM. Behind a reverse proxy, set `APP_URL` and `TRUSTED_PROXIES`.
 
-### 1. Spectora Audit Engine (`App\SpectoraEngine\Audit`)
-* **Multi-Factor Scoring Matrix (0–100 Index & Letter Grades A+ to F):**
-  * **Performance:** Server TTFB (Time-To-First-Byte) and HTML payload size optimization.
-  * **Structure & SEO:** Single H1 hierarchy enforcement, `<title>` snippet validation, and `<meta name="description">` audits.
-  * **Accessibility:** Automatic verification of image `alt` attributes.
-  * **Security:** HTTPS enforcement, Strict-Transport-Security (HSTS), X-Frame-Options framing defenses, and X-Content-Type-Options.
-
-### 2. Spectora Watchdog Engine (`App\SpectoraEngine\Watchdog`)
-* Deep heuristic malware, cloaking, and defacement detection running with zero latency overhead during uptime checks:
-  * **Obfuscated Payloads:** Detects `eval(String.fromCharCode(...))`, `document.write(unescape(...))`, and browser cryptominers.
-  * **SEO Spam Hijacking:** Detects Japanese Keyword Hack (CJK unicode spam) and common hack titles (casino, payday, pharma).
-  * **Black-Hat Cloaking:** Flags text hidden via `display:none`, `visibility:hidden`, and extreme negative text-indents.
-  * **Malicious Iframes:** Flags hidden 0px/1px iframes used for credential harvesting or drive-by downloads.
-  * **Defacement Redirects:** Catches client-side meta-refresh redirect attacks.
-
-### 3. Spectora Pulse Telemetry (`App\SpectoraEngine\Pulse`)
-* **Zero-Cookie Privacy Telemetry:**
-  * Ultra-lightweight `< 1KB` tracking kernel ([public/js/sp-pulse.js](public/js/sp-pulse.js)).
-  * **SPA Navigation Support:** Automatically tracks route changes in Single Page Applications (React, Vue, Next.js, Nuxt) via the History API (`pushState` / `popstate`).
-  * **Custom Conversion Events:** Allows client websites to track conversion actions:
-    ```javascript
-    window.spectora.track('lead_form_submitted', { plan: 'enterprise' });
-    ```
-  * **GDPR-Compliant Daily Visitor Hashing:** Generates rotating `HMAC-SHA256` visitor hashes with truncated IPs and daily rotating server subkeys. No raw IP addresses or persistent cookies are ever stored.
-
-### 4. Incident State Machine & Multi-Channel Alerting (`App\SpectoraEngine\Incidents`)
-* **Incident Lifecycle Management:** Tracks consecutive failures and prevents alert storms.
-* **Instant Outage Alerts:** Triggered on confirmed failures across configured channels.
-* **Automated Recovery Alerts:** Automatically dispatches a resolution alert as soon as the site recovers healthy HTTP responses.
-* **Multi-Channel Dispatcher:**
-  * **Discord Webhooks:** Rich visual embeds with error details and direct dashboard jump links.
-  * **Slack Webhooks:** Formatted incident cards for agency communication channels.
-  * **E-Mail Alerts:** HTML downtime warnings and recovery digests.
-  * **Web Push Notifications:** Real-time desktop and mobile browser push notifications via VAPID.
-
----
-
-## 🚀 Quick Start with Docker
-
-### Prerequisites
-* Docker & Docker Compose
-* ~1 GB RAM
-* Reverse Proxy (e.g. Nginx, Traefik, Caddy, Cloudflare, or Nginx Proxy Manager)
-
-### 1. Start the Container
-Clone the repository and spin up the environment:
 ```bash
 git clone https://github.com/Everlite/Spectora-Website-Monitoring-Suite.git
 cd Spectora-Website-Monitoring-Suite
 docker compose up -d --build
-```
-
-### 2. Run the Interactive Admin Setup
-Initialize your primary administrator account securely via the CLI:
-```bash
 docker compose exec app php artisan spectora:setup
 ```
-Enter your **first name, last name, email, and password** when prompted.
 
-Navigate to your domain or **http://localhost:8000**, log in, and explore your command center!
+Then open `http://localhost:8000` and sign in.
 
----
+**Production** (image build, no source mounts) — from the host checkout:
 
-## ⚙️ Configuration (.env)
-
-| Variable | Purpose |
-| :--- | :--- |
-| `APP_URL` | Public URL of your instance (e.g. `https://spectora.taikon.de`). |
-| `TRUSTED_PROXIES` | Set to `*` or proxy IPs behind reverse proxies (Nginx, Traefik, Cloudflare). |
-| `SPECTORA_FORCE_HTTPS` | `true` — ensures secure cookie and asset generation behind HTTPS proxies. |
-| `SPECTORA_REGISTRATION_ENABLED` | `false` (default) — disables public sign-up for agency privacy. |
-| `DB_DATABASE` | SQLite database path (default in Docker: `/var/www/html/storage/database.sqlite`). |
-| `QUEUE_CONNECTION` | `database` (default) — executed automatically via Docker Supervisor. |
-| `MAIL_*` | SMTP configuration for email alerts, recovery notifications, and monthly digests. |
-| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web Push notification keys (subscribe directly from the UI). |
-
----
-
-## 📡 Pulse Client Tracking Code
-
-To enable privacy-first telemetry on a client website, embed this snippet in the `<head>` of your website:
-
-```html
-<!-- Spectora Pulse Telemetry Kernel -->
-<script defer src="https://spectora.yourdomain.com/js/sp-pulse.js" data-domain="YOUR_DOMAIN_UUID"></script>
+```bash
+git pull origin main
+docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-### Tracking Custom Events
+The container entrypoint already runs `migrate --force` and clears compiled views. Queue and scheduler run under Supervisor. Details: [docs/RUNBOOK.md](docs/RUNBOOK.md).
+
+---
+
+## Configuration
+
+| Variable | Purpose |
+| --- | --- |
+| `APP_URL` | Public URL of this instance |
+| `TRUSTED_PROXIES` | `*` or proxy IPs (Nginx, Traefik, Cloudflare) |
+| `SPECTORA_FORCE_HTTPS` | Force HTTPS cookies/assets behind a TLS proxy |
+| `SPECTORA_REGISTRATION_ENABLED` | `false` by default — no public sign-up |
+| `DB_DATABASE` | SQLite path (Docker: `/var/www/html/storage/database.sqlite`) |
+| `QUEUE_CONNECTION` | `database` — required for probes |
+| `MAIL_*` | Outage, recovery, monthly digest |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web Push (subscribe in the UI) |
+
+---
+
+## Pulse snippet
+
+Put this in the client site `<head>`. `YOUR_DOMAIN_UUID` is on the domain cockpit.
+
+```html
+<script defer src="https://your-spectora.example/js/sp-pulse.js" data-domain="YOUR_DOMAIN_UUID"></script>
+```
+
+Custom events:
+
 ```javascript
-// Track button clicks, form submissions, or conversions
 window.spectora.track('lead_form_submitted', { plan: 'enterprise' });
 ```
 
+SPA route changes (`pushState` / `popstate`) are tracked unless you set `data-spa="false"`.
+
 ---
 
-## 🧪 Testing
-
-Spectora includes a complete test suite covering the engine kernels, security filters, and incident workflows:
+## Tests
 
 ```bash
-# Run unit and feature tests
 docker compose exec app php artisan test
 ```
 
+Covers probe (one HTTP fetch + Watchdog prefetch), audit, Watchdog, Pulse ingest, incidents, authz.
+
 ---
 
-## 📄 License & Credits
+## Docs
 
-Spectora is open-source software licensed under the **[MIT License](LICENSE)**.
+- [CHANGELOG.md](CHANGELOG.md) — release notes
+- [docs/RUNBOOK.md](docs/RUNBOOK.md) — deploy, queue, scheduler, backups
+- [docs/PRIVACY.md](docs/PRIVACY.md) — Pulse / GDPR notes
+- [DESIGN.md](DESIGN.md) — UI tokens
+- [SECURITY.md](SECURITY.md) — how to report issues
 
-Built with passion for freelancers and agencies that value privacy, elegance, and complete data ownership.
+---
 
-*Created and maintained by [Everlite](https://github.com/Everlite).*
+## License
+
+[MIT](LICENSE). Maintained by [Everlite](https://github.com/Everlite).
