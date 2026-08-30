@@ -54,14 +54,12 @@
     $oks = collect($rows)->where('status', 'success')->count();
 @endphp
 
-<section class="border-t border-studio-border pt-12">
-    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-8">
+<section class="spectora-card overflow-hidden">
+    <div class="px-4 py-3 border-b border-studio-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <p class="sp-kicker">Spectora Engine</p>
-            <h2 class="sp-display text-4xl text-studio-text mt-2">Engine-Bericht</h2>
-            <p class="text-sm text-studio-muted mt-3 max-w-xl">
-                Dokument-Score aus dem HTML, das Spectora geholt hat. Kein Chrome, kein Lighthouse.
-                Watchdog kommt vom letzten Probe. Deep Probe startet den Audit-Job.
+            <h2 class="text-sm font-medium text-studio-text">Engine-Bericht</h2>
+            <p class="text-[11px] text-studio-muted mt-0.5">
+                Dokument-Score aus dem HTML, das Spectora geholt hat — kein Lighthouse. Watchdog vom letzten Probe.
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -80,7 +78,7 @@
     </div>
 
     @if($rows === [])
-        <p class="py-8 text-sm text-studio-muted">Noch kein Audit. „Deep Probe starten“ holt das HTML und bewertet es.</p>
+        <p class="px-4 py-8 text-sm text-studio-muted">Noch kein Audit. „Deep Probe starten“ holt das HTML und bewertet es.</p>
     @else
         <div class="divide-y divide-studio-border">
             @foreach($groups as $category => $items)
@@ -93,7 +91,7 @@
                             @foreach($items as $item)
                                 <tr class="align-top">
                                     <td class="pl-5 pr-3 py-3 w-44 shrink-0">
-                                        <div class="text-xs font-bold text-white">{{ $item['label'] }}</div>
+                                        <div class="text-xs font-bold text-studio-text">{{ $item['label'] }}</div>
                                     </td>
                                     <td class="px-3 py-3">
                                         <p class="text-xs text-studio-text font-mono leading-relaxed">{{ $item['message'] }}</p>

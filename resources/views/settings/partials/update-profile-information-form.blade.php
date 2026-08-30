@@ -1,6 +1,6 @@
 <section>
     <header>
-        <h2 class="text-xs font-bold text-white uppercase tracking-wider">
+        <h2 class="text-xs font-bold text-studio-text uppercase tracking-wider">
             Profil
         </h2>
 

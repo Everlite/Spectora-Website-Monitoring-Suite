@@ -1,11 +1,11 @@
 @props(['domains'])
 
-<div class="overflow-x-auto">
+<div class="spectora-card overflow-x-auto">
         <table class="w-full text-left text-sm">
             <thead>
-                <tr class="border-y border-studio-border text-studio-muted text-[11px] uppercase tracking-[0.16em]">
-                    <th class="py-3 pr-4 font-medium">Website</th>
-                    <th class="py-3 px-4 font-medium">Besucher</th>
+                <tr class="border-b border-studio-border bg-studio-elevated text-studio-muted text-xs">
+                    <th class="py-3 px-4 font-medium">Website</th>
+                    <th class="py-3 px-4 font-medium">Nutzer (heute)</th>
                     <th class="py-3 px-4 font-medium">Status</th>
                     <th class="py-3 px-4 font-medium">Uptime</th>
                     <th class="py-3 px-4 font-medium">SSL</th>
@@ -20,11 +20,11 @@
                         $sslDays = $domain->ssl_days_left ?? 0;
                         $uptime = $domain->calculated_uptime ?? $domain->calculateUptime();
                     @endphp
-                    <tr class="border-b border-studio-border/80 hover:bg-studio-elevated/40"
+                    <tr class="border-b border-studio-border hover:bg-studio-elevated"
                         x-show="matchesFilter({{ json_encode(strtolower($domain->url)) }}, {{ json_encode($isOnline ? 'online' : 'offline') }})">
 
-                        <td class="py-5 pr-4">
-                            <a href="{{ route('domains.show', $domain) }}" class="sp-display text-2xl text-studio-text hover:text-studio-brand truncate block">
+                        <td class="py-3 px-4">
+                            <a href="{{ route('domains.show', $domain) }}" class="font-medium text-studio-brand hover:underline truncate block">
                                 {{ parse_url($domain->url, PHP_URL_HOST) ?: $domain->url }}
                             </a>
                             <span class="text-[11px] text-studio-muted">
@@ -32,7 +32,7 @@
                             </span>
                         </td>
 
-                        <td class="py-5 px-4 sp-display text-3xl text-studio-text tabular-nums">
+                        <td class="py-3 px-4 tabular-nums font-medium">
                             {{ number_format($domain->visitors_count_today ?? $domain->visitors_today ?? 0) }}
                         </td>
 
@@ -85,21 +85,21 @@
                                 <!-- Tracking Code Button -->
                                 <button type="button" 
                                         @click="openTracking({{ json_encode($domain->url) }}, {{ json_encode($domain->uuid) }})"
-                                        class="p-1.5 rounded-studio-sm bg-studio-elevated hover:bg-studio-border text-studio-muted hover:text-white transition-colors border border-studio-border"
+                                        class="p-1.5 rounded-studio-sm bg-studio-elevated hover:bg-studio-hover text-studio-muted hover:text-studio-brand transition-colors border border-studio-border"
                                         title="Pulse Tracking Code">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
                                 </button>
 
                                 <!-- Details Link -->
                                 <a href="{{ route('domains.show', $domain) }}" 
-                                   class="px-2.5 py-1 rounded-studio-sm bg-studio-elevated hover:bg-studio-brand text-white font-semibold text-xs border border-studio-border transition-colors">
+                                   class="btn-spectora-secondary">
                                     Bericht
                                 </a>
 
                                 <!-- Notes Button -->
                                 <button type="button" 
                                         @click="openNotes({{ $domain->id }}, {{ json_encode($domain->url) }})" 
-                                        class="p-1.5 rounded-studio-sm bg-studio-elevated hover:bg-studio-border text-studio-muted hover:text-white transition-colors border border-studio-border" 
+                                        class="p-1.5 rounded-studio-sm bg-studio-elevated hover:bg-studio-hover text-studio-muted hover:text-studio-text transition-colors border border-studio-border"
                                         title="Notizen">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>

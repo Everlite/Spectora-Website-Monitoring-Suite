@@ -27,9 +27,9 @@
                         </svg>
                     </div>
                     <div class="space-y-1">
-                        <h3 class="text-sm font-bold text-white">Löschen bestätigen</h3>
+                        <h3 class="text-sm font-bold text-studio-text">Löschen bestätigen</h3>
                         <p class="text-xs text-studio-muted leading-relaxed">
-                            Möchtest du <span x-text="deleteLabel" class="font-bold text-white font-mono"></span> wirklich entfernen? Alle Check-Historien und Telemetrie-Messungen werden unwiderruflich gelöscht.
+                            Möchtest du <span x-text="deleteLabel" class="font-bold text-studio-text font-mono"></span> wirklich entfernen? Alle Check-Historien und Telemetrie-Messungen werden unwiderruflich gelöscht.
                         </p>
                     </div>
                 </div>

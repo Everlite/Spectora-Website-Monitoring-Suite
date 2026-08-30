@@ -1,9 +1,8 @@
 <x-app-layout>
     <div class="space-y-6">
         <div>
-            <p class="sp-kicker">Konto</p>
-            <h2 class="sp-display text-4xl text-studio-text mt-2">Einstellungen</h2>
-            <p class="text-sm text-studio-muted mt-2">Profil, Passwort, Agentur-Logo für PDF-Reports.</p>
+            <h2 class="text-xl font-medium text-studio-text">Einstellungen</h2>
+            <p class="text-sm text-studio-muted mt-1">Profil, Passwort, Agentur-Logo für PDF-Reports.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -21,7 +20,7 @@
             <div class="spectora-card p-5 lg:col-span-2">
                 <section>
                     <header class="mb-4 pb-3 border-b border-studio-border">
-                        <h3 class="text-xs font-bold text-white uppercase tracking-wider">
+                        <h3 class="text-xs font-bold text-studio-text uppercase tracking-wider">
                             {{ __('White-Label Agentur Branding') }}
                         </h3>
                         <p class="mt-0.5 text-xs text-studio-muted">

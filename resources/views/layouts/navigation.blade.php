@@ -1,43 +1,47 @@
 @php
     $navDomain = request()->route('domain');
     $navDomain = $navDomain instanceof \App\Models\Domain ? $navDomain : null;
+    $host = $navDomain ? (parse_url($navDomain->url, PHP_URL_HOST) ?: $navDomain->url) : null;
 @endphp
 
-<header class="border-b border-studio-border">
-    <div class="max-w-[1360px] mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between gap-6">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 min-w-0">
-            <x-application-logo class="w-8 h-8 shrink-0" />
-            <span class="sp-display text-[28px] text-studio-text leading-none tracking-tight">Spectora</span>
+<aside class="hidden lg:flex flex-col w-60 bg-white border-r border-studio-border shrink-0 min-h-screen">
+    <div class="h-14 flex items-center px-4 border-b border-studio-border">
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 min-w-0">
+            <x-application-logo class="w-7 h-7 shrink-0" />
+            <span class="text-[17px] font-medium text-studio-text">Spectora</span>
         </a>
+    </div>
 
-        <nav class="hidden lg:flex items-center gap-8 text-sm">
-            <a href="{{ route('dashboard') }}"
-               class="{{ request()->routeIs('dashboard') && ! $navDomain ? 'text-studio-text' : 'text-studio-muted hover:text-studio-text' }}">
-                Websites
+    <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
+        <p class="px-3 pb-1 text-[11px] font-medium uppercase tracking-wide text-studio-subtle">Berichte</p>
+        <a href="{{ route('dashboard') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-studio-sm {{ request()->routeIs('dashboard') && ! $navDomain ? 'bg-studio-hover text-studio-brand font-medium' : 'text-studio-muted hover:bg-studio-elevated' }}">
+            Start
+        </a>
+        @if($navDomain)
+            <a href="{{ route('domains.show', $navDomain) }}"
+               class="flex items-center gap-3 px-3 py-2 rounded-studio-sm bg-studio-hover text-studio-brand font-medium truncate">
+                {{ $host }}
             </a>
-            @if($navDomain)
-                <span class="text-studio-subtle">/</span>
-                <span class="text-studio-text truncate max-w-[20rem]">{{ parse_url($navDomain->url, PHP_URL_HOST) ?: $navDomain->url }}</span>
-            @endif
-            <a href="{{ route('settings.edit') }}"
-               class="{{ request()->routeIs('settings.*') ? 'text-studio-text' : 'text-studio-muted hover:text-studio-text' }}">
-                Einstellungen
-            </a>
-        </nav>
+        @endif
 
-        <div class="flex items-center gap-4">
-            <x-spectora.push-alerts-badge />
-            <div class="hidden sm:block text-right leading-tight">
-                <div class="text-xs text-studio-text">{{ Auth::user()->name }}</div>
-                <div class="text-[11px] text-studio-muted truncate max-w-[10rem]">{{ Auth::user()->email }}</div>
+        <p class="px-3 pt-4 pb-1 text-[11px] font-medium uppercase tracking-wide text-studio-subtle">Verwaltung</p>
+        <a href="{{ route('settings.edit') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-studio-sm {{ request()->routeIs('settings.*') ? 'bg-studio-hover text-studio-brand font-medium' : 'text-studio-muted hover:bg-studio-elevated' }}">
+            Einstellungen
+        </a>
+    </nav>
+
+    <div class="p-3 border-t border-studio-border">
+        <div class="flex items-center justify-between px-2">
+            <div class="min-w-0">
+                <div class="text-xs font-medium truncate">{{ Auth::user()->name }}</div>
+                <div class="text-[11px] text-studio-muted truncate">{{ Auth::user()->email }}</div>
             </div>
-            <form method="POST" action="{{ route('logout') }}" class="hidden lg:block">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="text-xs text-studio-muted hover:text-studio-rose">Abmelden</button>
+                <button type="submit" class="text-[11px] text-studio-muted hover:text-studio-rose">Abmelden</button>
             </form>
-            <button type="button" @click="mobileNavOpen = !mobileNavOpen" class="lg:hidden text-studio-muted border border-studio-border p-2" aria-label="Menü">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7h16M4 12h16M4 17h16"></path></svg>
-            </button>
         </div>
     </div>
-</header>
+</aside>

@@ -1,10 +1,10 @@
 <x-app-layout>
     <div class="space-y-6" x-data="dashboardManager()">
         
-        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h1 class="sp-kicker">Properties</h1>
-                <p class="sp-display text-4xl sm:text-5xl text-studio-text mt-2">Websites</p>
+                <h1 class="text-xl font-medium text-studio-text">Start</h1>
+                <p class="text-sm text-studio-muted mt-0.5">Nutzer heute, dann deine Websites.</p>
             </div>
             <button type="button" @click="$dispatch('open-add-domain')" class="btn-spectora-primary">
                 Website hinzufügen
@@ -52,9 +52,9 @@
             </div>
         @else
             <!-- Zero State -->
-            <div class="py-20 border-t border-studio-border">
-                <p class="sp-display text-4xl text-studio-text">Noch keine Website.</p>
-                <p class="text-sm text-studio-muted mt-3 mb-6 max-w-md">Erste Property eintragen. Pulse-Snippet einbauen — Uptime läuft mit dem nächsten Probe.</p>
+            <div class="spectora-card p-10 text-center">
+                <p class="text-lg font-medium">Noch keine Website</p>
+                <p class="text-sm text-studio-muted mt-2 mb-5">Website hinzufügen, Pulse-Snippet einbauen. Uptime läuft automatisch.</p>
                 <button type="button" @click="$dispatch('open-add-domain')" class="btn-spectora-primary">
                     Website hinzufügen
                 </button>

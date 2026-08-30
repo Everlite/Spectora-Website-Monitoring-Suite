@@ -4,7 +4,7 @@
                 <div class="spectora-card p-5">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-white">Antwortzeit Verlauf (Letzte 50 Checks)</h3>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-studio-text">Antwortzeit Verlauf (Letzte 50 Checks)</h3>
                             <p class="text-[11px] text-studio-muted">Latenzmessung in Millisekunden</p>
                         </div>
                     </div>
@@ -16,7 +16,7 @@
                 <!-- 3. Probe Log Table -->
                 <div class="spectora-card overflow-hidden">
                     <div class="p-4 border-b border-studio-border flex items-center justify-between">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-white">Letzte Probe-Checks (Logbuch)</h3>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-studio-text">Letzte Probe-Checks (Logbuch)</h3>
                         <span class="text-[10px] text-studio-muted font-mono">Letzte 20 Einträge</span>
                     </div>
 
@@ -40,7 +40,7 @@
                                         $isHealthy = $check->status_code >= 200 && $check->status_code < 400;
                                     @endphp
                                     <tr class="hover:bg-studio-elevated/60 transition-colors">
-                                        <td class="py-3 px-4 text-white font-mono text-[11px]">{{ $checkTime }}</td>
+                                        <td class="py-3 px-4 text-studio-text font-mono text-[11px]">{{ $checkTime }}</td>
                                         <td class="py-3 px-4">
                                             @if($isHealthy)
                                                 <span class="badge-status-online">● HTTP {{ $check->status_code }}</span>
@@ -50,7 +50,7 @@
                                         </td>
                                         <td class="py-3 px-4 text-studio-muted font-mono">
                                             @if(isset($check->response_time))
-                                                <span class="text-white font-bold">{{ round($check->response_time * 1000) }}</span> ms
+                                                <span class="text-studio-text font-bold">{{ round($check->response_time * 1000) }}</span> ms
                                             @else
                                                 --
                                             @endif

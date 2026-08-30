@@ -1,7 +1,7 @@
 <div class="space-y-4" x-data="{ copied: false }">
     <p class="text-xs text-studio-muted">
         Cookie-frei, unter 1 KB. Täglich rotierender HMAC-Hash statt dauerhafter ID.
-        Vor <code class="bg-studio-bg px-1.5 py-0.5 rounded text-white font-mono border border-studio-border">&lt;/head&gt;</code> auf {{ $domain->url }} einfügen.
+        Vor <code class="bg-studio-elevated px-1.5 py-0.5 rounded text-studio-text font-mono border border-studio-border">&lt;/head&gt;</code> auf {{ $domain->url }} einfügen.
     </p>
 
     <div class="flex justify-end">

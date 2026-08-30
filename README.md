@@ -22,7 +22,7 @@ Spectora is a **private-by-design** Laravel app you run yourself. Registration i
 | **Alerts** | Email, Discord/Slack webhooks, Web Push — outage and recovery |
 | **Pulse** | Optional cookie-free first-party hits via `sp-pulse.js` |
 
-UI language is German. Visual system: [DESIGN.md](DESIGN.md) — warm ledger on `#0C0A08`, signal `#E4F54A`, Instrument Serif. Not a SaaS card deck.
+UI language is German. Visual system: [DESIGN.md](DESIGN.md) — light Analytics report (Roboto, `#1a73e8`, white cards).
 
 ---
 

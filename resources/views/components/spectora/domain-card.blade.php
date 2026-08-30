@@ -20,7 +20,7 @@
                     <span class="relative flex h-2 w-2 shrink-0">
                         <span class="relative inline-flex rounded-full h-2 w-2 {{ $isOnline ? 'bg-studio-emerald' : 'bg-studio-rose' }}"></span>
                     </span>
-                    <h3 class="text-xs font-bold text-white truncate hover:text-studio-brand transition-colors">
+                    <h3 class="text-xs font-bold text-studio-text truncate hover:text-studio-brand transition-colors">
                         <a href="{{ route('domains.show', $domain) }}">{{ $domain->url }}</a>
                     </h3>
                 </div>
@@ -44,7 +44,7 @@
 
                 <button type="button" 
                         @click="openTracking({{ json_encode($domain->url) }}, {{ json_encode($domain->uuid) }})"
-                        class="p-1 rounded-studio-sm bg-studio-elevated hover:bg-studio-border text-studio-muted hover:text-white transition-colors border border-studio-border"
+                        class="p-1 rounded-studio-sm bg-studio-elevated hover:bg-studio-border text-studio-muted hover:text-studio-text transition-colors border border-studio-border"
                         title="Pulse Tracking Code">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
                 </button>
@@ -82,7 +82,7 @@
 
         <div class="bg-studio-bg border border-studio-border rounded-studio-sm p-2.5 mb-3">
             <div class="text-[10px] uppercase font-bold text-studio-muted">Besucher heute</div>
-            <div class="font-mono text-lg font-bold text-white mt-0.5">
+            <div class="font-mono text-lg font-bold text-studio-text mt-0.5">
                 {{ number_format($domain->visitors_count_today ?? $domain->visitors_today ?? 0) }}
             </div>
             <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-studio-border">
@@ -94,7 +94,7 @@
                 </div>
                 <div>
                     <div class="text-[10px] uppercase font-bold text-studio-muted">SSL</div>
-                    <div class="font-mono text-[11px] font-medium mt-0.5 {{ $sslDays > 30 ? 'text-white' : ($sslDays > 7 ? 'text-studio-amber' : 'text-studio-rose') }}">
+                    <div class="font-mono text-[11px] font-medium mt-0.5 {{ $sslDays > 30 ? 'text-studio-text' : ($sslDays > 7 ? 'text-studio-amber' : 'text-studio-rose') }}">
                         {{ $sslDays > 0 ? $sslDays.' d' : ($sslDays === 0 ? 'Läuft ab' : 'Kein SSL') }}
                     </div>
                 </div>
@@ -110,7 +110,7 @@
 
         <button type="button" 
                 @click="openNotes({{ $domain->id }}, {{ json_encode($domain->url) }})" 
-                class="p-1.5 rounded-studio-sm bg-studio-elevated hover:bg-studio-border text-studio-muted hover:text-white transition-colors border border-studio-border" 
+                class="p-1.5 rounded-studio-sm bg-studio-elevated hover:bg-studio-border text-studio-muted hover:text-studio-text transition-colors border border-studio-border" 
                 title="Notizen">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
         </button>

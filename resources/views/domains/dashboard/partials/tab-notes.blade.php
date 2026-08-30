@@ -2,13 +2,13 @@
 
                 <!-- Add Note Card -->
                 <div class="spectora-card p-5">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-white mb-3">Neue Team-Notiz hinzufügen</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-studio-text mb-3">Neue Team-Notiz hinzufügen</h3>
                     <form action="{{ route('domains.notes.store', $domain) }}" method="POST" class="space-y-3">
                         @csrf
                         <textarea 
                             name="content" 
                             rows="3" 
-                            class="flex w-full rounded-studio-sm border border-studio-border bg-studio-bg px-3.5 py-2.5 text-xs text-white placeholder-studio-subtle focus:border-studio-brand focus:outline-none focus:ring-1 focus:ring-studio-brand"
+                            class="flex w-full rounded-studio-sm border border-studio-border bg-studio-bg px-3.5 py-2.5 text-xs text-studio-text placeholder-studio-subtle focus:border-studio-brand focus:outline-none focus:ring-1 focus:ring-studio-brand"
                             placeholder="Notiz für das Team (Deployments, DNS-Änderungen, Wartungsfenster)..."
                             required
                         ></textarea>
@@ -31,7 +31,7 @@
                                         <div class="w-6 h-6 rounded-studio-sm bg-studio-elevated border border-studio-border flex items-center justify-center font-bold text-xs text-studio-brand">
                                             {{ substr($note->user->first_name ?? 'A', 0, 1) }}
                                         </div>
-                                        <span class="text-xs font-bold text-white">
+                                        <span class="text-xs font-bold text-studio-text">
                                             {{ $note->user ? $note->user->first_name . ' ' . $note->user->last_name : 'Agentur-Team' }}
                                         </span>
                                     </div>

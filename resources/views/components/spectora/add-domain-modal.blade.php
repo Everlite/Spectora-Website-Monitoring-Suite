@@ -27,17 +27,17 @@
                 <!-- Modal Header -->
                 <div class="flex items-start justify-between pb-3 border-b border-studio-border">
                     <div>
-                        <h3 class="text-sm font-bold text-white">Neue Ziel-Website hinzufügen</h3>
+                        <h3 class="text-sm font-bold text-studio-text">Neue Ziel-Website hinzufügen</h3>
                         <p class="text-xs text-studio-muted mt-0.5">Automatisierte Uptime-Probes, SSL-Wächter & Telemetrie.</p>
                     </div>
-                    <button type="button" @click="closeModal()" class="text-studio-muted hover:text-white p-1 rounded-studio-sm hover:bg-studio-elevated">
+                    <button type="button" @click="closeModal()" class="text-studio-muted hover:text-studio-text p-1 rounded-studio-sm hover:bg-studio-elevated">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
                 <!-- URL -->
                 <div class="space-y-1.5">
-                    <label for="url" class="text-xs font-bold text-white">
+                    <label for="url" class="text-xs font-bold text-studio-text">
                         Website URL <span class="text-studio-rose">*</span>
                     </label>
                     <input type="text" name="url" id="url" required placeholder="https://kunden-website.de"
@@ -46,7 +46,7 @@
 
                 <!-- Keyword Must Contain -->
                 <div class="space-y-1.5">
-                    <label for="keyword_must_contain" class="text-xs font-bold text-white">
+                    <label for="keyword_must_contain" class="text-xs font-bold text-studio-text">
                         Muss Keyword enthalten <span class="text-studio-muted text-[10px] font-normal">(optional)</span>
                     </label>
                     <input type="text" name="keyword_must_contain" id="keyword_must_contain" placeholder="z. B. Willkommen, Copyright"
@@ -55,7 +55,7 @@
 
                 <!-- Keyword Must Not Contain -->
                 <div class="space-y-1.5">
-                    <label for="keyword_must_not_contain" class="text-xs font-bold text-white">
+                    <label for="keyword_must_not_contain" class="text-xs font-bold text-studio-text">
                         Darf Keyword NICHT enthalten <span class="text-studio-muted text-[10px] font-normal">(optional)</span>
                     </label>
                     <input type="text" name="keyword_must_not_contain" id="keyword_must_not_contain" placeholder="z. B. Error 500, Database connection failed"

@@ -23,10 +23,10 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between pb-3 border-b border-studio-border">
                     <div>
-                        <h3 class="text-sm font-bold text-white">Team-Notizen</h3>
+                        <h3 class="text-sm font-bold text-studio-text">Team-Notizen</h3>
                         <p class="text-xs text-studio-muted font-mono mt-0.5" x-text="domainUrl"></p>
                     </div>
-                    <button type="button" @click="closeNotes()" class="text-studio-muted hover:text-white p-1 rounded-studio-sm hover:bg-studio-elevated">
+                    <button type="button" @click="closeNotes()" class="text-studio-muted hover:text-studio-text p-1 rounded-studio-sm hover:bg-studio-elevated">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -36,7 +36,7 @@
                     <textarea x-model="newNote" 
                               rows="3" 
                               placeholder="Notiz für das Team (Deployments, DNS-Änderungen, Wartungsfenster)..."
-                              class="flex w-full rounded-studio-sm border border-studio-border bg-studio-bg px-3.5 py-2.5 text-xs text-white placeholder-studio-subtle focus:border-studio-brand focus:outline-none focus:ring-1 focus:ring-studio-brand"></textarea>
+                              class="flex w-full rounded-studio-sm border border-studio-border bg-studio-bg px-3.5 py-2.5 text-xs text-studio-text placeholder-studio-subtle focus:border-studio-brand focus:outline-none focus:ring-1 focus:ring-studio-brand"></textarea>
                     <div class="flex justify-end">
                         <button type="button" 
                                 @click="addNote()" 
@@ -51,11 +51,11 @@
                 <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
                     <template x-for="note in notes" :key="note.id">
                         <div class="rounded-studio-sm border border-studio-border bg-studio-bg p-3 space-y-1.5">
-                            <p class="text-xs text-white whitespace-pre-wrap leading-relaxed" x-text="note.content"></p>
+                            <p class="text-xs text-studio-text whitespace-pre-wrap leading-relaxed" x-text="note.content"></p>
                             <div class="text-[10px] text-studio-muted flex items-center justify-between border-t border-studio-border pt-1.5 mt-1.5">
                                 <span x-text="(note.user ? note.user.first_name + ' ' + note.user.last_name : 'Team') + ' · ' + formatDate(note.created_at)"></span>
                                 <div class="flex gap-2">
-                                    <button @click="editNote(note)" class="text-white hover:underline font-bold">Bearbeiten</button>
+                                    <button @click="editNote(note)" class="text-studio-text hover:underline font-bold">Bearbeiten</button>
                                     <button @click="deleteNote(note.id)" class="text-studio-rose hover:underline font-bold">Löschen</button>
                                 </div>
                             </div>

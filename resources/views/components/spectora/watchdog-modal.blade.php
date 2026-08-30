@@ -23,10 +23,10 @@
                 <!-- Header -->
                 <div class="flex items-start justify-between pb-3 border-b border-studio-border">
                     <div>
-                        <h3 class="text-sm font-bold text-white">Watchdog Sicherheits-Prüfbericht</h3>
+                        <h3 class="text-sm font-bold text-studio-text">Watchdog Sicherheits-Prüfbericht</h3>
                         <p class="text-xs text-studio-muted font-mono mt-0.5" x-text="watchdogUrl"></p>
                     </div>
-                    <button type="button" @click="closeWatchdog()" class="text-studio-muted hover:text-white p-1 rounded-studio-sm hover:bg-studio-elevated">
+                    <button type="button" @click="closeWatchdog()" class="text-studio-muted hover:text-studio-text p-1 rounded-studio-sm hover:bg-studio-elevated">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -39,7 +39,7 @@
                             <div class="w-8 h-8 rounded-full bg-studio-emerald/20 text-studio-emerald mx-auto flex items-center justify-center">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                             </div>
-                            <h4 class="text-xs font-bold text-white">Keine Bedrohungen erkannt</h4>
+                            <h4 class="text-xs font-bold text-studio-text">Keine Bedrohungen erkannt</h4>
                             <p class="text-[11px] text-studio-muted">Heuristik-Scan für Malware-Payloads, Defacements und Cloaking abgeschlossen.</p>
                         </div>
                     </template>
@@ -56,7 +56,7 @@
                                                   'bg-studio-amber/20 text-studio-amber border border-studio-amber/30': issue.severity === 'warning',
                                                   'bg-studio-elevated text-studio-muted border border-studio-border': issue.severity === 'info'
                                               }" x-text="issue.severity"></span>
-                                        <h5 class="text-xs font-bold text-white" x-text="issue.title"></h5>
+                                        <h5 class="text-xs font-bold text-studio-text" x-text="issue.title"></h5>
                                     </div>
                                     <p class="text-xs text-studio-muted" x-text="issue.description"></p>
                                     
@@ -71,7 +71,7 @@
 
                 <!-- Footer -->
                 <div class="flex items-center justify-between pt-3 border-t border-studio-border mt-4">
-                    <button type="button" @click="copyWatchdogJson()" class="text-xs text-studio-muted hover:text-white font-mono transition-colors">
+                    <button type="button" @click="copyWatchdogJson()" class="text-xs text-studio-muted hover:text-studio-text font-mono transition-colors">
                         JSON kopieren
                     </button>
                     <button type="button" @click="closeWatchdog()" class="btn-spectora-secondary">

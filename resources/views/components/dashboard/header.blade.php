@@ -9,7 +9,7 @@
                 <div class="relative" x-data="{ open: false }">
                     <button type="button" @click="open = !open" @click.outside="open = false"
                             class="flex items-center gap-2 group">
-                        <span class="sp-display text-3xl sm:text-4xl text-studio-text truncate">{{ parse_url($domain->url, PHP_URL_HOST) ?: $domain->url }}</span>
+                        <span class="text-xl font-medium text-studio-text truncate">{{ parse_url($domain->url, PHP_URL_HOST) ?: $domain->url }}</span>
                         <svg class="w-4 h-4 text-studio-muted group-hover:text-studio-text" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
 
@@ -21,7 +21,7 @@
                         </div>
                         @foreach($allDomains as $d)
                             <a href="{{ route('domains.show', $d) }}" 
-                               class="flex items-center justify-between px-2.5 py-1.5 rounded-studio-sm text-xs font-semibold {{ $d->id === $domain->id ? 'bg-studio-elevated text-white border border-studio-border' : 'text-studio-muted hover:text-white hover:bg-studio-elevated/60' }}">
+                               class="flex items-center justify-between px-2.5 py-1.5 rounded-studio-sm text-xs {{ $d->id === $domain->id ? 'bg-studio-hover text-studio-brand font-medium' : 'text-studio-muted hover:bg-studio-elevated' }}">
                                 <span class="truncate">{{ $d->url }}</span>
                                 <span class="w-2 h-2 rounded-full {{ $d->status_code >= 200 && $d->status_code < 400 ? 'bg-studio-emerald' : 'bg-studio-rose' }}"></span>
                             </a>
@@ -111,15 +111,15 @@
                  class="inline-block align-bottom bg-studio-surface border border-studio-border rounded-studio text-left overflow-hidden shadow-studio-card transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full p-6 space-y-4">
                 <div class="flex items-start justify-between pb-3 border-b border-studio-border">
                     <div>
-                        <h3 class="text-sm font-bold text-white">Pulse Telemetrie Snippet</h3>
+                        <h3 class="text-sm font-medium text-studio-text">Pulse-Snippet</h3>
                         <p class="text-xs text-studio-muted font-mono mt-0.5">{{ $domain->url }}</p>
                     </div>
-                    <button type="button" @click="showTrackingModal = false" class="text-studio-muted hover:text-white">
+                    <button type="button" @click="showTrackingModal = false" class="text-studio-muted hover:text-studio-text">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
                 <div class="space-y-2">
-                    <p class="text-xs text-studio-muted">Füge diesen Tag vor dem schließenden <code class="bg-studio-bg px-1.5 py-0.5 rounded text-white font-mono border border-studio-border">&lt;/head&gt;</code> Tag ein:</p>
+                    <p class="text-xs text-studio-muted">Füge diesen Tag vor dem schließenden <code class="bg-studio-elevated px-1.5 py-0.5 rounded text-studio-text font-mono border border-studio-border">&lt;/head&gt;</code> Tag ein:</p>
                     <pre class="bg-studio-bg border border-studio-border rounded-studio-sm p-3 text-xs font-mono text-studio-emerald select-all overflow-x-auto whitespace-pre-wrap leading-relaxed">&lt;script defer src="{{ rtrim(config('app.url'), '/') }}/js/sp-pulse.js" data-domain="{{ $domain->uuid }}"&gt;&lt;/script&gt;</pre>
                 </div>
                 <div class="flex justify-end pt-3 border-t border-studio-border">

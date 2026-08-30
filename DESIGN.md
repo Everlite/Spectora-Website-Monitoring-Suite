@@ -1,41 +1,25 @@
 # Spectora visual system
 
-Not Linear, not Vercel, not Datadog. Spectora is a **print ledger for first-party traffic**: warm paper ink on near-black, a spectrum mark, one request / one truth.
-
-## Atmosphere
-
-- Editorial, not ops-console. Huge figures, thin rules, no card soup.
-- Zero radius. No glow, no glass, no cobalt SaaS buttons.
-- Brand is the **spectrum** (coral → amber → signal → green → sky), not a rounded app icon.
+Google-Analytics-ähnlicher Report: helles Canvas, weiße Karten, linke Navigation, Roboto, Blau `#1a73e8`. Kein Ledger, kein Neon, kein Serif-Theater.
 
 ## Tokens
 
 ```css
 :root {
-  --studio-bg: #0C0A08;
-  --studio-surface: #14110E;
-  --studio-surface-elevated: #1C1814;
-  --studio-border: #2A241C;
-  --studio-brand: #E4F54A;
-  --studio-brand-hover: #F2FF7A;
-  --studio-emerald: #7DDB8A;
-  --studio-rose: #E85D4C;
-  --studio-amber: #E8A14A;
-  --studio-text-primary: #F3EDE3;
-  --studio-text-secondary: #9C9488;
-  --studio-text-tertiary: #6B645A;
+  --studio-bg: #f0f2f5;
+  --studio-surface: #ffffff;
+  --studio-surface-elevated: #f8f9fa;
+  --studio-border: #dadce0;
+  --studio-brand: #1a73e8;
+  --studio-emerald: #188038;
+  --studio-rose: #d93025;
+  --studio-amber: #e37400;
+  --studio-text-primary: #202124;
+  --studio-text-secondary: #5f6368;
 }
 ```
 
-- Display: Instrument Serif (visitor counts, wordmark).
-- UI: Source Sans 3.
-- Data: IBM Plex Mono.
-- Primary actions: signal lime, **ink text** (not white on lime).
-
-## Shell
-
-Top masthead only. No left sidebar. Spectrum hairline under the bar. Content ~1360px, generous vertical space.
-
-## Engine language
-
-Scores are a **Dokument-Score** from HTML Spectora fetched. Not PageSpeed, not Lighthouse, not Chrome. Watchdog findings come from the last probe body. Deep Probe runs the audit job.
+- UI: Roboto. Data: Roboto Mono.
+- Cards: white, 8px radius, light shadow.
+- Primary button: blue, white label.
+- Score in the UI is a **Dokument-Score** (HTML Spectora fetched). Not Lighthouse.
