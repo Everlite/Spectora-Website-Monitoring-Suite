@@ -1,9 +1,4 @@
-            <!-- Tab Content: Notes -->
-            <div x-show="tab === 'notes'" 
-                 x-transition:enter="transition ease-out duration-150"
-                 x-transition:enter-start="opacity-0 translate-y-1"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 class="space-y-6">
+            <div class="space-y-6">
 
                 <!-- Add Note Card -->
                 <div class="spectora-card p-5">
@@ -13,7 +8,7 @@
                         <textarea 
                             name="content" 
                             rows="3" 
-                            class="flex w-full rounded-studio-sm border border-[#202A3E] bg-[#090B10] px-3.5 py-2.5 text-xs text-white placeholder-[#5A667A] focus:border-[#3B57E8] focus:outline-none focus:ring-1 focus:ring-[#3B57E8]"
+                            class="flex w-full rounded-studio-sm border border-studio-border bg-studio-bg px-3.5 py-2.5 text-xs text-white placeholder-studio-subtle focus:border-studio-brand focus:outline-none focus:ring-1 focus:ring-studio-brand"
                             placeholder="Notiz für das Team (Deployments, DNS-Änderungen, Wartungsfenster)..."
                             required
                         ></textarea>
@@ -31,9 +26,9 @@
                     @forelse($notes as $note)
                         <div class="spectora-card p-4 flex flex-col justify-between" id="note-{{ $note->id }}">
                             <div>
-                                <div class="flex items-center justify-between mb-2 pb-2 border-b border-[#202A3E]">
+                                <div class="flex items-center justify-between mb-2 pb-2 border-b border-studio-border">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-studio-sm bg-[#171E2E] border border-[#202A3E] flex items-center justify-center font-bold text-xs text-[#3B57E8]">
+                                        <div class="w-6 h-6 rounded-studio-sm bg-studio-elevated border border-studio-border flex items-center justify-center font-bold text-xs text-studio-brand">
                                             {{ substr($note->user->first_name ?? 'A', 0, 1) }}
                                         </div>
                                         <span class="text-xs font-bold text-white">
@@ -41,7 +36,7 @@
                                         </span>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-[10px] text-[#8A95A8] font-mono">
+                                        <span class="text-[10px] text-studio-muted font-mono">
                                             {{ $note->created_at->format('d.m.Y H:i') }}
                                         </span>
 
@@ -49,20 +44,20 @@
                                             <form action="{{ route('notes.destroy', $note) }}" method="POST" class="inline" onsubmit="return confirm('Möchtest du diese Notiz wirklich löschen?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-[#8A95A8] hover:text-[#F43F5E] transition-colors p-1" title="Löschen">
+                                                <button type="submit" class="text-studio-muted hover:text-studio-rose transition-colors p-1" title="Löschen">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                                 </button>
                                             </form>
                                         @endif
                                     </div>
                                 </div>
-                                <div class="text-xs text-[#F1F3F9] whitespace-pre-wrap leading-relaxed">
+                                <div class="text-xs text-studio-text whitespace-pre-wrap leading-relaxed">
                                     {{ $note->content }}
                                 </div>
                             </div>
                         </div>
                     @empty
-                        <div class="spectora-card p-8 text-center text-[#8A95A8] text-xs">
+                        <div class="spectora-card p-8 text-center text-studio-muted text-xs">
                             Noch keine Notizen für diese Domain hinterlegt.
                         </div>
                     @endforelse

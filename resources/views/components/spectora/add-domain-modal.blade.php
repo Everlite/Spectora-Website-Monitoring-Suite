@@ -19,18 +19,18 @@
         <div x-show="isOpen" 
              x-transition:enter="ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" 
              x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" 
-             class="inline-block align-bottom bg-[#111622] border border-[#202A3E] rounded-studio text-left overflow-hidden shadow-studio-card transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+             class="inline-block align-bottom bg-studio-surface border border-studio-border rounded-studio text-left overflow-hidden shadow-studio-card transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
             
             <form method="POST" action="{{ route('domains.store') }}" class="p-6 space-y-4">
                 @csrf
                 
                 <!-- Modal Header -->
-                <div class="flex items-start justify-between pb-3 border-b border-[#202A3E]">
+                <div class="flex items-start justify-between pb-3 border-b border-studio-border">
                     <div>
                         <h3 class="text-sm font-bold text-white">Neue Ziel-Website hinzufügen</h3>
-                        <p class="text-xs text-[#8A95A8] mt-0.5">Automatisierte Uptime-Probes, SSL-Wächter & Telemetrie.</p>
+                        <p class="text-xs text-studio-muted mt-0.5">Automatisierte Uptime-Probes, SSL-Wächter & Telemetrie.</p>
                     </div>
-                    <button type="button" @click="closeModal()" class="text-[#8A95A8] hover:text-white p-1 rounded-studio-sm hover:bg-[#171E2E]">
+                    <button type="button" @click="closeModal()" class="text-studio-muted hover:text-white p-1 rounded-studio-sm hover:bg-studio-elevated">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -38,7 +38,7 @@
                 <!-- URL -->
                 <div class="space-y-1.5">
                     <label for="url" class="text-xs font-bold text-white">
-                        Website URL <span class="text-[#F43F5E]">*</span>
+                        Website URL <span class="text-studio-rose">*</span>
                     </label>
                     <input type="text" name="url" id="url" required placeholder="https://kunden-website.de"
                            class="spectora-input">
@@ -47,7 +47,7 @@
                 <!-- Keyword Must Contain -->
                 <div class="space-y-1.5">
                     <label for="keyword_must_contain" class="text-xs font-bold text-white">
-                        Muss Keyword enthalten <span class="text-[#8A95A8] text-[10px] font-normal">(optional)</span>
+                        Muss Keyword enthalten <span class="text-studio-muted text-[10px] font-normal">(optional)</span>
                     </label>
                     <input type="text" name="keyword_must_contain" id="keyword_must_contain" placeholder="z. B. Willkommen, Copyright"
                            class="spectora-input">
@@ -56,14 +56,14 @@
                 <!-- Keyword Must Not Contain -->
                 <div class="space-y-1.5">
                     <label for="keyword_must_not_contain" class="text-xs font-bold text-white">
-                        Darf Keyword NICHT enthalten <span class="text-[#8A95A8] text-[10px] font-normal">(optional)</span>
+                        Darf Keyword NICHT enthalten <span class="text-studio-muted text-[10px] font-normal">(optional)</span>
                     </label>
                     <input type="text" name="keyword_must_not_contain" id="keyword_must_not_contain" placeholder="z. B. Error 500, Database connection failed"
                            class="spectora-input">
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#202A3E] mt-4">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-studio-border mt-4">
                     <button type="button" @click="closeModal()" class="btn-spectora-secondary">
                         Abbrechen
                     </button>

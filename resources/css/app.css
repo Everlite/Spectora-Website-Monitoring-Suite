@@ -4,7 +4,34 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --studio-bg: #090B10;
+    --studio-surface: #111622;
+    --studio-surface-elevated: #171E2E;
+    --studio-surface-hover: #1D2538;
+    --studio-border: #202A3E;
+    --studio-border-subtle: #182030;
+    --studio-border-focus: #3B57E8;
+    --studio-brand: #3B57E8;
+    --studio-brand-hover: #4F6BFF;
+    --studio-brand-subtle: rgba(59, 87, 232, 0.12);
+    --studio-emerald: #10B981;
+    --studio-emerald-subtle: rgba(16, 185, 129, 0.12);
+    --studio-rose: #F43F5E;
+    --studio-rose-subtle: rgba(244, 63, 94, 0.12);
+    --studio-amber: #F59E0B;
+    --studio-amber-subtle: rgba(245, 158, 11, 0.12);
+    --studio-cyan: #06B6D4;
+    --studio-text-primary: #F1F3F9;
+    --studio-text-secondary: #8A95A8;
+    --studio-text-tertiary: #5A667A;
+}
+
 @layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
     html {
         scroll-behavior: smooth;
     }
@@ -12,74 +39,69 @@
     body {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        background-color: #090B10;
-        color: #F1F3F9;
+        background-color: var(--studio-bg);
+        color: var(--studio-text-primary);
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* Minimal Studio Scrollbars */
     ::-webkit-scrollbar {
         width: 5px;
         height: 5px;
     }
     ::-webkit-scrollbar-track {
-        background: #090B10;
+        background: var(--studio-bg);
     }
     ::-webkit-scrollbar-thumb {
-        background: #202A3E;
+        background: var(--studio-border);
         border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-        background: #2F3D5B;
+        background: var(--studio-surface-hover);
     }
 }
 
 @layer components {
-    /* Bespoke Spectora Card */
     .spectora-card {
-        @apply bg-[#111622] rounded-studio border border-[#202A3E] shadow-studio-card transition-all duration-200;
+        @apply bg-studio-surface rounded-studio border border-studio-border shadow-studio-card transition-all duration-200;
     }
 
     .spectora-card-hover:hover {
-        @apply border-[#3B57E8]/60 bg-[#141B2A];
+        @apply border-studio-brand/60 bg-studio-hover;
     }
 
-    /* Bespoke Buttons */
     .btn-spectora-primary {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-studio-sm font-bold text-xs text-white bg-[#3B57E8] hover:bg-[#4F6BFF] active:scale-95 shadow-studio-btn transition-all duration-150;
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-studio-sm font-bold text-xs text-white bg-studio-brand hover:bg-studio-brand-hover active:scale-95 shadow-studio-btn transition-all duration-150;
     }
 
     .btn-spectora-secondary {
-        @apply inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-studio-sm font-semibold text-xs text-[#F1F3F9] bg-[#171E2E] hover:bg-[#202A3E] border border-[#202A3E] transition-all duration-150;
+        @apply inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-studio-sm font-semibold text-xs text-studio-text bg-studio-elevated hover:bg-studio-border border border-studio-border transition-all duration-150;
     }
 
     .btn-spectora-ghost {
-        @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-studio-sm text-xs font-semibold text-[#8A95A8] hover:text-white hover:bg-[#171E2E] transition-colors;
+        @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-studio-sm text-xs font-semibold text-studio-muted hover:text-white hover:bg-studio-elevated transition-colors;
     }
 
     .btn-spectora-danger {
-        @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-studio-sm text-xs font-bold text-[#F43F5E] bg-[#F43F5E]/10 hover:bg-[#F43F5E]/20 border border-[#F43F5E]/30 transition-colors;
+        @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-studio-sm text-xs font-bold text-studio-rose bg-studio-rose/10 hover:bg-studio-rose/20 border border-studio-rose/30 transition-colors;
     }
 
-    /* Inputs */
     .spectora-input {
-        @apply flex h-9 w-full rounded-studio-sm border border-[#202A3E] bg-[#090B10] px-3.5 py-1.5 text-xs text-[#F1F3F9] placeholder-[#5A667A] shadow-sm transition-colors focus:border-[#3B57E8] focus:outline-none focus:ring-1 focus:ring-[#3B57E8];
+        @apply flex h-9 w-full rounded-studio-sm border border-studio-border bg-studio-bg px-3.5 py-1.5 text-xs text-studio-text placeholder-studio-subtle shadow-sm transition-colors focus:border-studio-brand focus:outline-none focus:ring-1 focus:ring-studio-brand;
     }
 
-    /* Status Badges */
     .badge-status-online {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30;
+        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-studio-emerald/15 text-studio-emerald border border-studio-emerald/30;
     }
 
     .badge-status-offline {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#F43F5E]/15 text-[#F43F5E] border border-[#F43F5E]/30;
+        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-studio-rose/15 text-studio-rose border border-studio-rose/30;
     }
 
     .badge-status-warning {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30;
+        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-studio-amber/15 text-studio-amber border border-studio-amber/30;
     }
 
     .badge-status-neutral {
-        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#171E2E] text-[#8A95A8] border border-[#202A3E];
+        @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-studio-elevated text-studio-muted border border-studio-border;
     }
 }

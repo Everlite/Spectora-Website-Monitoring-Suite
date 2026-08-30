@@ -18,38 +18,38 @@
         <div x-show="isTrackingOpen" 
              x-transition:enter="ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" 
              x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" 
-             class="inline-block align-bottom bg-[#111622] border border-[#202A3E] rounded-studio text-left overflow-hidden shadow-studio-card transform transition-all sm:my-8 sm:align-middle sm:max-w-xl w-full">
+             class="inline-block align-bottom bg-studio-surface border border-studio-border rounded-studio text-left overflow-hidden shadow-studio-card transform transition-all sm:my-8 sm:align-middle sm:max-w-xl w-full">
             
             <div class="p-6 space-y-4">
                 
                 <!-- Modal Header -->
-                <div class="flex items-start justify-between gap-4 pb-3 border-b border-[#202A3E]">
+                <div class="flex items-start justify-between gap-4 pb-3 border-b border-studio-border">
                     <div>
                         <h3 class="text-sm font-bold text-white">Pulse Telemetrie Installation</h3>
-                        <p class="text-xs text-[#8A95A8] font-mono mt-0.5" x-text="trackingDomainUrl"></p>
+                        <p class="text-xs text-studio-muted font-mono mt-0.5" x-text="trackingDomainUrl"></p>
                     </div>
-                    <button type="button" @click="closeTracking()" class="text-[#8A95A8] hover:text-white p-1 rounded-studio-sm hover:bg-[#171E2E]">
+                    <button type="button" @click="closeTracking()" class="text-studio-muted hover:text-white p-1 rounded-studio-sm hover:bg-studio-elevated">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
                 <!-- Segmented Tabs -->
-                <div class="inline-flex rounded-studio-sm bg-[#090B10] border border-[#202A3E] p-1 text-[#8A95A8] w-full">
+                <div class="inline-flex rounded-studio-sm bg-studio-bg border border-studio-border p-1 text-studio-muted w-full">
                     <button type="button" 
                             @click="activeTab = 'html'" 
-                            :class="activeTab === 'html' ? 'bg-[#171E2E] text-white font-bold' : 'hover:text-white'"
+                            :class="activeTab === 'html' ? 'bg-studio-elevated text-white font-bold' : 'hover:text-white'"
                             class="flex-1 px-3 py-1.5 rounded-studio-sm text-xs transition-all">
                         HTML / WordPress
                     </button>
                     <button type="button" 
                             @click="activeTab = 'nextjs'" 
-                            :class="activeTab === 'nextjs' ? 'bg-[#171E2E] text-white font-bold' : 'hover:text-white'"
+                            :class="activeTab === 'nextjs' ? 'bg-studio-elevated text-white font-bold' : 'hover:text-white'"
                             class="flex-1 px-3 py-1.5 rounded-studio-sm text-xs transition-all">
                         Next.js / React
                     </button>
                     <button type="button" 
                             @click="activeTab = 'events'" 
-                            :class="activeTab === 'events' ? 'bg-[#171E2E] text-white font-bold' : 'hover:text-white'"
+                            :class="activeTab === 'events' ? 'bg-studio-elevated text-white font-bold' : 'hover:text-white'"
                             class="flex-1 px-3 py-1.5 rounded-studio-sm text-xs transition-all">
                         Custom Events
                     </button>
@@ -57,20 +57,20 @@
 
                 <!-- Tab 1: HTML / WP -->
                 <div x-show="activeTab === 'html'" class="space-y-2.5">
-                    <p class="text-xs text-[#8A95A8] leading-relaxed">
-                        Füge diesen Tag in den <code class="bg-[#090B10] px-1.5 py-0.5 rounded text-white font-mono border border-[#202A3E]">&lt;head&gt;</code> deiner Website ein. Funktioniert mit WordPress (WPCode), Shopify, Webflow und statischem HTML:
+                    <p class="text-xs text-studio-muted leading-relaxed">
+                        Füge diesen Tag in den <code class="bg-studio-bg px-1.5 py-0.5 rounded text-white font-mono border border-studio-border">&lt;head&gt;</code> deiner Website ein. Funktioniert mit WordPress (WPCode), Shopify, Webflow und statischem HTML:
                     </p>
                     <div class="relative">
-                        <pre class="bg-[#090B10] border border-[#202A3E] rounded-studio-sm p-3.5 text-xs font-mono text-[#10B981] select-all overflow-x-auto whitespace-pre-wrap leading-relaxed" x-text="getSnippet()"></pre>
+                        <pre class="bg-studio-bg border border-studio-border rounded-studio-sm p-3.5 text-xs font-mono text-studio-emerald select-all overflow-x-auto whitespace-pre-wrap leading-relaxed" x-text="getSnippet()"></pre>
                     </div>
                 </div>
 
                 <!-- Tab 2: Next.js -->
                 <div x-show="activeTab === 'nextjs'" class="space-y-2.5">
-                    <p class="text-xs text-[#8A95A8] leading-relaxed">
-                        In Next.js (App Router) in <code class="bg-[#090B10] px-1.5 py-0.5 rounded text-white font-mono border border-[#202A3E]">app/layout.tsx</code> einbinden:
+                    <p class="text-xs text-studio-muted leading-relaxed">
+                        In Next.js (App Router) in <code class="bg-studio-bg px-1.5 py-0.5 rounded text-white font-mono border border-studio-border">app/layout.tsx</code> einbinden:
                     </p>
-                    <pre class="bg-[#090B10] border border-[#202A3E] rounded-studio-sm p-3.5 text-xs font-mono text-[#8A95A8] overflow-x-auto whitespace-pre-wrap leading-relaxed">&lt;Script 
+                    <pre class="bg-studio-bg border border-studio-border rounded-studio-sm p-3.5 text-xs font-mono text-studio-muted overflow-x-auto whitespace-pre-wrap leading-relaxed">&lt;Script 
   defer 
   src="{{ rtrim(config('app.url'), '/') }}/js/sp-pulse.js" 
   data-domain="<span x-text="trackingDomainUuid"></span>" 
@@ -79,14 +79,14 @@
 
                 <!-- Tab 3: Events -->
                 <div x-show="activeTab === 'events'" class="space-y-2.5">
-                    <p class="text-xs text-[#8A95A8] leading-relaxed">
+                    <p class="text-xs text-studio-muted leading-relaxed">
                         Tracke benutzerdefinierte Conversions wie Lead-Formulare oder Button-Klicks:
                     </p>
-                    <pre class="bg-[#090B10] border border-[#202A3E] rounded-studio-sm p-3.5 text-xs font-mono text-[#8A95A8] overflow-x-auto whitespace-pre-wrap leading-relaxed">window.spectora.track('lead_form_submitted', { plan: 'pro' });</pre>
+                    <pre class="bg-studio-bg border border-studio-border rounded-studio-sm p-3.5 text-xs font-mono text-studio-muted overflow-x-auto whitespace-pre-wrap leading-relaxed">window.spectora.track('lead_form_submitted', { plan: 'pro' });</pre>
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="flex items-center justify-between pt-3 border-t border-[#202A3E] mt-4">
+                <div class="flex items-center justify-between pt-3 border-t border-studio-border mt-4">
                     <button type="button" @click="closeTracking()" class="btn-spectora-ghost">
                         Schließen
                     </button>

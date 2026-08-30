@@ -12,6 +12,22 @@ class DomainAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_owner_sees_domain_cockpit_without_tab_bar(): void
+    {
+        $owner = User::factory()->create();
+        $domain = Domain::factory()->create([
+            'user_id' => $owner->id,
+            'url' => 'https://1.1.1.1',
+        ]);
+
+        $this->actingAs($owner)
+            ->get("/domains/{$domain->uuid}")
+            ->assertOk()
+            ->assertSee('Uptime (30d)', false)
+            ->assertSee('Spectora Pulse', false)
+            ->assertDontSee('Historie & Probes', false);
+    }
+
     public function test_user_cannot_view_another_users_domain_dashboard(): void
     {
         $owner = User::factory()->create();

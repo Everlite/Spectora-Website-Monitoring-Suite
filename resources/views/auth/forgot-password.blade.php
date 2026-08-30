@@ -1,25 +1,23 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+<x-auth-layout>
+    <h1 class="text-lg font-extrabold text-white tracking-tight">Passwort zurücksetzen</h1>
+    <p class="text-xs text-studio-muted mt-1">Wir schicken dir einen Link an deine E-Mail-Adresse.</p>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <x-auth-session-status class="mt-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('password.email') }}">
+    <form method="POST" action="{{ route('password.email') }}" class="mt-6 space-y-4">
         @csrf
 
-        <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
+            <label for="email" class="text-xs font-bold text-studio-muted">E-Mail</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
+                class="spectora-input mt-1.5">
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="btn-spectora-primary w-full py-2.5">Link senden</button>
+
+        <p class="text-center text-xs text-studio-muted">
+            <a href="{{ route('login') }}" class="font-bold text-studio-brand hover:text-studio-brand-hover">Zurück zur Anmeldung</a>
+        </p>
     </form>
-</x-guest-layout>
+</x-auth-layout>

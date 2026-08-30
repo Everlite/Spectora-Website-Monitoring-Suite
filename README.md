@@ -79,6 +79,8 @@ The application interface is a 100% bespoke design system crafted exclusively fo
 
 ## ⚡ Core Modules & Features
 
+Outbound checks run through `App\SpectoraEngine\SpectoraEngine::probe()` (one HTTP fetch, then keywords, watchdog, persist, incidents). `CheckUrlJob` is the queue wrapper. Audit stays a separate job; Pulse is inbound.
+
 ### 1. Spectora Audit Engine (`App\SpectoraEngine\Audit`)
 * **Multi-Factor Scoring Matrix (0–100 Index & Letter Grades A+ to F):**
   * **Performance:** Server TTFB (Time-To-First-Byte) and HTML payload size optimization.

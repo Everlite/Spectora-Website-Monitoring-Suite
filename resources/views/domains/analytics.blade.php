@@ -34,7 +34,7 @@
                                     </p>
                                     <div class="bg-gray-900 rounded-lg p-4 relative group text-left">
                                         <code class="text-sm text-green-400 font-mono break-all">
-                                            &lt;script src="{{ asset('js/sp-core.js') }}" data-domain="{{ $domain->uuid }}" defer&gt;&lt;/script&gt;
+                                            &lt;script defer src="{{ asset('js/sp-pulse.js') }}" data-domain="{{ $domain->uuid }}"&gt;&lt;/script&gt;
                                         </code>
                                         <button onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText.trim())" 
                                                 class="absolute top-2 right-2 p-2 bg-gray-800 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition group-hover:opacity-100">

@@ -1,39 +1,32 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
-        @csrf
+<x-auth-layout>
+    <h1 class="text-lg font-extrabold text-white tracking-tight">Neues Passwort</h1>
+    <p class="text-xs text-studio-muted mt-1">Wähle ein neues Passwort für dein Konto.</p>
 
-        <!-- Password Reset Token -->
+    <form method="POST" action="{{ route('password.store') }}" class="mt-6 space-y-4">
+        @csrf
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-        <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
+            <label for="email" class="text-xs font-bold text-studio-muted">E-Mail</label>
+            <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username"
+                class="spectora-input mt-1.5">
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
+        <div>
+            <label for="password" class="text-xs font-bold text-studio-muted">Passwort</label>
+            <input id="password" type="password" name="password" required autocomplete="new-password"
+                class="spectora-input mt-1.5">
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
+        <div>
+            <label for="password_confirmation" class="text-xs font-bold text-studio-muted">Passwort bestätigen</label>
+            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                class="spectora-input mt-1.5">
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="btn-spectora-primary w-full py-2.5">Passwort speichern</button>
     </form>
-</x-guest-layout>
+</x-auth-layout>

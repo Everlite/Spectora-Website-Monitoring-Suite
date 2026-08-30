@@ -30,16 +30,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - `AlertDispatcher`: Multi-channel notification dispatcher supporting **Discord Webhooks**, **Slack Webhooks**, Email, and Web Push.
 - **Client Tracking Kernels**:
   - `public/js/sp-pulse.js`: < 1KB tracking script supporting SPA History API route tracking (`pushState`/`popstate`) and `window.spectora.track()` custom events.
-- **Cyber-Glassmorphic UI/UX Redesign ("WOW Factor")**:
-  - Dark obsidian and neon cyber design tokens (`#0B0F17`, `#00F2FE`, `#10B981`, `#F43F5E`, `#8B5CF6`).
-  - Modular Blade components: `<x-spectora.global-metrics>`, `<x-spectora.domain-card>`, `<x-spectora.add-domain-modal>`, `<x-spectora.watchdog-modal>`, `<x-spectora.notes-modal>`, and `<x-spectora.delete-modal>`.
-  - Upgraded top navigation with live glowing `ENGINE ACTIVE` radar pill.
-  - Webhook URL configuration in User Settings.
+- Modular Blade components: `<x-spectora.global-metrics>`, `<x-spectora.domain-card>`, `<x-spectora.add-domain-modal>`, `<x-spectora.watchdog-modal>`, `<x-spectora.notes-modal>`, and `<x-spectora.delete-modal>`.
+- Webhook URL configuration in User Settings.
 - **Database & Performance**:
   - Migration `2026_06_15_000000_upgrade_spectora_engine_schema.php` with `webhook_url` support and composite indexes on `checks_history` and `analytics_visits`.
   - Batch aggregation in `DashboardController` eliminating all N+1 query overhead.
 - **Unit Tests**:
-  - `SpectoraAuditEngineTest`, `SpectoraWatchdogEngineTest`, `PulseIngestEngineTest`, and `IncidentStateMachineTest`.
+  - `SpectoraAuditEngineTest`, `SpectoraWatchdogEngineTest`, `PulseIngestEngineTest`, `IncidentStateMachineTest`, and `SpectoraEngineProbeTest`.
+
+### Changed
+
+- `SpectoraEngine::probe()` is the single outbound check cycle (filter, one HTTP fetch, keywords, watchdog on the same body, persist, incidents). `CheckUrlJob` is a queue wrapper.
+- Domain page is a cockpit: availability, Pulse, Watchdog, then probe log / notes / subpages. No tab bar.
+- Auth, shell, and settings use Studio tokens and the Spectora mark. Pulse snippet is advertised as `sp-pulse.js`.
+
+### Removed
+
+- Duplicate `WatchdogService` (replaced by `SpectoraWatchdogEngine`).
+- Domain overhaul-banner and the 5-tab controller.
 
 ---
 

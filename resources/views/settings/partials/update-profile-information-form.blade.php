@@ -1,11 +1,11 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Profile Information') }}
+        <h2 class="text-xs font-bold text-white uppercase tracking-wider">
+            Profil
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account's profile information and email address.") }}
+        <p class="mt-1 text-xs text-studio-muted">
+            Name, E-Mail, Zeitzone und Alert-Webhook.
         </p>
     </header>
 
@@ -41,7 +41,7 @@
 
         <div>
             <x-input-label for="timezone" :value="__('Timezone')" />
-            <select id="timezone" name="timezone" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-cyan-500 dark:focus:border-cyan-500 focus:ring-cyan-500 rounded-md shadow-sm">
+            <select id="timezone" name="timezone" class="spectora-input mt-1">
                 @foreach(timezone_identifiers_list() as $timezone)
                     <option value="{{ $timezone }}" {{ old('timezone', $user->timezone) == $timezone ? 'selected' : '' }}>
                         {{ $timezone }}
@@ -54,7 +54,7 @@
         <div>
             <x-input-label for="webhook_url" :value="__('Discord / Slack Webhook URL (Optional)')" />
             <x-text-input id="webhook_url" name="webhook_url" type="url" placeholder="https://discord.com/api/webhooks/... or https://hooks.slack.com/..." class="mt-1 block w-full" :value="old('webhook_url', $user->webhook_url)" />
-            <p class="mt-1 text-xs text-gray-500">Receive instant outage and recovery alerts directly in your team's Discord or Slack channel.</p>
+            <p class="mt-1 text-xs text-studio-muted">Discord- oder Slack-Webhook für Ausfall- und Recovery-Alerts.</p>
             <x-input-error class="mt-2" :messages="$errors->get('webhook_url')" />
         </div>
 
@@ -67,7 +67,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
+                    class="text-xs font-bold text-studio-emerald"
                 >{{ __('Saved.') }}</p>
             @endif
         </div>
